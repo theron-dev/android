@@ -4,9 +4,9 @@ package org.hailong.framework.tasks.impl;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.hailong.framework.tasks.IHttpRequestTask;
+import org.hailong.framework.tasks.IHttpTask;
 
-public class BaseHttpRequestTask extends AbstractHttpRequestTask<String> implements IHttpRequestTask<String> {
+public class BaseHttpRequestTask extends AbstractHttpRequestTask<String> implements IHttpTask<String> {
 
 	
 	public BaseHttpRequestTask(HttpUriRequest httpRequest){
@@ -29,7 +29,7 @@ public class BaseHttpRequestTask extends AbstractHttpRequestTask<String> impleme
 	}
 	
 	@Override
-	public void onError(Exception ex){
+	public void onException(Exception ex){
 		
 	}
 

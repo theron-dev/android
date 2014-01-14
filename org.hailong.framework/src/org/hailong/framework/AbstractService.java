@@ -2,15 +2,13 @@ package org.hailong.framework;
 
 public abstract class AbstractService implements IService {
 
-	protected TaskQueue taskQueue;
 	private IServiceContext context;
 	private Object config;
 	
 	public AbstractService(){
-		taskQueue = new TaskQueue();
+
 	}
 	
-
 	public void didReceiveMemoryWarning() {
 	}
 
@@ -18,9 +16,6 @@ public abstract class AbstractService implements IService {
 		return ServiceState.Running;
 	}
 
-	public int getRunningTaskCount() {
-		return taskQueue.size();
-	}
 	
 	public IServiceContext getContext(){
 		return context;
@@ -39,7 +34,6 @@ public abstract class AbstractService implements IService {
 	}
 	
 	public void destroy(){
-		taskQueue = null;
 		context = null;
 		config = null;
 	}

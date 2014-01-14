@@ -1,12 +1,13 @@
 package org.hailong.framework.tasks.impl;
 
 import org.apache.http.client.methods.HttpUriRequest;
-import org.hailong.framework.tasks.IHttpRequestTask;
+import org.hailong.framework.tasks.IHttpResourceTask;
+import org.hailong.framework.tasks.IHttpTask;
 
 import android.os.Handler;
 import android.os.Message;
 
-public abstract class AbstractHttpRequestTask<T> extends Handler implements IHttpRequestTask<T>{
+public abstract class AbstractHttpRequestTask<T> extends Handler implements IHttpTask<T>,IHttpResourceTask<T>{
 	
 	private final static int WHAT_FINISH = 1;
 	private final static int WHAT_ERROR = 2;
@@ -14,6 +15,7 @@ public abstract class AbstractHttpRequestTask<T> extends Handler implements IHtt
 	
 	protected HttpUriRequest httpRequest;
 	private Object waiter;
+	private boolean canceled;
 	
 	public AbstractHttpRequestTask(HttpUriRequest httpRequest){
 		this.httpRequest = httpRequest;
@@ -27,21 +29,26 @@ public abstract class AbstractHttpRequestTask<T> extends Handler implements IHtt
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleMessage(Message message){
-		if(message.what == WHAT_FINISH){
-			onFinish((T)message.obj);
+		
+		if(!canceled){
+			if(message.what == WHAT_FINISH){
+				onFinish((T)message.obj);
+			}
+			else if(message.what == WHAT_ERROR){
+				onException((Exception)message.obj);
+			}
 		}
-		else if(message.what == WHAT_ERROR){
-			onError((Exception)message.obj);
-		}
+		
 		synchronized (waiter) {
 			waiter.notifyAll();
 		}
+		
 		waiter = null;
 	}
 	
 	public abstract void onFinish(T result);
 	
-	public abstract void onError(Exception ex);
+	public abstract void onException(Exception ex);
 	
 
 	public void sendFinishMessage(T result,Object waiter){
@@ -71,6 +78,14 @@ public abstract class AbstractHttpRequestTask<T> extends Handler implements IHtt
 			} catch (InterruptedException e) {
 			}
 		}
+	}
+	
+	public boolean isCanceled(){
+		return canceled;
+	}
+	
+	public void setCanceled(boolean canceled){
+		this.canceled = canceled;
 	}
 
 }

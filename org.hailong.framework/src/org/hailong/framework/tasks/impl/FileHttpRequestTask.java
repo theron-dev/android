@@ -14,11 +14,16 @@ public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implement
 
 	private File _file;
 	
+	public File getFile(){
+		return _file;
+	}
+	
 	public FileHttpRequestTask(HttpUriRequest httpRequest,File file){
 		super(httpRequest);
 		_file = file;
 	}
 	
+
 	public ResponseHandler<File> getResponseHandler() {
 		return this;
 	}
@@ -29,7 +34,7 @@ public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implement
 	}
 
 	@Override
-	public void onError(Exception ex) {
+	public void onException(Exception ex) {
 
 	}
 

@@ -43,7 +43,7 @@ public class DNSService implements Runnable {
 			
 			_socket = null;
 			
-			_thread.stop();
+			_thread.interrupt();
 			
 			_thread = null;
 			

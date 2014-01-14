@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<controller view="org.hailong.controller.demo.R.layout.user" class="org.hailong.controller.DemoUserViewController" title="Home" alias="Home">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.user" class="org.hailong.controller.DemoUserViewController" title="Hot" alias="Hot">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.user" class="org.hailong.controller.DemoUserViewController" title="User" alias="User">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.user" class="org.hailong.controller.DemoUserViewController" title="Setting" alias="Setting">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.navigation" class="org.hailong.controller.DemoNavigationController"
+		 title="Home" alias="HomeNavigation" token="Home">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.navigation" class="org.hailong.controller.DemoNavigationController"
+		 title="Hot" alias="HotNavigation" token="Hot">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.navigation" class="org.hailong.controller.DemoNavigationController" 
+		title="User" alias="UserNavigation" token="User">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.navigation" class="org.hailong.controller.DemoNavigationController"
+		 title="Setting" alias="SettingNavigation" token="Setting">
+	</controller>
+	<controller view="org.hailong.controller.demo.R.layout.main" class="org.hailong.controller.DemoHomeViewController"
+		 alias="ROOT" token="HomeNavigation/HotNavigation/UserNavigation/SettingNavigation">
+		<config>
+			<dict>
+				<key>disabledDisplaced</key>
+				<true/>
+			</dict>
+		</config>
+	</controller>
+</config>

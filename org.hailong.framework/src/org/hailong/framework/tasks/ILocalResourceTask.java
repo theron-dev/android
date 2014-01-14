@@ -19,9 +19,4 @@ public interface ILocalResourceTask {
 	 * @param obj 缓存的资源对象
 	 */
 	public void setResourceObject(Object obj);
-	
-	/**
-	 * 资源大小
-	 */
-	public double getResourceSize();
 }

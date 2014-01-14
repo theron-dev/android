@@ -20,8 +20,6 @@ public interface IService {
 	
 	public ServiceState getServiceState();
 	
-	public int getRunningTaskCount();
-	
 	public Object getConfig();
 	
 	public void setConfig(Object config);

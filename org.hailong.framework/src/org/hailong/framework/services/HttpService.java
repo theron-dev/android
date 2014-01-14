@@ -1,9 +1,15 @@
 package org.hailong.framework.services;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.hailong.framework.AbstractService;
 import org.hailong.framework.ITask;
-import org.hailong.framework.tasks.IHttpRequestTask;
+import org.hailong.framework.tasks.IHttpTask;
+import org.hailong.framework.value.Value;
+
 import android.util.Log;
 
 /**
@@ -15,42 +21,39 @@ import android.util.Log;
 public class HttpService extends AbstractService {
 
 	private final static String TAG = "HttpService";
-	
-	private Object threadLocker;
-	private Thread thread;
-	
+
+	private ThreadPoolExecutor _poolExecutor;
+
 	public HttpService(){
 		super();
-		threadLocker = new Object();
 	}
 	
-	private void setNeedRequest(){
-		if(thread == null){
-			IHttpRequestTask<?> task = null;
-			synchronized (taskQueue) {
-				task = taskQueue.beginTaskType(IHttpRequestTask.class);
+	protected ThreadPoolExecutor getPoolExecutor(){
+		
+		if(_poolExecutor == null){
+			
+			int maxThreadCount = Value.intValueForKey(getConfig(), "maxThreadCount");
+			
+			if(maxThreadCount < 1){
+				maxThreadCount = 1;
 			}
-			if(task != null){
-				synchronized (threadLocker) {
-					if(thread == null){
-						thread = new Thread(new ConnectionRunnable());
-						thread.start();
-					}
-				}
-			}
+			
+			long keepAlive = Value.longValueForKey(getConfig(), "keepAlive");
+			
+			_poolExecutor = new ThreadPoolExecutor(1, maxThreadCount, keepAlive , TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+			
 		}
+		
+		return _poolExecutor;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T extends ITask> boolean handle(
 			Class<T> taskType, T task, int priority) throws Exception {
 		
-		if(taskType == IHttpRequestTask.class){
+		if(IHttpTask.class.isAssignableFrom(taskType)){
 			
-			synchronized (taskQueue) {
-				taskQueue.addTask( IHttpRequestTask.class, (IHttpRequestTask<?>)task, priority);
-			}
-			
-			this.setNeedRequest();
+			getPoolExecutor().execute(new ConnectionRunnable((IHttpTask<Object>)task,taskType));
 			
 			return false;
 		}
@@ -61,23 +64,21 @@ public class HttpService extends AbstractService {
 	public <T extends ITask> boolean cancelHandle(
 			Class<T> taskType, T task) throws Exception {
 		
-		if(taskType == IHttpRequestTask.class){
+		if(IHttpTask.class.isAssignableFrom(taskType)){
 			
-			synchronized (taskQueue) {
-				if(task == taskQueue.beginTaskType(IHttpRequestTask.class)){
-					if(thread !=null){
-						synchronized (threadLocker) {
-							if(thread !=null){
-								thread.interrupt();
-								thread = null;
-							}
-						}
+			ThreadPoolExecutor pool = getPoolExecutor();
+		
+			Object[] runnables = pool.getQueue().toArray();
+			
+			for(Object runnable : runnables){
+				if(runnable instanceof ConnectionRunnable){
+					ConnectionRunnable run = (ConnectionRunnable) runnable;
+					if(run.taskType == taskType && (task == null || task == run.httpTask)){
+						run.httpTask.setCanceled(true);
+						pool.remove(run);
 					}
 				}
-				taskQueue.removeTask( IHttpRequestTask.class, (IHttpRequestTask<?>)task);
 			}
-			
-			this.setNeedRequest();
 			
 			return false;
 		}
@@ -86,58 +87,37 @@ public class HttpService extends AbstractService {
 
 	@Override
 	public void destroy(){
-		if(thread !=null){
-			synchronized (threadLocker) {
-				if(thread !=null){
-					thread.interrupt();
-					thread = null;
-				}
-			}
-		}
 		super.destroy();
 	}
 	
 	private class ConnectionRunnable implements Runnable{
 
-		@SuppressWarnings("unchecked")
-		public void run() {
-			Object waiter = new Object();
-			IHttpRequestTask<Object> task = null;
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			while(true){
-				
-				synchronized (taskQueue) {
-					task = taskQueue.beginTaskType(IHttpRequestTask.class);
-				}
-				
-				if(task == null){
-					break;
-				}
-				
-				try {
-					
-					Object result = httpClient.execute(task.getHttpRequest(),task.getResponseHandler());
-					
-					task.sendFinishMessage(result,waiter);
+		public Class<?> taskType;
+		public IHttpTask<Object> httpTask;
 		
-				}
-				catch (Exception e) {
-					task.sendErrorMessage(e,waiter);
-					Log.d(TAG, Log.getStackTraceString(e));
-				}
-				finally{
-					
-					synchronized (taskQueue) {
-						taskQueue.removeTask(IHttpRequestTask.class, task);
-					}
-				}
+		public ConnectionRunnable(IHttpTask<Object> httpTask,Class<?> taskType){
+			this.httpTask = httpTask;
+			this.taskType = taskType;
+			httpTask.setCanceled(false);
+		}
+		
+		public void run() {
+			
+			Object waiter = new Object();
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			
+			try {
+				
+				Object result = httpClient.execute(httpTask.getHttpRequest(),httpTask.getResponseHandler());
+				
+				httpTask.sendFinishMessage(result,waiter);
+	
+			}
+			catch (Exception e) {
+				httpTask.sendErrorMessage(e,waiter);
+				Log.d(TAG, Log.getStackTraceString(e));
 			}
 			
-			synchronized (threadLocker) {
-				thread = null;
-			}
-			
-			setNeedRequest();
 		}
 		
 	}

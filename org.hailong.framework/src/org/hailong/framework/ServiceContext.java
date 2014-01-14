@@ -73,11 +73,6 @@ public class ServiceContext extends Service implements IServiceContext {
 			}
 		}
 	}
-	
-	@Override
-	public void onStart(android.content.Intent intent, int startId){
-		super.onStart(intent, startId);
-	}
 
 	@Override
 	public void onDestroy(){
@@ -95,8 +90,6 @@ public class ServiceContext extends Service implements IServiceContext {
 		
 		return serviceContainer;
 	}
-	
-	
 	
 	
 	@SuppressWarnings("unchecked")

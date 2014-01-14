@@ -34,7 +34,9 @@ public interface IResourceTask extends ITask {
 	public void setResourceObject(Object obj);
 	
 	/**
-	 * 资源大小
+	 * 异常
+	 * @param ex
 	 */
-	public double getResourceSize();
+	public void onException(Exception ex);
+	
 }

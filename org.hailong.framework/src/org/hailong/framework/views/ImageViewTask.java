@@ -14,8 +14,7 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 
 	private String _imageUrl = null;
 	private boolean _forceDownload = false;
-	private double _resourceSize = 200;
-
+	private boolean _hasImage = false;
 	
 	public ImageViewTask(Context context) {
 		super(context);
@@ -39,6 +38,7 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 	
 	public void setImageUrl(String imageUrl){
 		_imageUrl = imageUrl;
+		_hasImage = false;
 	}
 	
 	public String getResourceUri() {
@@ -47,7 +47,7 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 
 
 	public boolean isNeedDownload() {
-		return _imageUrl != null && _imageUrl.length() >0;
+		return _imageUrl != null && _imageUrl.length() >0 && !_hasImage;
 	}
 
 
@@ -55,8 +55,7 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 		if(localUri != null ){
 			Drawable image = Drawable.createFromPath(localUri.getPath());
 			setImageDrawable(image);
-			_imageUrl = null;
-			
+			_hasImage = true;
 			return image;
 		}
 		return null;
@@ -70,18 +69,15 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 		_forceDownload = forceDownload;
 	}
 
-	public double getResourceSize(){
-		return _resourceSize;
-	}
-	
-	public void setResourceSize(double size){
-		_resourceSize = size;
-	}
-
 	public void setResourceObject(Object obj) {
 		if(obj != null){
 			setImageDrawable((Drawable)obj);
-			_imageUrl = null;
+			_hasImage = true;
 		}
 	}
+
+	public void onException(Exception ex) {
+
+	}
+
 }
