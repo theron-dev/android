@@ -2,6 +2,9 @@ package org.hailong.framework.value;
 
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Value {
 
@@ -12,7 +15,7 @@ public class Value {
 			if(object instanceof String){
 				return (String)object;
 			}
-			
+
 			return object.toString();
 		}
 		
@@ -33,7 +36,6 @@ public class Value {
 			else if(object instanceof Number){
 				return ((Number) object).intValue();
 			}
-
 		}
 
 		return defaultValue;
@@ -125,17 +127,20 @@ public class Value {
 	
 	public static Map<?,?> mapValue(Object object){
 		
-		if(object instanceof Map){
-			return ( Map<?,?>) object;
+		if(object != null){
+			if(object instanceof Map){
+				return ( Map<?,?>) object;
+			}
 		}
-		
 		return null;
 	}
 	
 	public static List<?> listValue(Object object){
 		
-		if(object instanceof List){
-			return (List<?>) object;
+		if(object != null){
+			if(object instanceof List){
+				return (List<?>) object;
+			}
 		}
 		
 		return null;
@@ -147,6 +152,73 @@ public class Value {
 			
 			if(object instanceof Map){
 				return ((Map<?, ?>) object).get(key);
+			}
+			else if(object instanceof JSONObject){
+				try {
+					return ((JSONObject) object).get(key);
+				} catch (JSONException e) {
+				}
+			}
+			else if(object instanceof JSONArray){
+				
+				if(key.equals("@last")){
+					int size = ((JSONArray) object).length();
+					if(size >0){
+						try {
+							return ((JSONArray) object).get(size -1);
+						} catch (JSONException e) {
+						}
+					}
+				}
+				else if(key.equals("@first")){
+					int size = ((JSONArray) object).length();
+					if(size >0){
+						try {
+							return ((JSONArray) object).get(0);
+						} catch (JSONException e) {
+						}
+					}
+				}
+				else if(key.equals("@joinString")){
+					
+					StringBuilder sb = new StringBuilder();
+					
+					int size = ((JSONArray) object).length();
+					
+					for(int i=0;i<size;i++){
+						
+						Object v = null;
+						
+						try {
+							v = ((JSONArray) object).get(i);
+						} catch (JSONException e) {
+						}
+						
+						String s = Value.stringValue(v,null);
+						
+						if(s != null){
+							if(sb.length() == 0){
+								sb.append(s);
+							}
+							else{
+								sb.append(",").append(s);
+							}
+						}
+						
+					}
+					
+					return sb.toString();
+				}
+				else if(key.startsWith("@")){
+					int index = Integer.valueOf(key.substring(1));
+					int size = ((JSONArray) object).length();
+					if(index >=0 && index < size){
+						try {
+							return ((JSONArray) object).get(index);
+						} catch (JSONException e) {
+						}
+					}
+				}
 			}
 			else if(object instanceof List){
 				if(key.equals("@last")){
@@ -327,5 +399,20 @@ public class Value {
 	public static boolean booleanValueForKeyPath(Object object,String keyPath){
 		return booleanValue(objectValueForKeyPath(object,keyPath),false);
 	}
+
+	public static Map<?,?> mapValueForKey(Object object,String key){
+		return mapValue(objectValueForKey(object,key));
+	}
 	
+	public static Map<?,?> mapValueForKeyPath(Object object,String keyPath){
+		return mapValue(objectValueForKeyPath(object,keyPath));
+	}
+	
+	public static List<?> listValueForKey(Object object,String key){
+		return listValue(objectValueForKey(object,key));
+	}
+	
+	public static List<?> listValueForKeyPath(Object object,String keyPath){
+		return listValue(objectValueForKeyPath(object,keyPath));
+	}
 }

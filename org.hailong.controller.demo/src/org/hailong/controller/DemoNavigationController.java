@@ -21,10 +21,7 @@ public class DemoNavigationController extends NavigationController<DemoContext> 
 		super.didViewLoaded();
 		
 		_titleView = (TextView) getView().findViewById(R.id.titleTextView);
-		
-		if(_titleView !=null){
-			_titleView.setText(getTopViewController().getTitle());
-		}
+	
 	}
 	
 	@Override
@@ -36,7 +33,7 @@ public class DemoNavigationController extends NavigationController<DemoContext> 
 	protected void onTopControllerChanged(){
 		super.onTopControllerChanged();
 		
-		if(_titleView !=null){
+		if(_titleView !=null && getTopViewController() != null){
 			_titleView.setText(getTopViewController().getTitle());
 		}
 	}

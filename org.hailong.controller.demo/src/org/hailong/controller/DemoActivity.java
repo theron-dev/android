@@ -10,5 +10,4 @@ public class DemoActivity extends AbstractViewControllerActivity<DemoContext> {
 		return new Intent(this,DemoService.class);
 	}
 
-	
 }

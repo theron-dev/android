@@ -1,7 +1,9 @@
 package org.hailong.controller;
 
 import org.hailong.controller.demo.R;
+import org.hailong.framework.URL;
 import org.hailong.framework.controllers.IViewControllerContext;
+
 import android.content.pm.ActivityInfo;
 import android.view.View;
 import android.widget.Button;
@@ -40,7 +42,7 @@ public class DemoUserViewController extends DemoBaseController {
 			@Override
 			public void onClick(View v) {
 				
-				getControllerContext().openUrl("User", true);
+				openURL(new URL(getAlias() + "/user", getURL()), true);
 				
 			}});
 	}

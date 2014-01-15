@@ -3,20 +3,19 @@ package org.hailong.framework.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hailong.framework.Framework;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.R;
-import org.hailong.framework.ServiceContextHandler;
+import org.hailong.framework.URL;
+import org.hailong.framework.value.Value;
 
-import android.content.pm.ActivityInfo;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.ViewGroup;
-import android.view.animation.TranslateAnimation;
-import android.widget.FrameLayout;
 
 public class TabBarController<T extends IServiceContext> extends
-		ViewController<T>  implements IViewControllerContext<T> {
+		ViewController<T>  {
 
-	private List<ViewController<T>> _viewControllers;
+	private List<IViewController<T>> _viewControllers;
 	private ViewGroup _contentView;
 	private int _selectedIndex;
 	
@@ -24,19 +23,12 @@ public class TabBarController<T extends IServiceContext> extends
 		super(activity, 0);
 	}
 	
-	public TabBarController(IViewControllerContext<T> activity,ViewController<T> rootViewController) {
-		super(activity, 0);
-		_viewControllers = new ArrayList<ViewController<T>>();
-		_viewControllers.add(rootViewController);
-		rootViewController.setParentViewController(this);
-	}
-	
 	public TabBarController(IViewControllerContext<T> activity, int viewLayout) {
 		super(activity, viewLayout);
 	}
 	
 	
-	public ViewController<T> getSelectedViewController(){
+	public IViewController<T> getSelectedViewController(){
 		if(_selectedIndex >=0 && _viewControllers != null && _selectedIndex < _viewControllers.size()){
 			return _viewControllers.get(_selectedIndex);
 		}
@@ -54,7 +46,7 @@ public class TabBarController<T extends IServiceContext> extends
 	public void setSelectedIndex(int selectedIndex,boolean animated){
 		if(selectedIndex >=0 && _viewControllers != null && selectedIndex < _viewControllers.size() && _selectedIndex != selectedIndex){
 			if(isViewAppeared()){
-				ViewController<T> topViewController = getSelectedViewController();
+				IViewController<T> topViewController = getSelectedViewController();
 				if(topViewController !=null){
 					topViewController.viewRemoveForSuperView(animated);
 				}
@@ -63,7 +55,7 @@ public class TabBarController<T extends IServiceContext> extends
 			_selectedIndex = selectedIndex;
 			
 			if(isViewAppeared()){
-				ViewController<T> topViewController = getSelectedViewController();
+				IViewController<T> topViewController = getSelectedViewController();
 				if(topViewController !=null){
 					topViewController.viewAppearToSuperView(getContentView(), animated);
 				}
@@ -73,74 +65,82 @@ public class TabBarController<T extends IServiceContext> extends
 		}
 	}
 	
-	public void setSelectedViewController(ViewController<T> viewController){
+	public void setSelectedViewController(IViewController<T> viewController){
 		setSelectedViewController(viewController,false);
 	}
 	
-	public void setSelectedViewController(ViewController<T> viewController,boolean animated){
+	public void setSelectedViewController(IViewController<T> viewController,boolean animated){
 		if(_viewControllers !=null){
 			setSelectedIndex(_viewControllers.indexOf(viewController),animated);
 		}
 	}
 	
-	public void setViewControllers(List<ViewController<T>> viewControllers){
+	public void setViewControllers(List<IViewController<T>> viewControllers){
 		setViewControllers(viewControllers, false);
 	}
 
-	public void setViewControllers(List<ViewController<T>> viewControllers,boolean animated){
+	public void setViewControllers(List<IViewController<T>> viewControllers,boolean animated){
 		
-		if(isViewAppeared() && _viewControllers != null){
-			ViewController<T> topViewController = getSelectedViewController();
-			if(topViewController !=null){
-				topViewController.viewRemoveForSuperView(animated);
+		if(isAnimation()){
+			return;
+		}
+		
+		ArrayList<IViewController<T>> newViewControllers = new ArrayList<IViewController<T>>(4);
+		
+		for(IViewController<T> viewController : viewControllers){
+			
+			newViewControllers.add(viewController);
+			viewController.setParentController(this);
+
+			if(_viewControllers != null){
+				_viewControllers.remove(viewController);
 			}
 		}
 		
 		if(_viewControllers != null){
-			for(ViewController<T> viewController : _viewControllers){
-				viewController.setParentViewController(null);
+			
+			for(IViewController<T> viewController : _viewControllers){
+				
+				viewController.setParentController(null);
+
+				if(viewController.isViewAppeared()){
+					viewController.viewRemoveForSuperView(animated);
+				}
 			}
+
 		}
 		
-		_viewControllers = viewControllers;
+		_viewControllers = newViewControllers;
+
+		if(_selectedIndex >= _viewControllers.size()){
+			_selectedIndex = _viewControllers.size() - 1;
+		}
 		
-		if(_viewControllers != null){
-			for(ViewController<T> viewController : _viewControllers){
-				viewController.setParentViewController(this);
-			}
+		if(_selectedIndex < 0 ){
+			_selectedIndex = 0;
 		}
 		
 		if(isViewAppeared()){
-			ViewController<T> topViewController = getSelectedViewController();
-			if(topViewController !=null){
+			IViewController<T> topViewController = getSelectedViewController();
+			
+			for(IViewController<T> viewController : _viewControllers){
 				
-				ViewGroup contentView = getContentView();
-				
-				topViewController.viewAppearToSuperView(contentView, animated);
-		
-				TranslateAnimation animation = new  TranslateAnimation(contentView.getWidth(), 0, 0, 0);
-				animation.setDuration(300);
-				topViewController.getView().startAnimation(animation);
+				if(topViewController == viewController){
+					if(!topViewController.isViewAppeared()){
+						topViewController.viewAppearToSuperView(getContentView(), animated);
+					}
+				}
+				else if(viewController.isViewAppeared()){
+					viewController.viewRemoveForSuperView(animated);
+				}
 			}
 		}
 		
 		onSelectedControllerChanged();
 	}
 	
-	public List<ViewController<T>> getViewControllers(){
+	public List<IViewController<T>> getViewControllers(){
 		return _viewControllers;
-	}
-
-	
-	@Override
-	protected void loadView() {
-		if(getViewLayoutReseource() == 0){
-			setView(new FrameLayout(getContext()));
-			didViewLoaded();
-		}
-		else{
-			super.loadView();
-		}
 	}
 	
 	@Override
@@ -164,8 +164,8 @@ public class TabBarController<T extends IServiceContext> extends
 	public void viewWillAppear(boolean animated){
 		super.viewWillAppear(animated);
 		
-		ViewController<T> topViewController = getSelectedViewController();
-		if(topViewController != null){
+		IViewController<T> topViewController = getSelectedViewController();
+		if(topViewController != null && !topViewController.isViewAppeared()){
 			topViewController.viewAppearToSuperView(getContentView(), animated);
 		}
 	}
@@ -184,141 +184,87 @@ public class TabBarController<T extends IServiceContext> extends
 	public void viewDidDisappear(boolean animated){
 		super.viewDidDisappear(animated);
 		
-		ViewController<T> topViewController = getSelectedViewController();
-		if(topViewController != null){
-			topViewController.viewRemoveForSuperView(false);
-		}
-	}
-
-	public boolean isBindServiceContext() {
-		return getControllerContext().isBindServiceContext();
-	}
-
-	public void addServiceContextListener(ServiceContextHandler<T> listener) {
-		getControllerContext().addServiceContextListener(listener);
-	}
-
-	public void removeServiceContextListener(ServiceContextHandler<T> listener) {
-		getControllerContext().removeServiceContextListener(listener);
-	}
-
-	public ViewController<T> getInstance(String alias,
-			IViewControllerContext<T> controllerContext) {
-		return getControllerContext().getInstance(alias, controllerContext);
-	}
-	
-	public ViewController<T> getInstance(String alias){
-		return getControllerContext().getInstance(alias, this);
-	}
-
-	public boolean openUrl(String uri, boolean animated) {
-		if("@root".equals(uri)){
-			setSelectedIndex(0,animated);
-			return true;
-		}
-		return false;
-	}
-
-	public Object getValue(String key) {
-		return getControllerContext().getValue(key);
-	}
-
-	public void setValue(String key, Object value) {
-		getControllerContext().setValue(key, value);
-	}
-
-	public String setValue(Object value) {
-		return getControllerContext().setValue(value);
-	}
-
-	public IViewControllerContext<T> getRootContext() {
-		return getControllerContext().getRootContext();
-	}
-
-	public IViewControllerContext<T> getParentContext() {
-		return getControllerContext();
-	}
-	
-	public void setToken(String token){
-		super.setToken(token);
-		if(token != null){
-			String[] aliass = token.split("/");
-			List<ViewController<T>> viewControllers = new ArrayList<ViewController<T>>();
-			for(String alias : aliass){
-				ViewController<T> viewController = getInstance(alias,this);
-				if(viewController != null){
-					viewControllers.add(viewController);
-				}
-			}
-			setViewControllers(viewControllers,false);
-		}
-	}
-	
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(getModalViewController() != null){
-			return getModalViewController().onKeyDown(keyCode, event);
-		}
-		
-		ViewController<T> topViewController = getSelectedViewController();
-	    if (topViewController != null ) {
-	        if(! topViewController.onKeyDown(keyCode, event)){
-	        	if(onPressBack()){
-	        		super.onKeyDown(keyCode, event);
-	        	}
-	        	return false;
-	        }
-	        return true;
-	    }
-	    return super.onKeyDown(keyCode, event);
-	}
-	
-	public int getControllerOrientation(){
-		return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-	}
-	
-	public void onOrientationChanged(int orientation){
-		
-		if(getModalViewController() != null){
-			getModalViewController().onOrientationChanged(orientation);
-			return ;
-		}
-		
-		ViewController<T> topViewController = getSelectedViewController();
-	    if (topViewController != null ) {
-	    	topViewController.onOrientationChanged(orientation);
-	    	return;
-	    }
-	    
-		super.onOrientationChanged(orientation);
 	}
 	
 	public ViewGroup getContentView(){
-		getView();
 		return _contentView;
 	}
-	
-	public void setResult(Object result){
-		getControllerContext().setResult(result);
-	}
-	
-	public Object getResult(){
-		return getControllerContext().getResult();
-	}
 
-	
 	protected void onSelectedControllerChanged(){
 		
 	}
 	
-	public ViewController<T> getFocusViewController(){
-		ViewController<T> focusController = super.getFocusViewController();
-		if(getSelectedViewController() != null && focusController == this){
-			return getSelectedViewController();
+	public void setConfig(Object config){
+		super.setConfig(config);
+		
+		ArrayList<IViewController<T>> viewControllers = new ArrayList<IViewController<T>>();
+		
+		List<?> items = Value.listValueForKey(config, "items");
+		
+		for(Object item : items){
+			
+			String url = Value.stringValueForKey(item, "url");
+			
+			if(url != null){
+				
+				URL u = new URL(url);
+				
+				IViewController<T> viewController = getViewControllerContext().getViewController(u, "/");
+				
+				if(viewController != null){
+					viewController.loadURL(u, "/", false);
+					viewControllers.add(viewController);
+				}
+				
+			}
+			
 		}
-		return focusController;
+		
+		setViewControllers(viewControllers,false);
 	}
 	
-	public void onFocusViewControllerChanged() {
-		getControllerContext().onFocusViewControllerChanged();
+	@Override
+	public boolean openURL(URL url,boolean animated){
+		
+		String scheme = getScheme();
+		
+		if(scheme == null){
+			scheme = "tab";
+		}
+		
+		if(scheme.equals(url.getScheme())){
+
+			Log.d(Framework.TAG, url.toString());
+			
+			String alias = url.firstPathComponent("/");
+			
+			if(alias != null && _viewControllers !=null){
+				
+				for(IViewController<T> viewController : _viewControllers){
+					if(alias.equals(viewController.getAlias())){
+						setSelectedViewController(viewController,animated);
+						break;
+					}
+				}
+				
+			}
+			
+	        return true;
+			
+		}
+		
+		return super.openURL(url, animated);
+	}
+	
+	public IViewController<T> getTopController() {
+		IViewController<T> controller = super.getTopController();
+		if(controller == this){
+			controller = getSelectedViewController();
+			if(controller != null){
+				return controller.getTopController();
+			}
+			return this;
+		}
+		return controller;
 	}
 }

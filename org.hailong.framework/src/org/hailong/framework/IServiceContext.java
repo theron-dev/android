@@ -15,4 +15,6 @@ public interface IServiceContext {
 	
 	public Object getSystemService(String name);
 
+	public Object getConfig();
+
 }

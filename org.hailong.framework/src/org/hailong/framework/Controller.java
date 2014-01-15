@@ -37,7 +37,9 @@ public abstract class Controller<T extends IServiceContext> {
 
 	abstract public void onServiceContextStop() ;
 	
-	abstract public void destroy();
-	
+	public void destroy(){
+		activity = null;
+	}
+
 
 }

@@ -1,9 +1,9 @@
 package org.hailong.controller;
 
 import org.hailong.controller.demo.R;
+import org.hailong.framework.controllers.IViewController;
 import org.hailong.framework.controllers.IViewControllerContext;
 import org.hailong.framework.controllers.TabBarController;
-import org.hailong.framework.controllers.ViewController;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -43,7 +43,7 @@ public class DemoHomeViewController extends TabBarController<DemoContext> {
 			if(index < _radioGroup.getChildCount()){
 				((RadioButton)_radioGroup.getChildAt(index)).setChecked(true);
 			}
-			for(ViewController<DemoContext> viewController : getViewControllers()){
+			for(IViewController<DemoContext> viewController : getViewControllers()){
 				if(index < _radioGroup.getChildCount()){
 					RadioButton tab = (RadioButton)_radioGroup.getChildAt(index ++);
 					tab.setText(viewController.getTitle());

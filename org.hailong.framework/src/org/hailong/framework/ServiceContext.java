@@ -1,18 +1,15 @@
 package org.hailong.framework;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
+import org.hailong.framework.value.Value;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -21,6 +18,7 @@ import android.util.Log;
 
 public class ServiceContext extends Service implements IServiceContext {
 	
+	private Object _config;
 	private List<ServiceContainer<?>> _serviceContainers;
 	
 	public <T extends ITask> boolean handle(Class<T> taskType, T task,
@@ -52,26 +50,89 @@ public class ServiceContext extends Service implements IServiceContext {
 	}
 	
 	protected String getConfigFile(){
-		return "config.xml";
+		return "config.json";
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(){
 		super.onCreate();
 
-		_serviceContainers = new ArrayList<ServiceContainer<?>>();
-		
-		InputStream inputStream = this.getClass().getResourceAsStream(getConfigFile());
-		if(inputStream != null){
-			try {
-				DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				Document document  = documentBuilder.parse(inputStream);
-				inputStream.close();
-				config(document);
-			} catch (Exception e) {
-				Log.d(Framework.TAG, Log.getStackTraceString(e));
+		if(_serviceContainers == null){
+			
+			_serviceContainers = new ArrayList<ServiceContainer<?>>();
+			
+			Object config = getConfig();
+			
+			List<?> services = Value.listValueForKey(config, "services");
+			
+			if(services != null){
+				
+				for(Object cfg : services){
+					
+					String className = Value.stringValueForKey(cfg, "class");
+					
+					Class<?> clazz = null;
+					
+					try {
+						clazz = Class.forName(className);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					if(clazz != null && IService.class.isAssignableFrom(clazz)){
+						
+						IServiceContainer container = registerService((Class<IService>)clazz);
+						
+						List<?> taskTypes = Value.listValueForKey(cfg, "taskTypes");
+						
+						if(taskTypes != null){
+							
+							for(Object taskType : taskTypes){
+								
+								Class<?> taskTypeClass = null;
+								
+								try {
+									taskTypeClass = Class.forName(taskType.toString());
+								} catch (Exception e) {
+									
+								}
+								
+								if(taskTypeClass != null && ITask.class.isAssignableFrom(taskTypeClass)){
+									container.addTaskType((Class<ITask>)taskType);
+								}
+								else{
+									Log.d(Framework.TAG, "not found taskType "+taskType);
+								}
+							}
+							
+						}
+						
+						if(Value.booleanValueForKey(cfg, "allocDealloc")){
+							container.setAllowDeallocInstance(true);
+						}
+						
+						if(Value.booleanValueForKey(cfg, "createInstance")){
+							try {
+								container.createInstance();
+							} catch (Exception e) {
+								Log.d(Framework.TAG, Log.getStackTraceString(e));
+							}
+						}
+					
+						container.setConfig(cfg);
+						
+					}
+					else{
+						Log.d(Framework.TAG, "not found service class "+className);
+					}
+					
+				}
+				
 			}
+			
 		}
+		
 	}
 
 	@Override
@@ -89,68 +150,6 @@ public class ServiceContext extends Service implements IServiceContext {
 		_serviceContainers.add(serviceContainer);
 		
 		return serviceContainer;
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	private void config(Document configDocument){
-		NodeList nodes =  configDocument.getElementsByTagName("service");
-		int length = nodes.getLength();
-		for(int i=0;i<length;i++){
-			Node node = nodes.item(i);
-			String className = PLIST.getNodeAttribute(node,"class");
-			Class<?> clazz = null;
-			try {
-				clazz = Class.forName(className);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			if(clazz != null && IService.class.isAssignableFrom(clazz)){
-				IServiceContainer container = registerService((Class<IService>)clazz);
-				NodeList tasks = ((Element) node).getElementsByTagName("task");
-				int taskCount = tasks.getLength();
-				for(int j=0;j<taskCount;j++){
-					Node task = tasks.item(j);
-					String taskTypeName = PLIST.getNodeContentString(task);
-					Class<?> taskType = null;
-					try {
-						taskType = Class.forName(taskTypeName);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}
-					if(taskType !=null && ITask.class.isAssignableFrom(taskType)){
-						container.addTaskType((Class<ITask>)taskType);
-					}
-				}
-				String allowDealloc = PLIST.getNodeAttribute(node,"allocDealloc");
-				if("false".equals(allowDealloc)){
-					container.setAllowDeallocInstance(false);
-				}
-				String createInstance = PLIST.getNodeAttribute(node,"createInstance");
-				
-				if("true".equals(createInstance)){
-					try {
-						container.createInstance();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				
-				NodeList configs = ((Element) node).getElementsByTagName("config");
-				if(configs.getLength() >0){
-					Node config = configs.item(0);
-					NodeList datas = config.getChildNodes();
-				
-					for(int j=0;j<datas.getLength();j++){
-						config = datas.item(j);
-						if(config.getNodeType() == Node.ELEMENT_NODE){
-							break;
-						}
-					}
-					container.setConfig(PLIST.parseXmlObject(config));
-				}
-			}
-		}
 	}
 	
 	
@@ -257,5 +256,72 @@ public class ServiceContext extends Service implements IServiceContext {
 		        _instance = null;
 			}
 		}
+	}
+
+	public Object getConfig() {
+		
+		if(_config == null){
+			
+			String configFile = getConfigFile();
+			
+			if(configFile != null){
+				
+				if(configFile.endsWith(".json")){
+					
+					InputStream inputStream = this.getClass().getResourceAsStream(getConfigFile());
+					
+					if(inputStream != null){
+
+						try {
+							
+							InputStreamReader reader = new InputStreamReader(inputStream,"utf-8");
+							
+							StringBuilder sb = new StringBuilder();
+							
+							char[] buf = new char[12400];
+							
+							int len;
+							
+							while((len = reader.read(buf)) >0){
+								sb.append(buf,0,len);
+							}
+							
+							_config = JSON.decodeString(sb.toString());
+							
+							reader.close();
+							inputStream.close();
+							
+						} catch (Exception e) {
+							Log.d(Framework.TAG, Log.getStackTraceString(e));
+						}
+					}
+					
+				}
+				else if(configFile.startsWith(".xml")){
+
+					InputStream inputStream = this.getClass().getResourceAsStream(getConfigFile());
+					
+					if(inputStream != null){
+
+						try {
+							
+							DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+							Document document  = documentBuilder.parse(inputStream);
+							inputStream.close();
+							
+							_config = PLIST.parseXmlObject(document.getDocumentElement());
+
+							
+						} catch (Exception e) {
+							Log.d(Framework.TAG, Log.getStackTraceString(e));
+						}
+					}
+				}
+				
+			}
+			
+		}
+		
+		return _config;
 	}
 }
