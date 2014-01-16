@@ -72,12 +72,12 @@ public class Animation implements android.view.animation.Animation.AnimationList
 		_duration = duration;
 	}
 	
-	public void translate(View view , float fromX,float fromY,float toX,float toY ){
-		addAnimation(view, new TranslateAnimation(fromX, fromY, toX, toY));
+	public void translate(View view , float fromX,float toX,float fromY,float toY ){
+		addAnimation(view, new TranslateAnimation(fromX, toX, fromY, toY));
 	}
 	
-	public void scale(View view , float fromX,float fromY,float toX,float toY ){
-		addAnimation(view, new ScaleAnimation(fromX, fromY, toX, toY));
+	public void scale(View view , float fromX,float toX,float fromY,float toY ){
+		addAnimation(view, new ScaleAnimation(fromX, toX, fromY, toY));
 	}
 	
 	public static interface Listener {

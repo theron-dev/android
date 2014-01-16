@@ -180,11 +180,24 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	
 	public boolean onPressBack(){
 		
+		IViewController<T> controller = getModalViewController();
 		
-		return true;
+		if(controller != null){
+			return true;
+		}
+		
+		controller = getParentController();
+		
+		if(controller != null){
+			
+			return controller.onPressBack();
+		}
+		
+		return false;
 	}
 	
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
 	    if (keyCode == KeyEvent.KEYCODE_BACK 
 	    		&& event.getRepeatCount() == 0 ) {
 	    	
@@ -198,7 +211,7 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	    	}
 	    	return true;
 	    }
-	    
+
 	    return false;
 	}
 	
@@ -212,7 +225,8 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	
 	public void presentModalViewController(ViewController<T> viewController,boolean animated){
 		
-		if( _animation || viewController == null || _modalViewController != null || !isViewAppeared()){
+		if( _animation || viewController == null || _modalViewController != null 
+				|| !isViewAppeared() || getViewControllerContext().isIdleTimerDisabled()){
 			return;
 		}
 		
@@ -244,6 +258,7 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 							ViewGroup contentView = (ViewGroup)getView().getParent();
 							contentView.setEnabled(true);
 							_animation = false;
+							getViewControllerContext().setIdleTimerDisabled(false);
 						}
 						
 					});
@@ -251,6 +266,7 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 			});
 			_animation = true;
 			contentView.setEnabled(false);
+			getViewControllerContext().setIdleTimerDisabled(true);
 			_modalViewController.getView().startAnimation(animation);
 			
 		}

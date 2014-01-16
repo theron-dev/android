@@ -31,7 +31,7 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 	
 	public void setViewControllers(List<IViewController<T>> viewControllers,boolean animated){
 		
-		if(isAnimation()){
+		if(isAnimation() || getViewControllerContext().isIdleTimerDisabled()){
 			return;
 		}
 		
@@ -54,26 +54,19 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 					i ++;
 				}
 				
-				if(i < size){
-					
-					int ii = i;
-					
-					while(ii<_viewControllers.size()){
-						removeViewControllers.add(_viewControllers.get(ii));
-						_viewControllers.remove(ii);
-					}
-					
-					ii = i;
-					
-					for(;ii<viewControllers.size();ii++){
-						addViewControllers.add(viewControllers.get(ii));
-					}
+				int ii = i;
+				
+				while(ii<_viewControllers.size()){
+					removeViewControllers.add(_viewControllers.get(ii));
+					_viewControllers.remove(ii);
 				}
-				else{
-					for(;i<viewControllers.size();i++){
-						addViewControllers.add(viewControllers.get(i));
-					}
+				
+				ii = i;
+				
+				for(;ii<viewControllers.size();ii++){
+					addViewControllers.add(viewControllers.get(ii));
 				}
+				
 			}
 			else{
 				for(IViewController<T> viewController : _viewControllers){
@@ -101,6 +94,7 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 			if(addSize + removeSize > 0){
 				
 				final ViewGroup contentView = getContentView();
+				final ArrayList<IViewController<T>> removeViews = new ArrayList<IViewController<T>>(4);
 				
 				Animation anim = new Animation();
 				
@@ -113,12 +107,21 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 					}
 
 					public void onEnd() {
+						
+						for(IViewController<T> viewController : removeViews){
+							if(viewController.isViewAppeared()){
+								viewController.viewRemoveForSuperView(false);
+							}
+						}
+						
 						contentView.setEnabled(true);
 						setAnimation(false);
+						getViewControllerContext().setIdleTimerDisabled(false);
 					}});
 				
 				contentView.setEnabled(false);
 				setAnimation(true);
+				getViewControllerContext().setIdleTimerDisabled(true);
 				
 				for(i=0; i< removeSize;i++){
 					
@@ -128,7 +131,9 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 
 					if(viewController.isViewAppeared()){
 					
-						anim.translate(viewController.getView(), contentView.getWidth(), 0, 0, 0);
+						anim.translate(viewController.getView(), 0, contentView.getWidth(), 0, 0);
+						
+						removeViews.add(viewController);
 					}
 				}
 				
@@ -146,7 +151,10 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 					for(IViewController<T> viewController : _viewControllers){
 						
 						if(viewController.isViewAppeared()){
-							anim.translate(viewController.getView(), 0, 0, - contentView.getWidth(), 0);
+							
+							anim.translate(viewController.getView(), 0, - contentView.getWidth(), 0 , 0);
+							
+							removeViews.add(viewController);
 						}
 					}
 					
@@ -160,6 +168,13 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 					
 					anim.translate(viewController.getView(),  contentView.getWidth(), 0, 0, 0);
 					
+				}
+				
+				IViewController<T> viewController = getTopViewController();
+				
+				if(viewController !=null && !viewController.isViewAppeared()){
+					viewController.viewAppearToSuperView(contentView, animated);
+					anim.translate(viewController.getView(),  -contentView.getWidth(), 0, 0, 0);
 				}
 
 				anim.submit();
@@ -288,6 +303,7 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 				if(alias.equals(viewController.getAlias())){
 					basePath = viewController.loadURL(url, basePath, animated);
 					viewControllers.add(viewController);
+					index ++;
 				}
 				else{
 					index = -1;
@@ -337,5 +353,27 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 		}
 		
 		return super.openURL(url, animated);
+	}
+	
+	@Override
+	public boolean onPressBack(){
+		
+		IViewController<T> controller = getModalViewController();
+		
+		if(controller != null){
+			return true;
+		}
+		
+		if(_viewControllers != null && _viewControllers.size() > 1){
+			return true;
+		}
+		
+		controller = getParentController();
+		
+		if(controller != null){
+			return controller.onPressBack();
+		}
+		
+		return super.onPressBack();
 	}
 }

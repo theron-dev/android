@@ -23,7 +23,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-
+import android.view.MotionEvent;
 
 public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 		extends AbstractActivity<T> implements IViewControllerContext<T> {
@@ -35,6 +35,7 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 	private IResultCallback _resultCallback;
 	private Object _config;
 	private Map<String,ViewControllerClassDefine> _classDefines;
+	private boolean _idleTimerDisabled;
 	
 	protected String getConfigFile(){
 		return "config.json";
@@ -145,8 +146,8 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)  {
-	    if(_rootViewController != null){
-	    	if(! _rootViewController.onKeyDown(keyCode, event)){
+	    if(!_idleTimerDisabled && _rootViewController != null){
+	    	if(! _rootViewController.getTopController().onKeyDown(keyCode, event)){
 	    		return super.onKeyDown(keyCode, event);
 	    	}
 	    	return true;
@@ -251,6 +252,27 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 		return _resultCallback != null;
 	}
 
+	public boolean isIdleTimerDisabled(){
+		return _idleTimerDisabled;
+	}
+	
+	public void setIdleTimerDisabled(boolean idleTimerDisabled){
+		_idleTimerDisabled = idleTimerDisabled;
+	}
+	
+	public boolean dispatchTouchEvent(MotionEvent event){
+		if(!_idleTimerDisabled){
+			return super.dispatchTouchEvent(event);
+		}
+		return false;
+	}
+	
+	public boolean dispatchKeyEvent(KeyEvent event){
+		if(!_idleTimerDisabled){
+			return super.dispatchKeyEvent(event);
+		}
+		return false;
+	}
 
 	public Object getConfig() {
 		if(_config == null){

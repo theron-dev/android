@@ -77,5 +77,7 @@ public interface IViewController<T extends IServiceContext> {
 	public boolean isAnimation();
 	
 	public void setAnimation(boolean animation);
+	
+	public boolean onPressBack();
 
 }

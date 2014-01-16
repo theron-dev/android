@@ -81,7 +81,7 @@ public class TabBarController<T extends IServiceContext> extends
 
 	public void setViewControllers(List<IViewController<T>> viewControllers,boolean animated){
 		
-		if(isAnimation()){
+		if(isAnimation() || getViewControllerContext().isIdleTimerDisabled()){
 			return;
 		}
 		
