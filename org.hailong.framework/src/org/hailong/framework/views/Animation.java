@@ -2,69 +2,33 @@ package org.hailong.framework.views;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import android.animation.Animator.AnimatorListener;
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
+import android.util.Property;
 import android.view.View;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 
-public class Animation implements android.view.animation.Animation.AnimationListener {
+public class Animation implements android.animation.ValueAnimator.AnimatorUpdateListener {
 
-	private long _duration;
-	private Listener _listener;
-	private List<View> _views;
-	private List<android.view.animation.Animation> _animations;
-	private int _submitCount = 0;
-	private int _startCount = 0;
-	private int _endCount = 0;
+	private long _duration = 0;
+	private AnimatorListener _listener = null;
+	private List<AnimationItem<?>> _animationItems = null;
+	private TimeInterpolator _timeInterpolator = null;
 	
-	public void submit(){
+	public void addAnimationItem(AnimationItem<?> anim){
 		
-		if(_submitCount == 0){
+		if(anim != null){
 			
-			_submitCount = 0;
-			_startCount = 0;
-			_startCount = 0;
-			
-			if(_views != null && _animations != null){
-				
-				int size = Math.min(_views.size(), _animations.size());
-				
-				for(int i=0;i<size;i++){
-					
-					View v = _views.get(i);
-					
-					android.view.animation.Animation anim = _animations.get(i);
-					anim.setDuration(_duration);
-					anim.setAnimationListener(this);
-					
-					v.startAnimation(anim);
-					
-					_submitCount ++;
-				}
-				
-			}
-		}
-	}
-	
-	public void addAnimation(View view,android.view.animation.Animation anim){
-		
-		if(view != null && anim != null){
-			
-			if(_views == null){
-				_views = new ArrayList<View>(4);
+			if(_animationItems == null){
+				_animationItems = new ArrayList<AnimationItem<?>>(4);
 			}
 			
-			if(_animations == null){
-				_animations = new ArrayList<android.view.animation.Animation>(4);
-			}
-			
-			_views.add(view);
-			_animations.add(anim);
+			_animationItems.add(anim);
 		}
 
 	}
 	
-	public void setListener(Listener listener){
+	public void setListener(AnimatorListener listener){
 		_listener = listener;
 	}
 	
@@ -72,46 +36,96 @@ public class Animation implements android.view.animation.Animation.AnimationList
 		_duration = duration;
 	}
 	
+	public void setTimeInterpolator(TimeInterpolator timeInterpolator){
+		_timeInterpolator = timeInterpolator;
+	}
+	
 	public void translate(View view , float fromX,float toX,float fromY,float toY ){
-		addAnimation(view, new TranslateAnimation(fromX, toX, fromY, toY));
+		addAnimationItem( new AnimationItem<Float>(view,View.TRANSLATION_X, fromX, toX));
+		addAnimationItem( new AnimationItem<Float>(view,View.TRANSLATION_Y, fromY, toY));
+	}
+	
+	public void translateTo(View view , float toX,float toY ){
+		translate(view,view.getX(),toX,view.getY(),toY);
+		view.setX(toX);
+		view.setY(toY);
 	}
 	
 	public void scale(View view , float fromX,float toX,float fromY,float toY ){
-		addAnimation(view, new ScaleAnimation(fromX, toX, fromY, toY));
+		addAnimationItem( new AnimationItem<Float>(view,View.SCALE_X, fromX, toX));
+		addAnimationItem( new AnimationItem<Float>(view,View.SCALE_Y, fromY, toY));
 	}
 	
-	public static interface Listener {
-		
-		public void onStart();
-		
-		public void onEnd();
-		
+	public void scaleTo(View view , float toX,float toY ){
+		scale(view,view.getScaleX(),toX,view.getScaleY(),toY);
+		view.setScaleX(toX);
+		view.setScaleY(toY);
 	}
 
-	public void onAnimationEnd(android.view.animation.Animation arg0) {
+	public void alpha(View view ,float fromAlpha,float toAlpha){
+		addAnimationItem( new AnimationItem<Float>(view,View.ALPHA, fromAlpha, toAlpha));
+	}
+	
+	public void alphaTo(View view,float toAlpha){
+		alpha(view,view.getAlpha(),toAlpha);
+		view.setAlpha(toAlpha);
+	}
+	
+	public static class AnimationItem<T> {
 		
-		_endCount ++;
+		private View _view;
+		private Property<View, T> _property;
+		private T _fromValue;
+		private T _toValue;
 		
-		if(_endCount == _submitCount){
-			if(_listener != null){
-				_listener.onEnd();
-			}
+		public AnimationItem(View view,Property<View, T> property,T fromValue,T toValue){
+			_view = view;
+			_property = property;
+			_fromValue = fromValue;
+			_toValue = toValue;
 		}
 		
-	}
-
-	public void onAnimationRepeat(android.view.animation.Animation arg0) {
-		
-	}
-
-	public void onAnimationStart(android.view.animation.Animation arg0) {
-		
-		if(_startCount == 0){
-			if(_listener != null){
-				_listener.onStart();
-			}
+		public void setAnimationValue(float animationValue){
+			_property.set(_view, getValue(animationValue));
 		}
 		
-		_startCount ++;
+		@SuppressWarnings("unchecked")
+		public T getValue(float animationValue){
+			
+			Class<T> type = _property.getType();
+			
+			if(type == Float.class){
+				
+				return (T) (Float) ( (Float)_fromValue + ((Float) _toValue -(Float)_fromValue) * animationValue);
+			}
+			else if(type == Integer.class){
+				
+				int fv = (Integer)_fromValue;
+				int tv = (Integer)_toValue;
+				
+				return (T) (Integer) (int) ( fv + (tv - fv) * animationValue);
+			}
+
+			return _fromValue;
+		}
 	}
+
+	public void submit(){
+		ValueAnimator anim = ValueAnimator.ofFloat(0.0f,1.0f);
+		anim.setDuration(_duration);
+		anim.addUpdateListener(this);
+		anim.addListener(_listener);
+		anim.setInterpolator(_timeInterpolator);
+		anim.start();
+	}
+
+	public void onAnimationUpdate(ValueAnimator valueAnimator) {
+		if(_animationItems != null){
+			for(AnimationItem<?> animationItem : _animationItems){
+				animationItem.setAnimationValue((Float)valueAnimator.getAnimatedValue());
+			}
+		}
+	}
+
+	
 }

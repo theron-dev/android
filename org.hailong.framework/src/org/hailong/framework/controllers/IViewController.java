@@ -4,6 +4,7 @@ package org.hailong.framework.controllers;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
 
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,8 @@ public interface IViewController<T extends IServiceContext> {
 	
 	public void viewDidDisappear(boolean animated);
 	
+	public void viewAppearToSuperView(ViewGroup superView,boolean animated,boolean toBackground);
+	
 	public void viewAppearToSuperView(ViewGroup superView,boolean animated);
 
 	public void viewRemoveForSuperView(boolean animated);
@@ -80,4 +83,6 @@ public interface IViewController<T extends IServiceContext> {
 	
 	public boolean onPressBack();
 
+	public Handler getHandler();
+	
 }

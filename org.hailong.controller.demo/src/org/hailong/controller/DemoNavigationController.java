@@ -1,12 +1,12 @@
 package org.hailong.controller;
 
 import org.hailong.controller.demo.R;
+import org.hailong.framework.controllers.HeapController;
 import org.hailong.framework.controllers.IViewControllerContext;
-import org.hailong.framework.controllers.NavigationController;
 
 import android.widget.TextView;
 
-public class DemoNavigationController extends NavigationController<DemoContext> {
+public class DemoNavigationController extends HeapController<DemoContext> {
 
 	private TextView _titleView;
 	

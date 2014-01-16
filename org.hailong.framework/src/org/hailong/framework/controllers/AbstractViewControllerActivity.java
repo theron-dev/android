@@ -396,6 +396,7 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 
 			}
 		}
+		
 		return layout;
 	}
 

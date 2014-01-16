@@ -7,7 +7,6 @@ import org.hailong.framework.Framework;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
 import org.hailong.framework.value.Value;
-
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Handler;
@@ -129,11 +128,19 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 		return _view != null && _view.getParent() != null;
 	}
 	
-
 	public void viewAppearToSuperView(ViewGroup superView,boolean animated){
+		viewAppearToSuperView(superView,animated,false); 
+	}
+
+	public void viewAppearToSuperView(ViewGroup superView,boolean animated,boolean toBackground){
 		View view = getView();
 		viewWillAppear(animated);
-		superView.addView(view);
+		if(toBackground){
+			superView.addView(view, 0);
+		}
+		else{
+			superView.addView(view);
+		}
 		viewWillDisappear(animated);
 	}
 	
@@ -462,4 +469,7 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 		return null;
 	}
 	
+	public Handler getHandler(){
+		return _handler;
+	}
 }

@@ -2,28 +2,40 @@ package org.hailong.framework.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hailong.framework.Framework;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.R;
 import org.hailong.framework.URL;
+import org.hailong.framework.value.Value;
 import org.hailong.framework.views.Animation;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 
-public class NavigationController<T extends IServiceContext> extends ViewController<T>  {
+public class HeapController<T extends IServiceContext> extends ViewController<T> implements OnGestureListener ,View.OnTouchListener {
 
 	private List<IViewController<T>> _viewControllers;
 	private ViewGroup _contentView;
+	private GestureDetector _gestureDetector;
+	private float _gestureTouchX = 0;
+	private int _gestureDirection = GestureDirectionNone;
 	
-	public NavigationController(IViewControllerContext<T> activity) {
+	private final static int GestureDirectionNone = 0;
+	private final static int GestureDirectionLeft = 1;
+	private final static int GestureDirectionRight = 2;
+	private final static float ScaleValue  = 0.95f;
+	private final static float AlphaValue = 0.4f;
+	
+	public HeapController(IViewControllerContext<T> activity) {
 		super(activity, 0);
 	}
 
-	public NavigationController(IViewControllerContext<T> activity, int viewLayout) {
+	public HeapController(IViewControllerContext<T> activity, int viewLayout) {
 		super(activity, viewLayout);
 	}
 	
@@ -116,20 +128,20 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 						getViewControllerContext().setIdleTimerDisabled(false);
 					}
 
-					public void onAnimationCancel(Animator arg0) {
+					public void onAnimationCancel(Animator animation) {
 						onEnd();
 					}
 
-					public void onAnimationEnd(Animator arg0) {
+					public void onAnimationEnd(Animator animation) {
 						onEnd();
 					}
 
-					public void onAnimationRepeat(Animator arg0) {
+					public void onAnimationRepeat(Animator animation) {
 						// TODO Auto-generated method stub
 						
 					}
 
-					public void onAnimationStart(Animator arg0) {
+					public void onAnimationStart(Animator animation) {
 						// TODO Auto-generated method stub
 						
 					}});
@@ -167,7 +179,10 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 						
 						if(viewController.isViewAppeared()){
 							
-							anim.translate(viewController.getView(), 0, - contentView.getWidth(), 0 , 0);
+							View v = viewController.getView();
+							
+							anim.scale(v, 1.0f, ScaleValue,1.0f, ScaleValue);
+							anim.alpha(v,1.0f, AlphaValue);
 							
 							removeViews.add(viewController);
 						}
@@ -189,7 +204,11 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 				
 				if(viewController !=null && !viewController.isViewAppeared()){
 					viewController.viewAppearToSuperView(contentView, animated,true);
-					anim.translate(viewController.getView(),  -contentView.getWidth(), 0, 0, 0);
+					
+					View v = viewController.getView();
+					
+					anim.scale(v, ScaleValue, 1.0f,ScaleValue, 1.0f);
+					anim.alpha(v, AlphaValue,1.0f);
 				}
 
 				anim.submit();
@@ -254,6 +273,13 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 		if(_contentView == null){
 			_contentView = (ViewGroup)getView();
 		}
+		
+		if(_gestureDetector == null){
+			_gestureDetector = new GestureDetector(getContext(), this, getHandler());
+		}
+		
+		getView().setOnTouchListener(this);
+		
 	}
 	
 	@Override
@@ -390,5 +416,238 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 		}
 		
 		return super.onPressBack();
+	}
+
+	public boolean onDown(MotionEvent e) {
+		
+		if(_viewControllers != null && _viewControllers.size() > 1 && getModalViewController() == null){
+			
+			IViewController<T> viewController = getTopViewController();
+			
+			if(viewController != null){
+				
+				boolean disabledHeapGesture = Value.booleanValueForKey(viewController.getConfig(),"disabledHeapGesture");
+				
+				if(!disabledHeapGesture){
+					
+					_gestureTouchX = e.getX();
+					
+					return true;
+				}
+				
+			}
+
+		}
+		
+		return false;
+	}
+
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		return false;
+	}
+
+	public void onLongPress(MotionEvent e) {
+
+	}
+
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+
+		if(_viewControllers != null && _viewControllers.size() > 1){
+		
+			if(distanceX < 0.0f){
+				_gestureDirection = GestureDirectionRight;
+			}
+			else{
+				_gestureDirection = GestureDirectionLeft;
+			}
+			
+			float dx = e2.getX() - _gestureTouchX;
+			
+			ViewGroup contentView = getContentView();
+			
+			IViewController<T> viewController = _viewControllers.get(_viewControllers.size() -2);
+			IViewController<T> topViewController = getTopViewController();
+			
+			if(!viewController.isViewAppeared()){
+				viewController.viewAppearToSuperView(getContentView(), false,true);
+			}
+			
+			float width = contentView.getWidth();
+			float height = contentView.getHeight();
+			
+			float x = dx;
+			
+			if(x < 0.0f){
+				x = 0.0f;
+			}
+			
+			if(x > width){
+				x = width;
+			}
+			
+			
+			View view = viewController.getView();
+			
+			float scale = ScaleValue + (1.0f - ScaleValue) * x / width;
+			float alpha = AlphaValue + (1.0f - AlphaValue) * x / width;
+			
+			view.setAlpha(alpha);
+			view.setScaleX(scale);
+			view.setScaleY(scale);
+			view.setPivotX(width * 0.5f);
+			view.setPivotY(height * 0.5f);
+			
+			view = topViewController.getView();
+			
+			view.setX(x);
+			
+			return true;
+		}
+		
+		return false;
+	}
+
+	public void onShowPress(MotionEvent e) {
+	
+	}
+
+	public boolean onSingleTapUp(MotionEvent e) {
+		return false;
+	}
+
+	public boolean onTouch(View view, MotionEvent event) {
+		
+		boolean rs = _gestureDetector.onTouchEvent(event);
+		
+		int action = event.getAction();
+		
+		if(MotionEvent.ACTION_CANCEL == action || MotionEvent.ACTION_UP == action){
+			
+			if(_gestureDirection != GestureDirectionNone ){
+				
+				if(_viewControllers != null && _viewControllers.size() > 1){
+					
+					final ViewGroup contentView = getContentView();
+					final IViewController<T> viewController = _viewControllers.get(_viewControllers.size() -2);
+					final IViewController<T> topViewController = getTopViewController();
+					
+					if(_gestureDirection == GestureDirectionLeft){
+						
+						Animation anim = new Animation();
+						
+						anim.setDuration(300);
+						anim.setListener(new AnimatorListener() {
+							
+							public void onEnd(){
+								
+								if(viewController.isViewAppeared()){
+									viewController.viewRemoveForSuperView(true);
+								}
+								
+								getViewControllerContext().setIdleTimerDisabled(false);
+								contentView.setEnabled(true);
+							}
+							
+							public void onAnimationStart(Animator arg0) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							public void onAnimationRepeat(Animator arg0) {
+								// TODO Auto-generated method stub
+								
+							}
+							
+							public void onAnimationEnd(Animator arg0) {
+								onEnd();
+							}
+							
+							public void onAnimationCancel(Animator arg0) {
+								onEnd();
+							}
+						});
+						
+						getViewControllerContext().setIdleTimerDisabled(true);
+						contentView.setEnabled(false);
+						
+						View v = viewController.getView();
+						
+						anim.alpha(v,v.getAlpha(), AlphaValue);
+						anim.scale(v, v.getScaleX(), ScaleValue,v.getScaleY(),ScaleValue);
+						
+						v = topViewController.getView();
+						
+						anim.translateTo(v, 0, 0);
+						
+						
+						anim.submit();
+					}
+					else if(_gestureDirection == GestureDirectionRight){
+						
+						Animation anim = new Animation();
+						
+						anim.setDuration(300);
+						anim.setListener(new AnimatorListener() {
+							
+							public void onEnd(){
+								
+								if(topViewController.isViewAppeared()){
+									topViewController.viewRemoveForSuperView(true);
+									View v = viewController.getView();
+									v.setX(0);
+								}
+								
+								topViewController.setParentController(null);
+								
+								getViewControllerContext().setIdleTimerDisabled(false);
+								contentView.setEnabled(true);
+							}
+							
+							public void onAnimationStart(Animator arg0) {
+
+							}
+							
+							public void onAnimationRepeat(Animator arg0) {
+
+							}
+							
+							public void onAnimationEnd(Animator arg0) {
+								onEnd();
+							}
+							
+							public void onAnimationCancel(Animator arg0) {
+								onEnd();
+							}
+						});
+						
+						getViewControllerContext().setIdleTimerDisabled(true);
+						contentView.setEnabled(false);
+						
+						View v = viewController.getView();
+						
+						anim.alphaTo(v,1.0f);
+						anim.scaleTo(v, 1.0f,1.0f);
+						
+						v = topViewController.getView();
+						
+						anim.translateTo(v, contentView.getWidth(), 0);
+						
+						anim.submit();
+						
+						_viewControllers.remove(topViewController);
+					}
+					
+				}
+				
+				_gestureDirection = GestureDirectionNone;
+				_gestureTouchX = 0;
+			}
+
+		}
+		
+		
+		return rs;
 	}
 }
