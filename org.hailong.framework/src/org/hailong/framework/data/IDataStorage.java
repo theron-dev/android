@@ -24,7 +24,7 @@ public interface IDataStorage {
 	
 	public Map<String,Object> get(DataEntity dataEntity,long rawId);
 	
-	public <T extends DataItem> Cursor query(DataFetchRequest<T> fetchRequest);
+	public <T extends DataObject> Cursor query(DataFetchRequest<T> fetchRequest);
 	
 	public void destroy();
 }

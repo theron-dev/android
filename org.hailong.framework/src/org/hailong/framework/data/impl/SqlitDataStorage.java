@@ -2,6 +2,7 @@ package org.hailong.framework.data.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 import org.hailong.framework.Framework;
 import org.hailong.framework.data.DataFetchRequest;
-import org.hailong.framework.data.DataItem;
+import org.hailong.framework.data.DataObject;
 import org.hailong.framework.data.DataSort;
 import org.hailong.framework.data.DataSortType;
 import org.hailong.framework.data.IDataStorage;
@@ -32,6 +33,10 @@ public class SqlitDataStorage implements IDataStorage {
 	
 	public SqlitDataStorage(Context context,String name){
 		_database = context.openOrCreateDatabase(name, Activity.MODE_PRIVATE, null);
+	}
+	
+	public SqlitDataStorage(File file){
+		_database = SQLiteDatabase.openOrCreateDatabase(file,null);
 	}
 	
 	public void beginTransaction() {
@@ -269,7 +274,7 @@ public class SqlitDataStorage implements IDataStorage {
 		return values;
 	}
 
-	public <T extends DataItem> Cursor query(DataFetchRequest<T> fetchRequest) {
+	public <T extends DataObject> Cursor query(DataFetchRequest<T> fetchRequest) {
 		DataEntity dataEntity = fetchRequest.getDataEntity();
 		DataField[] fields = dataEntity.fields();
 		String[] fieldNames = new String[fields.length+1];

@@ -1,13 +1,14 @@
 package org.hailong.framework.tasks.impl;
 
 import org.apache.http.client.methods.HttpUriRequest;
+import org.hailong.framework.tasks.IHttpAPITask;
 import org.hailong.framework.tasks.IHttpResourceTask;
 import org.hailong.framework.tasks.IHttpTask;
 
 import android.os.Handler;
 import android.os.Message;
 
-public abstract class AbstractHttpRequestTask<T> extends Handler implements IHttpTask<T>,IHttpResourceTask<T>{
+public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T>,IHttpResourceTask<T>,IHttpAPITask<T>{
 	
 	private final static int WHAT_FINISH = 1;
 	private final static int WHAT_ERROR = 2;
@@ -17,7 +18,7 @@ public abstract class AbstractHttpRequestTask<T> extends Handler implements IHtt
 	private Object waiter;
 	private boolean canceled;
 	
-	public AbstractHttpRequestTask(HttpUriRequest httpRequest){
+	public AbstractHttpTask(HttpUriRequest httpRequest){
 		this.httpRequest = httpRequest;
 	}
 	

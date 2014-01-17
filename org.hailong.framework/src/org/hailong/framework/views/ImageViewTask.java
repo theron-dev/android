@@ -2,19 +2,18 @@ package org.hailong.framework.views;
 
 import java.io.File;
 
-import org.hailong.framework.tasks.ILocalResourceTask;
-import org.hailong.framework.tasks.IResourceTask;
-
+import org.hailong.framework.tasks.IImageTask;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-public class ImageViewTask extends ImageView implements IResourceTask ,ILocalResourceTask {
+public class ImageViewTask extends ImageView implements IImageTask {
 
 	private String _imageUrl = null;
 	private boolean _forceDownload = false;
 	private boolean _hasImage = false;
+	private boolean _loading = false;
 	
 	public ImageViewTask(Context context) {
 		super(context);
@@ -78,6 +77,14 @@ public class ImageViewTask extends ImageView implements IResourceTask ,ILocalRes
 
 	public void onException(Exception ex) {
 
+	}
+	
+	public boolean isLoading(){
+		return _loading;
+	}
+	
+	public void setLoading(boolean loading){
+		_loading = loading;
 	}
 
 }

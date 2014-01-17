@@ -7,10 +7,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-
+import java.util.Set;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.hailong.framework.AbstractService;
@@ -18,9 +18,10 @@ import org.hailong.framework.ITask;
 import org.hailong.framework.tasks.IHttpResourceTask;
 import org.hailong.framework.tasks.ILocalResourceTask;
 import org.hailong.framework.tasks.IResourceTask;
-import org.hailong.framework.tasks.impl.FileHttpRequestTask;
+import org.hailong.framework.tasks.impl.FileHttpTask;
 import org.hailong.framework.value.Value;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 public class ResourceService extends AbstractService{
@@ -149,10 +150,11 @@ public class ResourceService extends AbstractService{
 						
 						httpTask = new HttpTask(new HttpGet(uri),file);
 						
-						httpTask.tasks = new ArrayList<IResourceTask>();
+						httpTask.tasks = new HashSet<IResourceTask>();
 						httpTask.key = key;
 						
 						httpTask.tasks.add(resTask);
+						resTask.setLoading(true);
 						
 						if(_httpTasks == null){
 							_httpTasks = new HashMap<String,HttpTask>();
@@ -164,6 +166,7 @@ public class ResourceService extends AbstractService{
 					}
 					else{
 						httpTask.tasks.add(resTask);
+						resTask.setLoading(true);
 					}
 				}
 				else{
@@ -185,6 +188,16 @@ public class ResourceService extends AbstractService{
 			if(_httpTasks != null){
 				if(task == null){
 					
+					for(HttpTask httpTask : _httpTasks.values()){
+						
+						getContext().cancelHandle(IHttpResourceTask.class, httpTask);
+						
+						for(IResourceTask resTask : httpTask.tasks){
+							resTask.setLoading(false);
+						}
+					}
+					
+					_httpTasks.clear();
 				}
 				else {
 					
@@ -202,7 +215,9 @@ public class ResourceService extends AbstractService{
 						
 						if(httpTask != null){
 							
-							httpTask.tasks.remove(task);
+							resTask.setLoading(false);
+							
+							httpTask.tasks.remove(resTask);
 							
 							if(httpTask.tasks.size() == 0){
 								getContext().cancelHandle(IHttpResourceTask.class, httpTask);
@@ -224,14 +239,15 @@ public class ResourceService extends AbstractService{
 		_resourceCache = null;
 	}
 	
-	class HttpTask extends FileHttpRequestTask{
+	@SuppressLint("HandlerLeak")
+	class HttpTask extends FileHttpTask{
 
 		public HttpTask(HttpUriRequest httpRequest, File file) {
 			super(httpRequest, file);
 		}
 
 		public String key;
-		public ArrayList<IResourceTask> tasks;
+		public Set<IResourceTask> tasks;
 		
 		
 		@Override
@@ -290,13 +306,13 @@ public class ResourceService extends AbstractService{
 				else {
 					task.setResourceObject(v);
 				}
+				task.setLoading(false);
 			}
 			
 			if(_httpTasks != null){
 				_httpTasks.remove(key);
 			}
-			
-			super.onFinish(result);
+
 		}
 		
 		@Override
@@ -306,13 +322,13 @@ public class ResourceService extends AbstractService{
 			
 			for(IResourceTask task : tasks){
 				task.onException(ex);
+				task.setLoading(false);
 			}
 			
 			if(_httpTasks != null){
 				_httpTasks.remove(key);
 			}
 			
-			super.onException(ex);
 		}
 	}
 }

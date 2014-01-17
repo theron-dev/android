@@ -20,10 +20,10 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 	private ViewGroup _contentView;
 	
 	public NavigationController(IViewControllerContext<T> activity) {
-		super(activity, 0);
+		super(activity, null);
 	}
 
-	public NavigationController(IViewControllerContext<T> activity, int viewLayout) {
+	public NavigationController(IViewControllerContext<T> activity, String viewLayout) {
 		super(activity, viewLayout);
 	}
 	
@@ -390,5 +390,40 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 		}
 		
 		return super.onPressBack();
+	}
+	
+	@Override
+	public void onLowMemory(){
+		super.onLowMemory();
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onLowMemory();
+			}
+		}
+	}
+	
+	
+	@Override
+	public void onServiceContextStart() {
+		super.onServiceContextStart();
+		
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStart();
+			}
+		}
+		
+	}
+
+	@Override
+	public void onServiceContextStop() {
+
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStop();
+			}
+		}
+		
+		super.onServiceContextStop();
 	}
 }

@@ -1,6 +1,6 @@
 package org.hailong.framework.data;
 
-public interface IDataFetchedResultsDelegate<T extends DataItem> {
+public interface IDataFetchedResultsDelegate<T extends DataObject> {
 
 	public void onDataItemDeleted(T dataItem);
 	public void onDataItemInserted(T dataItem);

@@ -10,7 +10,7 @@ import org.hailong.framework.data.predicate.Value;
 
 
 
-public class DataFetchRequest<T extends DataItem>{
+public class DataFetchRequest<T extends DataObject>{
 	
 	private DataEntity _dataEntity;
 	private DataSort[] _dataSorts;

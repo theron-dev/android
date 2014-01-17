@@ -10,7 +10,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 
-public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implements  ResponseHandler<File>{
+public abstract class FileHttpTask extends AbstractHttpTask<File> implements  ResponseHandler<File>{
 
 	private File _file;
 	
@@ -18,7 +18,7 @@ public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implement
 		return _file;
 	}
 	
-	public FileHttpRequestTask(HttpUriRequest httpRequest,File file){
+	public FileHttpTask(HttpUriRequest httpRequest,File file){
 		super(httpRequest);
 		_file = file;
 	}
@@ -28,15 +28,6 @@ public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implement
 		return this;
 	}
 
-	@Override
-	public void onFinish(File result) {
-
-	}
-
-	@Override
-	public void onException(Exception ex) {
-
-	}
 
 	public File handleResponse(HttpResponse response)
 			throws ClientProtocolException, IOException {
@@ -45,7 +36,7 @@ public class FileHttpRequestTask extends AbstractHttpRequestTask<File> implement
 		
 		if(in != null){
 			FileOutputStream outputStream = new FileOutputStream(_file);
-			byte[] buffer = new byte[10240];
+			byte[] buffer = new byte[102400];
 			int length = in.read(buffer);
 			while(length >0){
 				outputStream.write(buffer, 0, length);

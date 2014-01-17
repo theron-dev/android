@@ -20,13 +20,12 @@ public class TabBarController<T extends IServiceContext> extends
 	private int _selectedIndex;
 	
 	public TabBarController(IViewControllerContext<T> activity) {
-		super(activity, 0);
+		super(activity, null);
 	}
 	
-	public TabBarController(IViewControllerContext<T> activity, int viewLayout) {
+	public TabBarController(IViewControllerContext<T> activity, String viewLayout) {
 		super(activity, viewLayout);
 	}
-	
 	
 	public IViewController<T> getSelectedViewController(){
 		if(_selectedIndex >=0 && _viewControllers != null && _selectedIndex < _viewControllers.size()){
@@ -266,5 +265,39 @@ public class TabBarController<T extends IServiceContext> extends
 			return this;
 		}
 		return controller;
+	}
+	
+	@Override
+	public void onLowMemory(){
+		super.onLowMemory();
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onLowMemory();
+			}
+		}
+	}
+	
+	@Override
+	public void onServiceContextStart() {
+		super.onServiceContextStart();
+		
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStart();
+			}
+		}
+		
+	}
+
+	@Override
+	public void onServiceContextStop() {
+
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStop();
+			}
+		}
+		
+		super.onServiceContextStop();
 	}
 }

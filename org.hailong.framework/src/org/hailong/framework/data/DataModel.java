@@ -22,7 +22,7 @@ public class DataModel {
 	}
 
 	
-	public <T extends DataItem> void addDataItemClass(Class<T> dataItemClass) {
+	public <T extends DataObject> void addDataItemClass(Class<T> dataItemClass) {
 		DataEntity dataEntity = dataItemClass.getAnnotation(DataEntity.class);
 		if(dataEntity != null){
 			if(_dataEntitys.indexOf(dataEntity) <0){
@@ -33,7 +33,7 @@ public class DataModel {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends DataItem> Class<T> getDataItemClass(DataEntity dataEntity){
+	public <T extends DataObject> Class<T> getDataItemClass(DataEntity dataEntity){
 		return (Class<T>)_dataItemClasss.get(dataEntity);
 	}
 	

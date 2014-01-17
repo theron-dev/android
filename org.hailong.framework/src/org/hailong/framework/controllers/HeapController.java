@@ -32,10 +32,10 @@ public class HeapController<T extends IServiceContext> extends ViewController<T>
 	private final static float AlphaValue = 0.4f;
 	
 	public HeapController(IViewControllerContext<T> activity) {
-		super(activity, 0);
+		super(activity, null);
 	}
 
-	public HeapController(IViewControllerContext<T> activity, int viewLayout) {
+	public HeapController(IViewControllerContext<T> activity, String viewLayout) {
 		super(activity, viewLayout);
 	}
 	
@@ -649,5 +649,40 @@ public class HeapController<T extends IServiceContext> extends ViewController<T>
 		
 		
 		return rs;
+	}
+	
+	@Override
+	public void onLowMemory(){
+		super.onLowMemory();
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onLowMemory();
+			}
+		}
+	}
+	
+	
+	@Override
+	public void onServiceContextStart() {
+		super.onServiceContextStart();
+		
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStart();
+			}
+		}
+		
+	}
+
+	@Override
+	public void onServiceContextStop() {
+
+		if(_viewControllers != null){
+			for(IViewController<T> viewController : _viewControllers){
+				viewController.onServiceContextStop();
+			}
+		}
+		
+		super.onServiceContextStop();
 	}
 }

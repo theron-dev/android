@@ -66,14 +66,14 @@ public class DataContext {
 
 	}
 	
-	public <T extends DataItem> T insertDataItem(Class<T> dataItemClass) throws DataException{
+	public <T extends DataObject> T insertDataItem(Class<T> dataItemClass) throws DataException{
 		DataEntity dataEntity = dataItemClass.getAnnotation(DataEntity.class);
 		DataEntityContext entityContext = _entityContexts.get(dataEntity);
 		
 		return entityContext.insertDataItem(dataItemClass);
 	}
 	
-	public <T extends DataItem> List<T> executeFetchRequest(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
+	public <T extends DataObject> List<T> executeFetchRequest(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
 		
 		DataEntity dataEntity = fetchRequest.getDataEntity();
 		
@@ -88,14 +88,14 @@ public class DataContext {
 	 * @return
 	 * @throws DataException 
 	 */
-	public <T extends DataItem> IDataFetchedResults<T> executeFetchRequestResults(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
+	public <T extends DataObject> IDataFetchedResults<T> executeFetchRequestResults(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
 		
 		DataEntity dataEntity = fetchRequest.getDataEntity();
 		DataEntityContext entityContext = _entityContexts.get(dataEntity);
 		return entityContext.executeFetchRequestResults(fetchRequest, batchSize);
 	}
 	
-	public boolean delete(DataItem dataItem){
+	public boolean delete(DataObject dataItem){
 		DataEntity dataEntity = dataItem.getClass().getAnnotation(DataEntity.class);
 		DataEntityContext entityContext = _entityContexts.get(dataEntity);
 		return entityContext.delete(dataItem);

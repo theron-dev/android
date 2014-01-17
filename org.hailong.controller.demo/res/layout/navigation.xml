@@ -10,12 +10,11 @@
         android:layout_height="44dip" android:background="#333333">
 
         <TextView
-            android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:textAppearance="?android:attr/textAppearanceLarge" android:text="标题"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" android:text="" android:contentDescription="text:topViewController.title"/>
 
     </RelativeLayout>
 

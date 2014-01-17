@@ -1,10 +1,12 @@
 package org.hailong.framework;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
+import org.json.JSONStringer;
 import org.json.JSONTokener;
 
 public final class JSON {
@@ -194,4 +196,65 @@ public final class JSON {
 		
 	}
 	
+	public static void encodeObject(Object object,JSONStringer stringer) throws JSONException{
+
+		if(object != null){
+			
+			if(object instanceof Map){
+				
+				stringer.object();
+				
+				@SuppressWarnings("unchecked")
+				Map<String,Object> map = (Map<String,Object>)object;
+				
+				for(String key : map.keySet()){
+					stringer.key(key);
+					encodeObject(map.get(key),stringer);
+				}
+				
+				stringer.endObject();
+				
+			}
+			else if(object instanceof List){
+				
+				stringer.array();
+				
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) object;
+				
+				for(Object v : list){
+					encodeObject(v,stringer);
+				}
+				
+				stringer.endArray();
+			}
+			else if(object instanceof Array){
+				
+				stringer.array();
+				
+				int c = Array.getLength(object);
+
+				for(int i=0;i<c;i++){
+					encodeObject(Array.get(object, i),stringer);
+				}
+				
+				stringer.endArray();
+			}
+			else{
+				stringer.value(object);
+			}
+		}
+		else{
+			stringer.value(object);
+		}
+	}
+	
+	public static String encodeObject(Object object) throws JSONException{
+		
+		JSONStringer stringer = new JSONStringer();
+	
+		encodeObject(object,stringer);
+		
+		return stringer.toString();
+	}
 }

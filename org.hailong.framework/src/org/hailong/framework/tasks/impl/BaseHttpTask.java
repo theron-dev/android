@@ -6,10 +6,10 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.hailong.framework.tasks.IHttpTask;
 
-public class BaseHttpRequestTask extends AbstractHttpRequestTask<String> implements IHttpTask<String> {
+public abstract class BaseHttpTask extends AbstractHttpTask<String> implements IHttpTask<String> {
 
 	
-	public BaseHttpRequestTask(HttpUriRequest httpRequest){
+	public BaseHttpTask(HttpUriRequest httpRequest){
 		super(httpRequest);
 	}
 	
@@ -20,17 +20,6 @@ public class BaseHttpRequestTask extends AbstractHttpRequestTask<String> impleme
 
 	public ResponseHandler<String> getResponseHandler() {
 		return new BasicResponseHandler();
-	}
-
-	
-	@Override
-	public void onFinish(String result){
-
-	}
-	
-	@Override
-	public void onException(Exception ex){
-		
 	}
 
 }

@@ -25,23 +25,23 @@ public class ServiceContext extends Service implements IServiceContext {
 			int priority)  throws Exception{
 		for(ServiceContainer<?> serviceContainer : _serviceContainers){
 			if(serviceContainer.hasTaskType(taskType)){
-				if(false == serviceContainer.handle(taskType, task, priority)){
-					return false;
+				if(serviceContainer.handle(taskType, task, priority)){
+					return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public <T extends ITask> boolean cancelHandle(Class<T> taskType, T task)  throws Exception{
 		for(ServiceContainer<?> serviceContainer : _serviceContainers){
 			if(serviceContainer.hasTaskType(taskType)){
-				if(false == serviceContainer.cancelHandle(taskType, task)){
-					return false;
+				if(serviceContainer.cancelHandle(taskType, task)){
+					return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class ServiceContext extends Service implements IServiceContext {
 								}
 								
 								if(taskTypeClass != null && ITask.class.isAssignableFrom(taskTypeClass)){
-									container.addTaskType((Class<ITask>)taskType);
+									container.addTaskType((Class<ITask>)taskTypeClass);
 								}
 								else{
 									Log.d(Framework.TAG, "not found taskType "+taskType);

@@ -1,6 +1,9 @@
 package org.hailong.framework.value;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -260,6 +263,50 @@ public class Value {
 					}
 				}
 			}
+			else if(key.length() > 0){
+				
+				String symbol = key.substring(0,1).toUpperCase(Locale.US) + key.substring(1);
+				
+				Method method = null;
+				
+				try {
+					method = object.getClass().getMethod("get" + symbol);
+				} catch (NoSuchMethodException e) {
+			
+				}
+				
+				if(method == null){
+					
+					try {
+						method = object.getClass().getMethod("is" + symbol);
+					} catch (NoSuchMethodException e) {
+				
+					}
+				}
+				
+				if(method != null){
+					try {
+						return method.invoke(object);
+					} catch (Exception e) {
+
+					}
+				}
+				
+				Field field = null;
+				
+				try {
+					field = object.getClass().getField(key);
+				} catch (Exception e) {
+			
+				}
+				
+				if(field != null){
+					try {
+						return field.get(object);
+					} catch (Exception e) {
+					} 
+				}
+			}
 			
 		}
 		
@@ -286,7 +333,7 @@ public class Value {
 		
 		if(object != null && keyPath != null){
 			
-			String[] keys = keyPath.split(".");
+			String[] keys = keyPath.split("\\.");
 			
 			if(keys.length >0){
 				return objectValueForKeyPath(object,keys,0);

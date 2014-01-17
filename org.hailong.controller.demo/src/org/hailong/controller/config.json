@@ -1,5 +1,38 @@
 
 {
+	"services":[
+		{
+			"class":"org.hailong.framework.services.HttpService",
+			"taskTypes":["org.hailong.framework.tasks.IHttpAPITask"],
+			"timeout": 30,
+			"maxThreadCount": 5
+		},
+		{
+			"class":"org.hailong.framework.services.HttpService",
+			"taskTypes":["org.hailong.framework.tasks.IHttpResourceTask"],
+			"timeout": 30,
+			"maxThreadCount": 20
+		},
+		{
+			"class":"org.hailong.framework.services.HttpService",
+			"taskTypes":["org.hailong.framework.tasks.IHttpTask"],
+			"timeout": 30,
+			"maxThreadCount": 5
+		}
+		,
+		{
+			"class":"org.hailong.framework.services.ResourceService",
+			"taskTypes":[
+				"org.hailong.framework.tasks.ILocalResourceTask"
+				,"org.hailong.framework.tasks.IResourceTask"
+				,"org.hailong.framework.tasks.IImageTask"
+			]
+		},
+		{
+			"class":"org.hailong.framework.services.URLDownlinkService",
+			"taskTypes":["org.hailong.framework.tasks.IURLDownlinkTask"]
+		}
+	],
 	"ui":{
 		"tab":{
 			"class":"org.hailong.controller.DemoHomeViewController",

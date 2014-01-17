@@ -1,40 +1,36 @@
 package org.hailong.controller;
 
-import org.hailong.controller.demo.R;
+import org.hailong.framework.container.Container;
 import org.hailong.framework.controllers.HeapController;
 import org.hailong.framework.controllers.IViewControllerContext;
 
-import android.widget.TextView;
-
 public class DemoNavigationController extends HeapController<DemoContext> {
 
-	private TextView _titleView;
-	
+	private Container _container;
+
 	public DemoNavigationController(
-			IViewControllerContext<DemoContext> activity, int viewLayout) {
+			IViewControllerContext<DemoContext> activity, String viewLayout) {
 		super(activity, viewLayout);
 		
 	}
-
+	
 	@Override
 	protected void didViewLoaded(){
 		super.didViewLoaded();
 		
-		_titleView = (TextView) getView().findViewById(R.id.titleTextView);
-	
+		_container = new Container(getView());
+
+		_container.setDataObject(this);
+		
 	}
-	
-	@Override
-	protected void didViewUnLoaded(){
-		_titleView = null;
-	}
-	
+
 	@Override
 	protected void onTopControllerChanged(){
 		super.onTopControllerChanged();
 		
-		if(_titleView !=null && getTopViewController() != null){
-			_titleView.setText(getTopViewController().getTitle());
+		if(_container != null){
+			_container.setDataObject(this);
 		}
+
 	}
 }

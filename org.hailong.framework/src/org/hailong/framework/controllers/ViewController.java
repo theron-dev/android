@@ -1,18 +1,18 @@
 package org.hailong.framework.controllers;
 
 import java.util.Map;
-
 import org.hailong.framework.Controller;
 import org.hailong.framework.Framework;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
 import org.hailong.framework.value.Value;
+import org.hailong.framework.views.ViewLayout;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -22,8 +22,6 @@ import android.widget.FrameLayout;
 
 public class ViewController<T extends IServiceContext> extends Controller<T> implements IViewController<T> {
 
-	private LayoutInflater _layoutInflater;
-	private int _viewLayout;
 	private View _view;
 	private IViewController<T> _parentController;
 	private Object _config;
@@ -35,23 +33,31 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	private String _basePath;
 	private String _alias;
 	private ViewController<T> _modalViewController;
+	private ViewLayout _viewLayout;
 	
-	public ViewController(IViewControllerContext<T> context,int viewLayout) {
+	public ViewController(IViewControllerContext<T> context,String viewLayout) {
 		super(context);
-		_layoutInflater = LayoutInflater.from(getContext());
-		_viewLayout = viewLayout;
+		_viewLayout = new ViewLayout(getContext(), viewLayout);
 		_handler = new Handler();
 		_animation = false;
 	}
 
 	@Override
 	public void onServiceContextStart() {
-
+	
+		if(_modalViewController != null){
+			_modalViewController.onServiceContextStart();
+		}
+		
 	}
 
 	@Override
 	public void onServiceContextStop() {
 
+		if(_modalViewController != null){
+			_modalViewController.onServiceContextStop();
+		}
+		
 	}
 	
 	public void onLowMemory(){
@@ -98,14 +104,20 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	public void viewDidDisappear(boolean animated){
 
 	}
-	
+
 	protected void loadView() {
-		if(_viewLayout == 0){
+		if(_viewLayout == null){
 			_view = new FrameLayout(getContext());
 		}
 		else{
-			_view = _layoutInflater.inflate(_viewLayout, null);
+			
+			_view = _viewLayout.getView();
+			
+			if(_view == null){
+				_view = new FrameLayout(getContext());
+			}
 		}
+		
 		didViewLoaded();
 	}
 	
@@ -151,11 +163,6 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 			viewDidDisappear(animated);
 		}
 	}
-	
-	protected int getViewLayoutReseource(){
-		return _viewLayout;
-	}
-	
 	
 	public Object getConfig(){
 		return _config;

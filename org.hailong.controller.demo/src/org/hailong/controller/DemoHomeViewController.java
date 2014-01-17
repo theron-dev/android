@@ -17,7 +17,7 @@ public class DemoHomeViewController extends TabBarController<DemoContext> {
 	private RadioGroup _radioGroup;
 	
 	public DemoHomeViewController(IViewControllerContext<DemoContext> context,
-			int viewLayout) {
+			String viewLayout) {
 		super(context, viewLayout);
 		
 		

@@ -4,7 +4,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.HttpVersion;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.hailong.framework.AbstractService;
 import org.hailong.framework.ITask;
 import org.hailong.framework.tasks.IHttpTask;
@@ -40,7 +44,7 @@ public class HttpService extends AbstractService {
 			
 			long keepAlive = Value.longValueForKey(getConfig(), "keepAlive");
 			
-			_poolExecutor = new ThreadPoolExecutor(1, maxThreadCount, keepAlive , TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+			_poolExecutor = new ThreadPoolExecutor(0, maxThreadCount, keepAlive , TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 			
 		}
 		
@@ -55,10 +59,10 @@ public class HttpService extends AbstractService {
 			
 			getPoolExecutor().execute(new ConnectionRunnable((IHttpTask<Object>)task,taskType));
 			
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 
 	public <T extends ITask> boolean cancelHandle(
@@ -80,9 +84,9 @@ public class HttpService extends AbstractService {
 				}
 			}
 			
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -104,7 +108,13 @@ public class HttpService extends AbstractService {
 		public void run() {
 			
 			Object waiter = new Object();
-			DefaultHttpClient httpClient = new DefaultHttpClient();
+			
+			HttpParams params = new BasicHttpParams();
+			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+			HttpProtocolParams.setContentCharset(params, "utf-8");
+			params.setBooleanParameter("http.protocol.expect-continue", false);
+			
+			DefaultHttpClient httpClient = new DefaultHttpClient(params);
 			
 			try {
 				

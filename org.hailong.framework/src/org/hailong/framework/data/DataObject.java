@@ -3,7 +3,7 @@ package org.hailong.framework.data;
 import org.hailong.framework.data.annotation.DataField;
 import org.hailong.framework.data.annotation.DataFieldType;
 
-public class DataItem {
+public class DataObject {
 
 	private IDataEntityRawData _rawData;
 	
@@ -16,13 +16,13 @@ public class DataItem {
 		if(value == null){
 			DataFieldType type = field.type();
 			if(type == DataFieldType.BIGINT){
-				return new Long(0);
+				return Long.valueOf(0);
 			}
 			else if(type ==DataFieldType.INT){
-				return new Integer(0);
+				return Integer.valueOf(0);
 			}
 			else if(type ==DataFieldType.DOUBLE){
-				return new Double(0);
+				return Double.valueOf(0.0);
 			}
 		}
 		return value;

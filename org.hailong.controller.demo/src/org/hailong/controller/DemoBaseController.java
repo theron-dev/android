@@ -6,7 +6,7 @@ import org.hailong.framework.controllers.ViewController;
 public class DemoBaseController extends ViewController<DemoContext> {
 
 	public DemoBaseController(IViewControllerContext<DemoContext> context,
-			int viewLayout) {
+			String viewLayout) {
 		super(context, viewLayout);
 		
 	}

@@ -3,7 +3,7 @@ package org.hailong.framework.data;
 import java.util.List;
 
 
-public interface IDataFetchedResults<T extends DataItem> {
+public interface IDataFetchedResults<T extends DataObject> {
 
 	public T getFetchedDataItem(int index);
 	

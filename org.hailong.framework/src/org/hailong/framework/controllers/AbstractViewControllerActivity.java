@@ -3,7 +3,6 @@ package org.hailong.framework.controllers;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,12 +71,19 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 	protected void onServiceContextStart(){
 		super.onServiceContextStart();
 		
+		if(_rootViewController != null){
+			_rootViewController.onServiceContextStart();
+		}
 	}
 	
 	@Override
 	protected void onServiceContextStop(){
 		super.onServiceContextStop();
 
+		if(_rootViewController != null){
+			_rootViewController.onServiceContextStop();
+		}
+		
 		lowMemory();
 	}
 	
@@ -202,16 +208,10 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 				
 				String view = Value.stringValueForKey(cfg, "view");
 				
-				int viewLayout = 0;
-				
-				if(view != null){
-					viewLayout = getViewLayout(view);
-				}
-				
 				IViewController<T> viewController = null;
 				
 				try {
-					viewController = define.newInstance(viewLayout);
+					viewController = define.newInstance(view);
 				} catch (Exception e) {
 					Log.d(Framework.TAG, Log.getStackTraceString(e));
 				} 
@@ -364,41 +364,6 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 		
 		return define;
 	}
-	
-	private int getViewLayout(String viewLayout){
-		
-		int layout = 0;
-		int index = viewLayout.lastIndexOf(".");
-		
-		if(index >0){
-		
-			try {
-				Class<?> c = Class.forName(viewLayout.substring(0,index));
-				Field field = c.getField(viewLayout.substring(index +1));
-				layout = field.getInt(null);
-			} catch (Exception e) {
-				
-				index = viewLayout.lastIndexOf(".layout");
-			
-				try {
-					Class<?> c = Class.forName(viewLayout.substring(0,index));
-					
-					for(Class<?> sub : c.getClasses()){
-						if("layout".equals(sub.getSimpleName())){
-							Field field = sub.getField(viewLayout.substring(viewLayout.lastIndexOf(".") +1));
-							layout = field.getInt(null);
-							break;
-						}
-					}
-				} catch (Exception ex) {
-					Log.d(Framework.TAG, Log.getStackTraceString(ex));
-				}
-
-			}
-		}
-		
-		return layout;
-	}
 
 	private class ViewControllerClassDefine {
 		
@@ -415,15 +380,16 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 			}
 			
 			try {
-				this.constructor = (Constructor<IViewController<T>>) clazz.getConstructor(IViewControllerContext.class,int.class);
+				this.constructor = (Constructor<IViewController<T>>) clazz.getConstructor(IViewControllerContext.class,String.class);
 			} catch (NoSuchMethodException e) {
 				this.constructor = (Constructor<IViewController<T>>) clazz.getConstructor(IViewControllerContext.class);
 			}
 
 		}
 		
-		public IViewController<T> newInstance(int layoutView) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
+		public IViewController<T> newInstance(String layoutView) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 			return this.constructor.newInstance(AbstractViewControllerActivity.this,layoutView);
 		}
 	}
+
 }

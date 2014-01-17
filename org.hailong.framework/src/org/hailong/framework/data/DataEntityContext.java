@@ -143,7 +143,7 @@ class DataEntityContext {
 		}
 	}
 	
-	public <T extends DataItem> T insertDataItem(Class<T> dataItemClass) throws DataException{
+	public <T extends DataObject> T insertDataItem(Class<T> dataItemClass) throws DataException{
 		DataEntity dataEntity = dataItemClass.getAnnotation(DataEntity.class);
 		DataEntityRawDataImpl rawData = new DataEntityRawDataImpl(dataEntity,0,null);
 		rawData.setInserted(true);
@@ -183,7 +183,7 @@ class DataEntityContext {
 		return null;
 	}
 	
-	public <T extends DataItem> List<T> executeFetchRequest(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
+	public <T extends DataObject> List<T> executeFetchRequest(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
 		
 		List<T> items = new ArrayList<T>(4);
 		
@@ -283,7 +283,7 @@ class DataEntityContext {
 	 * @return
 	 * @throws DataException 
 	 */
-	public <T extends DataItem> IDataFetchedResults<T> executeFetchRequestResults(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
+	public <T extends DataObject> IDataFetchedResults<T> executeFetchRequestResults(DataFetchRequest<T> fetchRequest,int batchSize) throws DataException{
 		int index = 0;
 		DataFetchedResultsImpl<T> fetchedResult = new DataFetchedResultsImpl<T>(fetchRequest);
 		if(_fetchedResults == null){
@@ -385,7 +385,7 @@ class DataEntityContext {
 		return fetchedResult;
 	}
 	
-	public boolean delete(DataItem dataItem){
+	public boolean delete(DataObject dataItem){
 		IDataEntityRawData rawData = dataItem.getRawData();
 		if(rawData instanceof DataEntityRawDataImpl){
 			((DataEntityRawDataImpl)rawData).setDeleted(true);
@@ -394,7 +394,7 @@ class DataEntityContext {
 		return false;
 	}
 	
-	private <T extends DataItem> T newDataItem(Class<T> dataItemClass, DataEntityRawDataImpl rawData) throws DataException{
+	private <T extends DataObject> T newDataItem(Class<T> dataItemClass, DataEntityRawDataImpl rawData) throws DataException{
 		try {
 			T data = dataItemClass.newInstance();
 			data.setRawData(rawData);
@@ -571,7 +571,7 @@ class DataEntityContext {
 		}
 	}
 	
-	private class DataFetchedResultsImpl<T extends DataItem> implements IDataFetchedResults<T> {
+	private class DataFetchedResultsImpl<T extends DataObject> implements IDataFetchedResults<T> {
 
 		private Class<T> _itemClass;
 		private DataFetchRequest<T> _fetchRequest;

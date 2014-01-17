@@ -4,17 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical" android:background="#ffffff">
 
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" android:textColor="#000000"/>
+	<ListView
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent" android:id="@+id/listView">
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button" />
+	</ListView>
 
 </LinearLayout>

@@ -3,7 +3,6 @@ package org.hailong.framework.controllers;
 
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
-
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
@@ -84,5 +83,9 @@ public interface IViewController<T extends IServiceContext> {
 	public boolean onPressBack();
 
 	public Handler getHandler();
-	
+
+	public void onServiceContextStart() ;
+
+	public void onServiceContextStop() ;
+
 }

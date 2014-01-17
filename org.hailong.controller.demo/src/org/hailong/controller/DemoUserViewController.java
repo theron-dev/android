@@ -1,18 +1,20 @@
 package org.hailong.controller;
 
 import org.hailong.controller.demo.R;
-import org.hailong.framework.URL;
+import org.hailong.framework.container.ListDataContainer;
 import org.hailong.framework.controllers.IViewControllerContext;
+import org.hailong.framework.datasource.URLDataSource;
+import org.hailong.framework.views.ViewLayout;
 
 import android.content.pm.ActivityInfo;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ListView;
 
 public class DemoUserViewController extends DemoBaseController {
 
+	private ListDataContainer<DemoContext> _dataContainer;
+	
 	public DemoUserViewController(IViewControllerContext<DemoContext> context,
-			int viewLayout) {
+			String viewLayout) {
 		super(context, viewLayout);
 		
 	}
@@ -31,19 +33,62 @@ public class DemoUserViewController extends DemoBaseController {
 	protected void didViewLoaded(){
 		super.didViewLoaded();
 		
-		TextView titleView = (TextView) getView().findViewById(R.id.titleTextView);
+		ListView listView = (ListView) getView().findViewById(R.id.listView);
 		
-		titleView.setText(getTitle());
-		
-		Button button = (Button) getView().findViewById(R.id.button1);
-		
-		button.setOnClickListener(new Button.OnClickListener(){
+		_dataContainer = new ListDataContainer<DemoContext>(getViewControllerContext());
+		_dataContainer.setListView(listView);
+		_dataContainer.setViewLayout(new ViewLayout(getContext(),R.layout.item));
+	
 
-			@Override
-			public void onClick(View v) {
-				
-				openURL(new URL(getAlias() + "/user", getURL()), true);
-				
-			}});
+		if(getServiceContext() != null){
+			
+			URLDataSource dataSource = new URLDataSource(getServiceContext());
+			
+			dataSource.setUrl("https://api.douban.com/v2/book/search?q=b");
+			dataSource.setDataKey("books");
+			
+			_dataContainer.setDataSource(dataSource);
+			
+			_dataContainer.reloadData();
+			
+		}
+		
+	}
+	
+	@Override
+	public void onServiceContextStart() {
+		super.onServiceContextStart();
+		
+		if(_dataContainer !=null && _dataContainer.getDataSource() == null){
+			
+			URLDataSource dataSource = new URLDataSource(getServiceContext());
+			
+			dataSource.setUrl("https://api.douban.com/v2/book/search?q=b");
+			dataSource.setDataKey("books");
+			
+			_dataContainer.setDataSource(dataSource);
+			
+			_dataContainer.reloadData();
+			
+		}
+		
+	}
+
+	@Override
+	public void onServiceContextStop() {
+		
+		super.onServiceContextStop();
+	}
+	
+	@Override
+	protected void didViewUnLoaded(){
+		
+		if(_dataContainer != null){
+			_dataContainer.cancel();
+			_dataContainer.setListener(null);
+			_dataContainer = null;
+		}
+		
+		super.didViewUnLoaded();
 	}
 }

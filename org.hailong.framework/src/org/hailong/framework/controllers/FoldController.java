@@ -37,10 +37,10 @@ public class FoldController<T extends IServiceContext> extends ViewController<T>
 	private final static float FoldWidth = 45;
 	
 	public FoldController(IViewControllerContext<T> activity) {
-		super(activity, 0);
+		super(activity, null);
 	}
 
-	public FoldController(IViewControllerContext<T> activity, int viewLayout) {
+	public FoldController(IViewControllerContext<T> activity, String viewLayout) {
 		super(activity, viewLayout);
 	}
 	
@@ -1157,5 +1157,52 @@ public class FoldController<T extends IServiceContext> extends ViewController<T>
 		
 		
 		return rs;
+	}
+	
+	@Override
+	public void onLowMemory(){
+		super.onLowMemory();
+		if(_leftViewController != null){
+			_leftViewController.onLowMemory();
+		}
+		if(_rightViewController != null){
+			_rightViewController.onLowMemory();
+		}
+		if(_centerViewController != null){
+			_centerViewController.onLowMemory();
+		}
+	}
+	
+	
+	@Override
+	public void onServiceContextStart() {
+		super.onServiceContextStart();
+		
+		if(_leftViewController != null){
+			_leftViewController.onServiceContextStart();
+		}
+		if(_rightViewController != null){
+			_rightViewController.onServiceContextStart();
+		}
+		if(_centerViewController != null){
+			_centerViewController.onServiceContextStart();
+		}
+		
+	}
+
+	@Override
+	public void onServiceContextStop() {
+
+		if(_leftViewController != null){
+			_leftViewController.onServiceContextStop();
+		}
+		if(_rightViewController != null){
+			_rightViewController.onServiceContextStop();
+		}
+		if(_centerViewController != null){
+			_centerViewController.onServiceContextStop();
+		}
+		
+		super.onServiceContextStop();
 	}
 }
