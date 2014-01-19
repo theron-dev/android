@@ -33,7 +33,7 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 		
 		if(!canceled){
 			if(message.what == WHAT_FINISH){
-				onFinish((T)message.obj);
+				onLoaded((T)message.obj);
 			}
 			else if(message.what == WHAT_ERROR){
 				onException((Exception)message.obj);
@@ -47,12 +47,19 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 		waiter = null;
 	}
 	
-	public abstract void onFinish(T result);
+	public void onBackgroundLoaded(T result){
+		
+	}
+	
+	public abstract void onLoaded(T result);
 	
 	public abstract void onException(Exception ex);
 	
 
 	public void sendFinishMessage(T result,Object waiter){
+		
+		onBackgroundLoaded(result);
+		
 		this.waiter = waiter;
 		Message msg = new Message();
 		msg.what = WHAT_FINISH;

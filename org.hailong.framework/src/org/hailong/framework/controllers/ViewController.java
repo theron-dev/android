@@ -48,7 +48,10 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 		if(_modalViewController != null){
 			_modalViewController.onServiceContextStart();
 		}
-		
+	
+		if(isViewLoaded()){
+			didViewLoadedContextStart();
+		}
 	}
 
 	@Override
@@ -62,17 +65,21 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	
 	public void onLowMemory(){
 		if(_view != null && _view.getParent() == null){
-			_view = null;
 			didViewUnLoaded();
+			_view = null;
 		}
 		if(_modalViewController != null){
 			_modalViewController.onLowMemory();
 		}
 	}
 	
+	protected void didViewLoadedContextStart(){
+		
+	}
 
 	protected void didViewLoaded(){
 
+	
 	}
 	
 	protected void didViewUnLoaded(){
@@ -119,6 +126,11 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 		}
 		
 		didViewLoaded();
+		
+		if(getServiceContext() != null){
+			didViewLoadedContextStart();
+		}
+		
 	}
 	
 	public View getView(){
@@ -470,8 +482,8 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	}
 
 	public IViewControllerContext<T> getViewControllerContext() {
-		if(activity instanceof IViewControllerContext){
-			return (IViewControllerContext<T>) activity;
+		if(_activity instanceof IViewControllerContext){
+			return (IViewControllerContext<T>) _activity;
 		}
 		return null;
 	}

@@ -166,7 +166,7 @@ public class URLDownlinkService extends DownlinkService {
 
 
 		@Override
-		public void onFinishObject(Object result) {
+		public void onLoadedObject(Object result) {
 
 			didLoaded(task, IURLDownlinkTask.class, result, task.isCached() && task.getPageIndex() == 1);
 			

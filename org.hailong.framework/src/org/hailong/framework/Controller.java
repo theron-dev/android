@@ -5,28 +5,32 @@ import android.content.Context;
 
 public abstract class Controller<T extends IServiceContext> {
 
-	protected IActivity<T> activity;
+	protected IActivity<T> _activity;
 
 	public Controller(IActivity<T> activity){
-		this.activity = activity;
+		_activity = activity;
 	}
 	
 	public T getServiceContext() {
-		return activity.getServiceContext();
+		return _activity.getServiceContext();
 	}
 
 	public Context getContext() {
-		if(activity instanceof Context){
-			return (Context)activity;
+		if(_activity instanceof Context){
+			return (Context)_activity;
 		}
 		return null;
 	}
 	
 	public Activity getActivity() {
-		if(activity instanceof Activity){
-			return (Activity)activity;
+		if(_activity instanceof Activity){
+			return (Activity)_activity;
 		}
 		return null;
+	}
+	
+	public boolean isBindServiceContext(){
+		return _activity.isBindServiceContext();
 	}
 
 	public void onLowMemory(){
@@ -36,10 +40,5 @@ public abstract class Controller<T extends IServiceContext> {
 	abstract public void onServiceContextStart() ;
 
 	abstract public void onServiceContextStop() ;
-	
-	public void destroy(){
-		activity = null;
-	}
-
 
 }

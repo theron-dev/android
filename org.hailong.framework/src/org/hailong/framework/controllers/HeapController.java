@@ -284,9 +284,15 @@ public class HeapController<T extends IServiceContext> extends ViewController<T>
 	
 	@Override
 	protected void didViewUnLoaded(){
-		super.didViewUnLoaded();
+		
+		IViewController<T> topViewController = getTopViewController();
+		if(topViewController != null && topViewController.isViewAppeared()){
+			topViewController.viewRemoveForSuperView(false);
+		}
 		
 		_contentView = null;
+		_gestureDetector = null;
+		super.didViewUnLoaded();
 	}
 	
 	@Override

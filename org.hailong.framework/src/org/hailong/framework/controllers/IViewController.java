@@ -87,5 +87,5 @@ public interface IViewController<T extends IServiceContext> {
 	public void onServiceContextStart() ;
 
 	public void onServiceContextStop() ;
-
+	
 }

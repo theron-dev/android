@@ -77,7 +77,9 @@ public class DataSource implements IDownlinkTask{
 			
 			List<Object> dataObjects = getDataObjects();
 			
-			List<?> list = Value.listValue(resultsData);
+			Object rs = _dataKey == null ? resultsData : Value.objectValueForKeyPath(resultsData, _dataKey);
+			
+			List<?> list = Value.listValue(rs);
 			
 			if(list != null){
 				dataObjects.addAll(list);

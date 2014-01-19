@@ -9,6 +9,7 @@ import org.hailong.framework.tasks.ILocalResourceTask;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class DataContainer <T extends IServiceContext> implements DataSource.Listener {
 
@@ -129,6 +130,20 @@ public class DataContainer <T extends IServiceContext> implements DataSource.Lis
 			}
 		}
 		
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				downloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+		
 	}
 
 	public void loadImagesForView(View view){
@@ -150,6 +165,19 @@ public class DataContainer <T extends IServiceContext> implements DataSource.Lis
 			}
 		}
 
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				loadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
 	}
 
 	public void cancelDownloadImagesForView(View view){
@@ -169,6 +197,19 @@ public class DataContainer <T extends IServiceContext> implements DataSource.Lis
 			}
 		}
 
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				cancelDownloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
 	}
 	
 	

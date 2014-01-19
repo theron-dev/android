@@ -30,7 +30,8 @@ public class ImageViewTask extends ImageView implements IImageTask {
 		super(context, attrs, defStyle);
 
 	}
-
+	
+	@android.view.ViewDebug.ExportedProperty
 	public String getImageUrl(){
 		return _imageUrl;
 	}

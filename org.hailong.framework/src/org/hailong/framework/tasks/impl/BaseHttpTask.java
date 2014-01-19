@@ -1,12 +1,20 @@
 package org.hailong.framework.tasks.impl;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.util.ByteArrayBuffer;
+import org.apache.http.util.EntityUtils;
 import org.hailong.framework.tasks.IHttpTask;
 
-public abstract class BaseHttpTask extends AbstractHttpTask<String> implements IHttpTask<String> {
+public abstract class BaseHttpTask extends AbstractHttpTask<String> implements IHttpTask<String> ,ResponseHandler<String>{
 
 	
 	public BaseHttpTask(HttpUriRequest httpRequest){
@@ -19,7 +27,51 @@ public abstract class BaseHttpTask extends AbstractHttpTask<String> implements I
 	}
 
 	public ResponseHandler<String> getResponseHandler() {
-		return new BasicResponseHandler();
+		return this;
 	}
+
+	public String handleResponse(HttpResponse response)
+			throws ClientProtocolException, IOException {
+		
+		HttpEntity entity = response.getEntity();
+	
+		boolean isGzip = false;
+
+		String charset = EntityUtils.getContentCharSet(entity);
+		
+		Header h = entity.getContentEncoding();
+		
+		if(h != null){
+			isGzip = h.getValue().indexOf("gzip") >=0;
+		}
+	
+		InputStream in = entity.getContent();
+		
+		if(in != null){
+			
+			if(isGzip){
+				in = new GZIPInputStream(in);
+			}
+			
+			ByteArrayBuffer bt= new ByteArrayBuffer(4096);
+			
+			byte[] buf = new byte[4096];
+			
+			int len;
+			
+			while((len = in.read(buf)) >0 ){
+				
+				bt.append(buf, 0, len);
+				
+			}
+			
+			in.close();
+			
+			return new String(bt.toByteArray(),charset);
+		}
+		
+		return null;
+	}
+
 
 }

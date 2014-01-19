@@ -38,9 +38,14 @@ public class DemoUserViewController extends DemoBaseController {
 		_dataContainer = new ListDataContainer<DemoContext>(getViewControllerContext());
 		_dataContainer.setListView(listView);
 		_dataContainer.setViewLayout(new ViewLayout(getContext(),R.layout.item));
-	
 
-		if(getServiceContext() != null){
+	}
+	
+	@Override
+	protected void didViewLoadedContextStart(){
+		super.didViewLoadedContextStart();
+		
+		if(_dataContainer != null && _dataContainer.getDataSource() == null){
 			
 			URLDataSource dataSource = new URLDataSource(getServiceContext());
 			
@@ -53,31 +58,6 @@ public class DemoUserViewController extends DemoBaseController {
 			
 		}
 		
-	}
-	
-	@Override
-	public void onServiceContextStart() {
-		super.onServiceContextStart();
-		
-		if(_dataContainer !=null && _dataContainer.getDataSource() == null){
-			
-			URLDataSource dataSource = new URLDataSource(getServiceContext());
-			
-			dataSource.setUrl("https://api.douban.com/v2/book/search?q=b");
-			dataSource.setDataKey("books");
-			
-			_dataContainer.setDataSource(dataSource);
-			
-			_dataContainer.reloadData();
-			
-		}
-		
-	}
-
-	@Override
-	public void onServiceContextStop() {
-		
-		super.onServiceContextStop();
 	}
 	
 	@Override

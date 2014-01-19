@@ -118,7 +118,7 @@ public class ResourceService extends AbstractService{
 			
 		}
 		
-		if(taskType == IResourceTask.class){
+		if(IResourceTask.class.isAssignableFrom(taskType)){
 			
 			IResourceTask resTask = (IResourceTask) task;
 			
@@ -251,7 +251,7 @@ public class ResourceService extends AbstractService{
 		
 		
 		@Override
-		public void onFinish(File result){
+		public void onLoaded(File result){
 			
 			File dir = getContext().getDir("resources", 0x0777);
 			

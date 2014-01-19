@@ -33,8 +33,11 @@ public final class JSON {
 		else if(c == '\''){
 			return token.nextString('\'');
 		}
-		else if(c == ',' || c == '}' || c == ']'){
+		else if(c == ','){
 			token.back();
+			return null;
+		}
+		else if(c == '}' || c== ']'){
 			return null;
 		}
 		else if(c != 0){

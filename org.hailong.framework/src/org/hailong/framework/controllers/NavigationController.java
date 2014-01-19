@@ -258,9 +258,16 @@ public class NavigationController<T extends IServiceContext> extends ViewControl
 	
 	@Override
 	protected void didViewUnLoaded(){
-		super.didViewUnLoaded();
+		
+		
+		IViewController<T> topViewController = getTopViewController();
+		if(topViewController != null && topViewController.isViewAppeared()){
+			topViewController.viewRemoveForSuperView(false);
+		}
 		
 		_contentView = null;
+		
+		super.didViewUnLoaded();
 	}
 	
 	@Override

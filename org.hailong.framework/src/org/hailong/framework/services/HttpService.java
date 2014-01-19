@@ -3,7 +3,6 @@ package org.hailong.framework.services;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.http.HttpVersion;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -13,7 +12,6 @@ import org.hailong.framework.AbstractService;
 import org.hailong.framework.ITask;
 import org.hailong.framework.tasks.IHttpTask;
 import org.hailong.framework.value.Value;
-
 import android.util.Log;
 
 /**
@@ -110,9 +108,9 @@ public class HttpService extends AbstractService {
 			Object waiter = new Object();
 			
 			HttpParams params = new BasicHttpParams();
+			
+			HttpProtocolParams.setContentCharset(params, "UTF-8");
 			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-			HttpProtocolParams.setContentCharset(params, "utf-8");
-			params.setBooleanParameter("http.protocol.expect-continue", false);
 			
 			DefaultHttpClient httpClient = new DefaultHttpClient(params);
 			

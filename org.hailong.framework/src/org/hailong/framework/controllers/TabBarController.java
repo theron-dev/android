@@ -154,9 +154,17 @@ public class TabBarController<T extends IServiceContext> extends
 	
 	@Override
 	protected void didViewUnLoaded(){
-		super.didViewUnLoaded();
+		
+		IViewController<T> topViewController = getSelectedViewController();
+		if(topViewController != null && topViewController.isViewAppeared()){
+			topViewController.viewRemoveForSuperView(false);
+		}
 		
 		_contentView = null;
+		
+		super.didViewUnLoaded();
+		
+		
 	}
 	
 	@Override

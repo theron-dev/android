@@ -116,9 +116,37 @@ public class FoldController<T extends IServiceContext> extends ViewController<T>
 	
 	@Override
 	protected void didViewUnLoaded(){
-		super.didViewUnLoaded();
+		
+		
+		IViewController<T> topViewController = null;
+		
+		if(_topControllerDirection == TopControllerDirectionLeft){
+			
+			topViewController = getLeftViewController();
+		
+			if(topViewController != null && topViewController.isViewAppeared()){
+				topViewController.viewRemoveForSuperView(false);
+			}
+		}
+		
+		if(_topControllerDirection == TopControllerDirectionRight){
+			
+			topViewController = getRightViewController();
+		
+			if(topViewController != null && topViewController.isViewAppeared()){
+				topViewController.viewRemoveForSuperView(false);
+			}
+		}
+		
+		topViewController = getCenterViewController();
+		
+		if(topViewController != null && topViewController.isViewAppeared()){
+			topViewController.viewRemoveForSuperView(false);
+		}
 		
 		_contentView = null;
+		_gestureDetector = null;
+		super.didViewUnLoaded();
 	}
 	
 	@Override

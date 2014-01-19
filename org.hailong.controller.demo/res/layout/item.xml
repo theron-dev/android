@@ -1,12 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.hailong.framework.container.ContainerView xmlns:android="http://schemas.android.com/apk/res/android"
+<org.hailong.framework.container.ContainerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent" android:background="#000000">
 
-    <TextView
-        android:id="@+id/textView1"
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="140dip" >
+         <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium" android:contentDescription="text:dataItem.title"/>
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:contentDescription="text:dataItem.title"
+        android:textColor="#ffffff"
+        android:layout_marginLeft="90dip"
+        android:layout_marginTop="10dip"/>
+
+         <org.hailong.framework.views.ImageViewTask
+             android:layout_width="76dip"
+             android:layout_height="120dip"
+             android:layout_marginLeft="10dip"
+             android:layout_marginTop="10dip"
+             android:contentDescription="imageUrl:dataItem.image"
+             />
+         
+    </FrameLayout>
 
 </org.hailong.framework.container.ContainerView>

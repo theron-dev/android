@@ -84,6 +84,9 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 		if(convertView == null){
 			convertView = getItemView(position);
 		}
+		else{
+			cancelDownloadImagesForView(convertView);
+		}
 		
 		Container container = null;
 		
@@ -101,11 +104,13 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 		dataItem = getItem(position);
 		container.setDataObject(this);
 		
+		downloadImagesForView(convertView);
+		
 		return convertView;
 	}
 
 	public int getViewTypeCount() {
-		return 0;
+		return 1;
 	}
 
 	public boolean hasStableIds() {
