@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.hailong.framework.container.ContainerView
+<org.hailong.framework.container.ContainerItemView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="match_parent" android:background="#000000">
@@ -26,4 +26,4 @@
          
     </FrameLayout>
 
-</org.hailong.framework.container.ContainerView>
+</org.hailong.framework.container.ContainerItemView>

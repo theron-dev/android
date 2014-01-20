@@ -18,6 +18,9 @@ import org.hailong.framework.PLIST;
 import org.hailong.framework.URL;
 import org.hailong.framework.value.Value;
 import org.w3c.dom.Document;
+
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -390,6 +393,14 @@ public abstract class AbstractViewControllerActivity<T extends IServiceContext>
 		public IViewController<T> newInstance(String layoutView) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
 			return this.constructor.newInstance(AbstractViewControllerActivity.this,layoutView);
 		}
+	}
+
+	public Context getContext() {
+		return this;
+	}
+	
+	public Activity getActivity() {
+		return this;
 	}
 
 }

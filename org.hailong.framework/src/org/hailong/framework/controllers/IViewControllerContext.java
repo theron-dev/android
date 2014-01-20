@@ -4,6 +4,9 @@ import org.hailong.framework.IActivity;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
 
+import android.app.Activity;
+import android.content.Context;
+
 public interface IViewControllerContext<T extends IServiceContext> extends IActivity<T> {
 
 	public IViewController<T> getViewController(URL url,String basePath);
@@ -25,5 +28,9 @@ public interface IViewControllerContext<T extends IServiceContext> extends IActi
 	public boolean isIdleTimerDisabled();
 	
 	public void setIdleTimerDisabled(boolean idleTimerDisabled);
+	
+	public Context getContext() ;
+	
+	public Activity getActivity() ;
 	
 }

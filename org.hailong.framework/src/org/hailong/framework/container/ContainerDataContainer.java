@@ -7,37 +7,36 @@ import org.hailong.framework.views.ViewLayout;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
-public class ListDataContainer <T extends IServiceContext> extends DataContainer<T> implements android.widget.ListAdapter{
+public class ContainerDataContainer <T extends IServiceContext> extends DataContainer<T> implements android.widget.Adapter{
 
 	public Object dataItem;
-	private ListView _listView;
-	private ViewLayout _itemViewLayout;
+	private ContainerView _containerView;
+	private ViewLayout _viewLayout;
 	
-	public ListDataContainer(IViewControllerContext<T> context) {
+	public ContainerDataContainer(IViewControllerContext<T> context) {
 		super(context);
 
 	}
 	
-	public ListView getListView(){
-		return _listView;
+	public ContainerView getContainerView(){
+		return _containerView;
 	}
 	
-	public void setListView(ListView listView){
-		_listView = listView;
+	public void setContainerView(ContainerView containerView){
+		_containerView = containerView;
 	}
 	
-	public ViewLayout getItemViewLayout(){
-		return _itemViewLayout;
+	public ViewLayout getViewLayout(){
+		return _viewLayout;
 	}
 	
-	public void setItemViewLayout(ViewLayout viewLayout){
-		_itemViewLayout = viewLayout;
+	public void setViewLayout(ViewLayout viewLayout){
+		_viewLayout = viewLayout;
 	}
 	
 	public ViewLayout getItemViewLayout(int position){
-		return _itemViewLayout;
+		return _viewLayout;
 	}
 	
 	public View getItemView(int position){
@@ -88,9 +87,9 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 		
 		Container container = null;
 		
-		if(convertView instanceof IContainerView){
+		if(convertView instanceof ContainerItemView){
 			
-			IContainerView containerView = (IContainerView)convertView;
+			ContainerItemView containerView = (ContainerItemView)convertView;
 			
 			container = containerView.getContainer();
 			
@@ -146,8 +145,8 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 	public void onDataSourceDidLoadedFromCached(DataSource dataSource,
 			long timestamp) {
 		
-		if(_listView != null){
-			_listView.setAdapter(this);
+		if(_containerView != null){
+			_containerView.setAdapter(this);
 		}
 		
 		
@@ -156,8 +155,8 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 
 	public void onDataSourceDidLoaded(DataSource dataSource) {
 		
-		if(_listView != null){
-			_listView.setAdapter(this);
+		if(_containerView != null){
+			_containerView.setAdapter(this);
 		}
 		
 		
@@ -166,8 +165,8 @@ public class ListDataContainer <T extends IServiceContext> extends DataContainer
 
 	public void onDataSourceDidContentChanged(DataSource dataSource) {
 		
-		if(_listView != null){
-			_listView.setAdapter(this);
+		if(_containerView != null){
+			_containerView.setAdapter(this);
 		}
 		
 		super.onDataSourceDidContentChanged(dataSource);

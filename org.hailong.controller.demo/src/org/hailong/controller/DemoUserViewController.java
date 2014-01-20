@@ -37,7 +37,7 @@ public class DemoUserViewController extends DemoBaseController {
 		
 		_dataContainer = new ListDataContainer<DemoContext>(getViewControllerContext());
 		_dataContainer.setListView(listView);
-		_dataContainer.setViewLayout(new ViewLayout(getContext(),R.layout.item));
+		_dataContainer.setItemViewLayout(new ViewLayout(getContext(),R.layout.item));
 
 	}
 	

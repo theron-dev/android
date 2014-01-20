@@ -49,8 +49,8 @@
 			"view":"org.hailong.controller.demo.R.layout.navigation",
 		},
 		"home":{
-			"class":"org.hailong.controller.DemoUserViewController",
-			"view":"org.hailong.controller.demo.R.layout.user",
+			"class":"org.hailong.controller.DemoContainerViewController",
+			"view":"org.hailong.controller.demo.R.layout.container",
 			"title":"Home"
 		},
 		"hot":{
