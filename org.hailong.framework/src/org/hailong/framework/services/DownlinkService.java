@@ -38,7 +38,7 @@ public class DownlinkService extends AbstractService {
 			
 			DataModel dm = new DataModel();
 			
-			dm.addDataItemClass(DataObject.class);
+			dm.addDataObjectClass(DataObject.class);
 			
 			_dataContext = new DataContext(db, dm);
 			

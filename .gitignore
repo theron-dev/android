@@ -1,2 +1,4 @@
 .metadata
-.class
+*.class
+*/gen/*
+*/bin/*

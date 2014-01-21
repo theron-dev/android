@@ -10,11 +10,11 @@ import org.hailong.framework.data.annotation.DataEntity;
 public class DataModel {
 	
 	private List<DataEntity> _dataEntitys;
-	private Map<DataEntity,Class<?>> _dataItemClasss;
+	private Map<DataEntity,Class<?>> _dataObjectClasss;
 	
 	public DataModel(){
 		_dataEntitys = new ArrayList<DataEntity>();
-		_dataItemClasss =new HashMap<DataEntity,Class<?>>();
+		_dataObjectClasss =new HashMap<DataEntity,Class<?>>();
 	}
 	
 	public DataEntity[] getDataEntitys(){
@@ -22,19 +22,19 @@ public class DataModel {
 	}
 
 	
-	public <T extends DataObject> void addDataItemClass(Class<T> dataItemClass) {
-		DataEntity dataEntity = dataItemClass.getAnnotation(DataEntity.class);
+	public <T extends DataObject> void addDataObjectClass(Class<T> dataObjectClass) {
+		DataEntity dataEntity = dataObjectClass.getAnnotation(DataEntity.class);
 		if(dataEntity != null){
 			if(_dataEntitys.indexOf(dataEntity) <0){
 				_dataEntitys.add(dataEntity);
-				_dataItemClasss.put(dataEntity, dataItemClass);
+				_dataObjectClasss.put(dataEntity, dataObjectClass);
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends DataObject> Class<T> getDataItemClass(DataEntity dataEntity){
-		return (Class<T>)_dataItemClasss.get(dataEntity);
+	public <T extends DataObject> Class<T> getDataObjectClass(DataEntity dataEntity){
+		return (Class<T>)_dataObjectClasss.get(dataEntity);
 	}
 	
 	

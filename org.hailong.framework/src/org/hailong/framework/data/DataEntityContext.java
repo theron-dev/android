@@ -202,7 +202,7 @@ class DataEntityContext {
 				}
 			}
 
-			Class<T> itemClass = _dataModel.getDataItemClass(dataEntity);
+			Class<T> itemClass = _dataModel.getDataObjectClass(dataEntity);
 			int index = 0;
 			Map<String,Object> values ;
 			long rawId = 0;
@@ -585,7 +585,7 @@ class DataEntityContext {
 		
 		DataFetchedResultsImpl(DataFetchRequest<T> fetchRequest){
 			_fetchRequest = fetchRequest;
-			_itemClass = _dataModel.getDataItemClass(fetchRequest.getDataEntity());
+			_itemClass = _dataModel.getDataObjectClass(fetchRequest.getDataEntity());
 			_datas = null;
 			_dataItems = null;
 		}
