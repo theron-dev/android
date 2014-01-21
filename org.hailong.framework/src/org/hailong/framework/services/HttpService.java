@@ -107,10 +107,15 @@ public class HttpService extends AbstractService {
 			
 			Object waiter = new Object();
 			
+			String userAgent = Value.stringValueForKey(getConfig(),"userAgent");
+			
 			HttpParams params = new BasicHttpParams();
 			
 			HttpProtocolParams.setContentCharset(params, "UTF-8");
 			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+			if(userAgent != null){
+				HttpProtocolParams.setUserAgent(params, userAgent);
+			}
 			
 			DefaultHttpClient httpClient = new DefaultHttpClient(params);
 			

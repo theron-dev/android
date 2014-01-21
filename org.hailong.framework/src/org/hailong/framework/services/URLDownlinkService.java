@@ -56,7 +56,7 @@ public class URLDownlinkService extends DownlinkService {
 				HttpGet http = new HttpGet(url);
 
 				http.setHeader("Accept-Encoding", "gzip, deflate");
-				
+
 				HttpTask httpTask = new HttpTask(http);
 				
 				httpTask.task = downTask;

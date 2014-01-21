@@ -39,6 +39,10 @@ public abstract class BaseHttpTask extends AbstractHttpTask<String> implements I
 
 		String charset = EntityUtils.getContentCharSet(entity);
 		
+		if(charset == null){
+			charset = "utf-8";
+		}
+		
 		Header h = entity.getContentEncoding();
 		
 		if(h != null){

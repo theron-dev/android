@@ -27,7 +27,7 @@ public class DemoContainerViewController extends DemoBaseController {
 
 		containerView.setBottomLoadingView((LoadingView)viewLayout.getView());
 
-		containerView.setContentSize(0, 1024);
+		containerView.setContentSize(0,4000);
 		
 	}
 	

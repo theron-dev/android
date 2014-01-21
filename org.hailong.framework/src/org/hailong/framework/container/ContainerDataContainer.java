@@ -146,7 +146,10 @@ public class ContainerDataContainer <T extends IServiceContext> extends DataCont
 			long timestamp) {
 		
 		if(_containerView != null){
-			_containerView.setAdapter(this);
+			IContainerAdapter adapter = _containerView.getAdapter();
+			if(adapter != null){
+				adapter.setDataSource(getDataSource());
+			}
 		}
 		
 		
@@ -156,9 +159,11 @@ public class ContainerDataContainer <T extends IServiceContext> extends DataCont
 	public void onDataSourceDidLoaded(DataSource dataSource) {
 		
 		if(_containerView != null){
-			_containerView.setAdapter(this);
+			IContainerAdapter adapter = _containerView.getAdapter();
+			if(adapter != null){
+				adapter.setDataSource(getDataSource());
+			}
 		}
-		
 		
 		super.onDataSourceDidLoaded(dataSource);
 	}
@@ -166,7 +171,10 @@ public class ContainerDataContainer <T extends IServiceContext> extends DataCont
 	public void onDataSourceDidContentChanged(DataSource dataSource) {
 		
 		if(_containerView != null){
-			_containerView.setAdapter(this);
+			IContainerAdapter adapter = _containerView.getAdapter();
+			if(adapter != null){
+				adapter.setDataSource(getDataSource());
+			}
 		}
 		
 		super.onDataSourceDidContentChanged(dataSource);

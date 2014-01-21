@@ -114,7 +114,9 @@ public class Animation implements android.animation.ValueAnimator.AnimatorUpdate
 		ValueAnimator anim = ValueAnimator.ofFloat(0.0f,1.0f);
 		anim.setDuration(_duration);
 		anim.addUpdateListener(this);
-		anim.addListener(_listener);
+		if(_listener != null){
+			anim.addListener(_listener );
+		}
 		anim.setInterpolator(_timeInterpolator);
 		anim.start();
 	}
@@ -126,6 +128,7 @@ public class Animation implements android.animation.ValueAnimator.AnimatorUpdate
 			}
 		}
 	}
+
 
 	
 }

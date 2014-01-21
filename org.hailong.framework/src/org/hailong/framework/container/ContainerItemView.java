@@ -6,7 +6,8 @@ import android.widget.FrameLayout;
 
 public class ContainerItemView extends FrameLayout implements IContainerView{
 
-	public Container _container;
+	private String _reuseIdentifier;
+	private Container _container;
 	
 	public ContainerItemView(Context context) {
 		super(context);
@@ -34,5 +35,14 @@ public class ContainerItemView extends FrameLayout implements IContainerView{
 
 	public void setContainer(Container container){
 		_container = container;
+	}
+	
+	@android.view.ViewDebug.ExportedProperty
+	public String getReuseIdentifier(){
+		return _reuseIdentifier;
+	}
+	
+	public void setReuseIdentifier(String reuseIdentifier){
+		_reuseIdentifier = reuseIdentifier;
 	}
 }
