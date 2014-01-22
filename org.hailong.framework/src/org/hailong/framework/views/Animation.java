@@ -110,7 +110,7 @@ public class Animation implements android.animation.ValueAnimator.AnimatorUpdate
 		}
 	}
 
-	public void submit(){
+	public ValueAnimator submit(){
 		ValueAnimator anim = ValueAnimator.ofFloat(0.0f,1.0f);
 		anim.setDuration(_duration);
 		anim.addUpdateListener(this);
@@ -119,6 +119,7 @@ public class Animation implements android.animation.ValueAnimator.AnimatorUpdate
 		}
 		anim.setInterpolator(_timeInterpolator);
 		anim.start();
+		return anim;
 	}
 
 	public void onAnimationUpdate(ValueAnimator valueAnimator) {

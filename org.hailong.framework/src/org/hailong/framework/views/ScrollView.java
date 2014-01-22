@@ -1,24 +1,28 @@
 package org.hailong.framework.views;
 
+import org.hailong.framework.Framework;
 import org.hailong.framework.R;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Scroller;
+import android.widget.OverScroller;
 
 public class ScrollView extends ViewGroup {
 
 	private final static float Friction = 0.6f;
 	private final static int VelocityUnits = 1000;
-	private final static long Duration = 300;
+	private final static int Duration = 300;
 	private final static float Factor = 0.6f;
 	
 	/**
@@ -58,7 +62,7 @@ public class ScrollView extends ViewGroup {
 	
 	private boolean _allowBounceVertically = true;
 	
-	private Scroller _scroller;
+	private OverScroller _scroller;
 	
 	private float _touchX;
 	private float _touchY;
@@ -74,6 +78,11 @@ public class ScrollView extends ViewGroup {
 	private boolean _dragging; 
 	private boolean _decelerating; 
 	
+	private ValueAnimator _scrollHorizontallyBarAnimator;
+	private ValueAnimator _scrollVerticallyBarAnimator;
+	
+	private int _maximumVelocity;
+	
 	public ScrollView(Context context) {
 		super(context);
 	}
@@ -84,6 +93,13 @@ public class ScrollView extends ViewGroup {
 
 	public ScrollView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+	}
+	
+	protected void _ScrollView(Context context){
+		
+		ViewConfiguration configuration = ViewConfiguration.get(context);
+		_maximumVelocity = configuration.getScaledMaximumFlingVelocity();
+    
 	}
 
 	@Override  
@@ -177,9 +193,9 @@ public class ScrollView extends ViewGroup {
 		
 	}
 	
-	private Scroller getScroller(){
+	private OverScroller getScroller(){
 		if(_scroller == null){
-			_scroller = new Scroller(getContext(),new DecelerateInterpolator(Factor));
+			_scroller = new OverScroller(getContext(),new DecelerateInterpolator(Factor));
 			_scroller.setFriction(Friction);
 		}
 		return _scroller;
@@ -187,7 +203,7 @@ public class ScrollView extends ViewGroup {
 	
 	public void setContentOffset(int x,int y,boolean animated){
 		if(animated){
-			Scroller scroller = getScroller();
+			OverScroller scroller = getScroller();
 			int scrollX = getScrollX();
 			int scrollY = getScrollY();
 			scroller.startScroll(scrollX, scrollY, (int) x - scrollX, (int) y - scrollY);
@@ -214,6 +230,7 @@ public class ScrollView extends ViewGroup {
     			int scrollY = _scroller.getCurrY();
     			int scrollX = _scroller.getCurrX();
     			scrollTo(scrollX,scrollY);
+    			Log.d(Framework.TAG, scrollX + "," + scrollY);
     		}
     	} 
     }
@@ -239,6 +256,7 @@ public class ScrollView extends ViewGroup {
 	@Override
 	public boolean onTouchEvent(MotionEvent event){
 
+
 		switch(event.getAction()){
 		case MotionEvent.ACTION_DOWN:
 		{
@@ -251,13 +269,22 @@ public class ScrollView extends ViewGroup {
 				_scroller.abortAnimation();
 			}
 			
+			if(_decelerating){
+				_decelerating = false;
+				onDeceleratingStop();
+			}
+			
 			_dragging = true;
 			onDraggingStart();
-			
+
 			return true;
 		}
 		case MotionEvent.ACTION_MOVE:
 		{
+			VelocityTracker tracker = getTracker();
+			
+			tracker.addMovement(event);
+			
 			float dy = event.getY() - _touchY;
 			float dx = event.getX() - _touchX;
 			
@@ -318,7 +345,7 @@ public class ScrollView extends ViewGroup {
 						
 						anim.alpha(v, 0.0f, 0.6f);
 						
-						anim.submit();
+						setScrollVerticallyBarAnimator( anim.submit() );
 					}
 					
 				}
@@ -344,18 +371,14 @@ public class ScrollView extends ViewGroup {
 						
 						anim.alpha(v, 0.0f, 0.6f);
 						
-						anim.submit();
+						setScrollHorizontallyBarAnimator( anim.submit() );
 					}
 					
 				}
 			}
 			
 			scrollTo(scrollX, scrollY);
-			
-			VelocityTracker tracker = getTracker();
-			
-			tracker.addMovement(event);
-			
+
 			return true;
 		}
 		default:
@@ -366,6 +389,8 @@ public class ScrollView extends ViewGroup {
 			int toScrollY = scrollY;
 			
 			VelocityTracker tracker = getTracker();
+			
+			tracker.addMovement(event);
 			
 			tracker.computeCurrentVelocity(VelocityUnits);
 			
@@ -402,16 +427,19 @@ public class ScrollView extends ViewGroup {
 			if(toScrollY > maxY + _contentEdgeBottom){
 				toScrollY = maxY + _contentEdgeBottom;
 			}
+			
+			velocityX = toScrollX - scrollX;
+			velocityY = toScrollY - scrollY;
 		
-			if(scrollX != toScrollX || scrollY != toScrollY){
+			if(velocityX != 0 || velocityY != 0){
 				
 				_decelerating = true;
 				
 				onDeceleratingStart();
 				
-				Scroller scroller = getScroller();
+				OverScroller scroller = getScroller();
 
-				scroller.startScroll(scrollX, scrollY, toScrollX - scrollX, toScrollY - scrollY,(int)Duration);
+				scroller.startScroll(scrollX, scrollY, velocityX, velocityY);
 				
 				invalidate();
 				
@@ -419,9 +447,20 @@ public class ScrollView extends ViewGroup {
 
 					public void run() {
 						
-						_decelerating = false;
 						
-						onDeceleratingStop();
+						if(_decelerating){
+							
+							OverScroller scroller = getScroller();
+							
+							if(scroller.isFinished()){
+								_decelerating = false;
+								onDeceleratingStop();
+							}
+							else{
+								getHandler().postDelayed(this,Duration);
+							}
+							
+						}
 						
 					}}, Duration);
 			}
@@ -664,7 +703,7 @@ public class ScrollView extends ViewGroup {
 					
 					anim.alpha(v, 0.6f, 0.0f);
 					
-					anim.submit();
+					setScrollVerticallyBarAnimator( anim.submit() );
 				}
 				
 			}
@@ -712,7 +751,7 @@ public class ScrollView extends ViewGroup {
 					
 					anim.alpha(v, 0.6f, 0.0f);
 					
-					anim.submit();
+					setScrollHorizontallyBarAnimator( anim.submit() );
 				}
 				
 			}
@@ -742,6 +781,28 @@ public class ScrollView extends ViewGroup {
 	
 	public boolean isDecelerating(){
 		return _decelerating;
+	}
+	
+	protected ValueAnimator getScrollHorizontallyBarAnimator(){
+		return _scrollHorizontallyBarAnimator;
+	}
+	
+	protected void setScrollHorizontallyBarAnimator(ValueAnimator animator){
+		if(_scrollHorizontallyBarAnimator != null){
+			_scrollHorizontallyBarAnimator.cancel();
+		}
+		_scrollHorizontallyBarAnimator = animator;
+	}
+	
+	protected ValueAnimator getScrollVerticallyBarAnimator(){
+		return _scrollVerticallyBarAnimator;
+	}
+	
+	protected void setScrollVerticallyBarAnimator(ValueAnimator animator){
+		if(_scrollVerticallyBarAnimator != null){
+			_scrollVerticallyBarAnimator.cancel();
+		}
+		_scrollVerticallyBarAnimator = animator;
 	}
 	
 	protected void onDraggingStart(){
