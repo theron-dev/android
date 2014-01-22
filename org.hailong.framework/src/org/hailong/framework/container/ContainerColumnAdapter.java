@@ -1,6 +1,7 @@
 package org.hailong.framework.container;
 
 import org.hailong.framework.Edge;
+import org.hailong.framework.IServiceContext;
 import org.hailong.framework.Rect;
 import org.hailong.framework.Size;
 
@@ -9,11 +10,12 @@ public abstract class ContainerColumnAdapter extends ContainerAdapter {
 	private Rect[] _itemRects;
 	private Object[] _columnWidths;
 	
-	public ContainerColumnAdapter(){
-		this("100%");
+	public ContainerColumnAdapter(IServiceContext context){
+		this(context,"100%");
 	}
 	
-	public ContainerColumnAdapter(Object ... columnWidths){
+	public ContainerColumnAdapter(IServiceContext context,Object ... columnWidths){
+		super(context);
 		if(columnWidths != null && columnWidths.length > 0){
 			_columnWidths = columnWidths;
 		}

@@ -1,10 +1,17 @@
 package org.hailong.framework.container;
 
 import org.hailong.framework.Edge;
+import org.hailong.framework.IServiceContext;
 import org.hailong.framework.Rect;
 import org.hailong.framework.Size;
 
 public abstract class ContainerListAdapter extends ContainerAdapter {
+
+	public ContainerListAdapter(IServiceContext context) {
+		super(context);
+		
+	}
+
 
 	private Rect[] _itemRects;
 	

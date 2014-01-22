@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#ffffff">
+    android:orientation="vertical" android:background="#000000">
 
 
 	<org.hailong.framework.container.ContainerView
 		    android:id="@+id/containerLayoutView"
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
-		    android:background="#ffffff" >
+		    android:background="#000000" >
 		    
 	</org.hailong.framework.container.ContainerView>
 

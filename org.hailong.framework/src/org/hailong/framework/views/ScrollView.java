@@ -1,29 +1,23 @@
 package org.hailong.framework.views;
 
-import org.hailong.framework.Framework;
 import org.hailong.framework.R;
-
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
-import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.OverScroller;
+import android.widget.Scroller;
 
 public class ScrollView extends ViewGroup {
 
-	private final static float Friction = 0.6f;
+	private final static float Friction = 0.99f;
 	private final static int VelocityUnits = 1000;
-	private final static int Duration = 300;
-	private final static float Factor = 0.6f;
+	private final static int Duration = 800;
+	private final static int FastDuration = 400;
+	private final static float Factor = 0.99f;
 	
 	/**
 	 * 内容宽度
@@ -62,45 +56,117 @@ public class ScrollView extends ViewGroup {
 	
 	private boolean _allowBounceVertically = true;
 	
-	private OverScroller _scroller;
+	private Scroller _scroller;
 	
+	private int _touchId;
 	private float _touchX;
 	private float _touchY;
 	private int _scrollX;
 	private int _scrollY;
 	
 	private VelocityTracker _tracker;
-	private View _scrollHorizontallyBar;
-	private View _scrollVerticallyBar;
-	private boolean _allowScrollHorizontallyBar;
-	private boolean _allowScrollVerticallyBar = true;
 	
 	private boolean _dragging; 
 	private boolean _decelerating; 
 	
-	private ValueAnimator _scrollHorizontallyBarAnimator;
-	private ValueAnimator _scrollVerticallyBarAnimator;
-	
 	private int _maximumVelocity;
+	private int _minimumVelocity;
 	
 	public ScrollView(Context context) {
 		super(context);
+		_ScrollView(context);
 	}
 
 	public ScrollView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		_ScrollView(context);
 	}
 
 	public ScrollView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		_ScrollView(context);
 	}
 	
 	protected void _ScrollView(Context context){
 		
 		ViewConfiguration configuration = ViewConfiguration.get(context);
 		_maximumVelocity = configuration.getScaledMaximumFlingVelocity();
-    
+		_minimumVelocity = configuration.getScaledMinimumFlingVelocity();
+		
+		setScrollbarFadingEnabled(true);
+		setScrollContainer(true);
+		setHorizontalScrollBarEnabled(true);
+		setVerticalScrollBarEnabled(true);
+
+		TypedArray a = context.obtainStyledAttributes(R.styleable.View);
+		initializeScrollbars(a);
+		a.recycle();
 	}
+	
+	@Override
+	protected int computeHorizontalScrollOffset(){
+		
+		int x = _contentOffsetX;
+		
+		if(x < 0){
+			x = 0;
+		}
+
+		return x;
+	}
+	
+	@Override
+	protected int computeHorizontalScrollRange(){
+		
+		int width = getWidth();
+		int contentWidth = _contentSizeWidth;
+	
+		if(contentWidth > width){
+			width = contentWidth - width;
+			if(_contentOffsetX < 0){
+				return contentWidth - _contentOffsetX;
+			}
+			else if(_contentOffsetX > width){
+				return contentWidth + _contentOffsetX - width;
+			}
+			return contentWidth;
+		}
+		
+		return 0;
+	}
+	
+	@Override
+	protected int computeVerticalScrollOffset(){
+		
+		int y = _contentOffsetY;
+		
+		if(y < 0){
+			y = 0;
+		}
+
+		return y;
+	}
+	
+	@Override
+	protected int computeVerticalScrollRange(){
+		
+		int height = getHeight();
+		int contentHeight = _contentSizeHeight;
+	
+		if(contentHeight > height){
+			height = contentHeight - height;
+			if(_contentOffsetY < 0){
+				return contentHeight - _contentOffsetY;
+			}
+			else if(_contentOffsetY > height){
+				return contentHeight + _contentOffsetY - height;
+			}
+			return contentHeight;
+		}
+		
+		return 0;
+	}
+	
 
 	@Override  
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {  
@@ -145,39 +211,6 @@ public class ScrollView extends ViewGroup {
 		_allowBounceVertically = allowBounceVertically;
 	}
 	
-	public View getScrollHorizontallyBar(){
-		return _scrollHorizontallyBar;
-	}
-	
-	public void setScrollHorizontallyBar(View scrollHorizontallyBar){
-		
-		if(_scrollHorizontallyBar == null){
-			View view = new View(getContext());
-			view.setLayoutParams(new LayoutParams(5,5));
-			view.setBackgroundResource(R.drawable.scrollbar);
-			_scrollHorizontallyBar = view;
-		}
-
-		_scrollHorizontallyBar = scrollHorizontallyBar;
-	}
-	
-	public View getScrollVerticallyBar(){
-		
-		if(_scrollVerticallyBar == null){
-			View view = new View(getContext());
-			view.setLayoutParams(new LayoutParams(5,5));
-			view.setBackgroundResource(R.drawable.scrollbar);
-			view.setVisibility(View.GONE);
-			_scrollVerticallyBar = view;
-		}
-		
-		return _scrollVerticallyBar;
-	}
-	
-	public void setScrollVerticallyBar(View scrollVerticallyBar){
-		_scrollVerticallyBar = scrollVerticallyBar;
-	}
-	
 	public void setContentSize(int width,int height){
 		_contentSizeWidth = width;
 		_contentSizeHeight = height;
@@ -188,14 +221,11 @@ public class ScrollView extends ViewGroup {
 		super.scrollTo(x, y);
 		_contentOffsetX = x;
 		_contentOffsetY = y;
-		
-		refreshScrollBar();
-		
 	}
 	
-	private OverScroller getScroller(){
+	private Scroller getScroller(){
 		if(_scroller == null){
-			_scroller = new OverScroller(getContext(),new DecelerateInterpolator(Factor));
+			_scroller = new Scroller(getContext(),new DecelerateInterpolator(Factor));
 			_scroller.setFriction(Friction);
 		}
 		return _scroller;
@@ -203,10 +233,21 @@ public class ScrollView extends ViewGroup {
 	
 	public void setContentOffset(int x,int y,boolean animated){
 		if(animated){
-			OverScroller scroller = getScroller();
+			
+			if(_decelerating){
+				_decelerating = false;
+				onDeceleratingStop();
+			}
+			
+			Scroller scroller = getScroller();
+			
+			if(!scroller.isFinished()){
+				scroller.abortAnimation();
+			}
+			
 			int scrollX = getScrollX();
 			int scrollY = getScrollY();
-			scroller.startScroll(scrollX, scrollY, (int) x - scrollX, (int) y - scrollY);
+			scroller.startScroll(scrollX, scrollY, (int) x - scrollX, (int) y - scrollY,Duration);
 			invalidate();
 		}
 		else{
@@ -230,7 +271,7 @@ public class ScrollView extends ViewGroup {
     			int scrollY = _scroller.getCurrY();
     			int scrollX = _scroller.getCurrX();
     			scrollTo(scrollX,scrollY);
-    			Log.d(Framework.TAG, scrollX + "," + scrollY);
+    			invalidate();
     		}
     	} 
     }
@@ -242,537 +283,304 @@ public class ScrollView extends ViewGroup {
 		_contentEdgeBottom = bottom;
 	}
 	
-	@SuppressLint("Recycle")
 	private VelocityTracker getTracker(){
 		
 		if(_tracker == null){
 			_tracker = VelocityTracker.obtain();
 		}
-		
+
 		return _tracker;
 	}
-
-	@SuppressLint("Recycle")
+	
 	@Override
-	public boolean onTouchEvent(MotionEvent event){
+	protected void finalize() throws Throwable{
+		
+		if(_tracker != null){
+			_tracker.recycle();
+			_tracker = null;
+		}
 
+		super.finalize();
+	}
 
-		switch(event.getAction()){
+	protected boolean scrollTouchEvent(MotionEvent event){
+		
+
+		switch(event.getAction() & MotionEvent.ACTION_MASK){
 		case MotionEvent.ACTION_DOWN:
 		{
-			_touchX = event.getX();
-			_touchY = event.getY();
-			_scrollX = getScrollX();
-			_scrollY = getScrollY();
-			
-			if(_scroller != null){
-				_scroller.abortAnimation();
+			if(_touchId == 0){
+				
+				_touchId = event.getPointerId(0);
+				_touchX = event.getX(0);
+				_touchY = event.getY(0);
+				
+				_scrollX = getScrollX();
+				_scrollY = getScrollY();
+				
+				if(_scroller != null){
+					_scroller.abortAnimation();
+				}
+				
+				if(_decelerating){
+					_decelerating = false;
+					onDeceleratingStop();
+				}
+				
+				VelocityTracker tracker = getTracker();
+				
+				tracker.clear();
+				
+				tracker.addMovement(event);
 			}
 			
-			if(_decelerating){
-				_decelerating = false;
-				onDeceleratingStop();
-			}
-			
-			_dragging = true;
-			onDraggingStart();
-
-			return true;
 		}
+			break;
 		case MotionEvent.ACTION_MOVE:
 		{
-			VelocityTracker tracker = getTracker();
+			int touchIndex = -1;
+			int c = event.getPointerCount();
 			
-			tracker.addMovement(event);
+			for(int i=0;i<c;i++){
+				if(event.getPointerId(i) == _touchId){
+					touchIndex = i;
+					break;
+				}
+			}
 			
-			float dy = event.getY() - _touchY;
-			float dx = event.getX() - _touchX;
+			if(touchIndex >=0 ){
+				
+				VelocityTracker tracker = getTracker();
+				
+				tracker.addMovement(event);
+				
+				float dy = event.getY(touchIndex) - _touchY;
+				float dx = event.getX(touchIndex) - _touchX;
+				
+				int scrollY = (int)(_scrollY - dy);
+				int scrollX = (int)(_scrollX - dx);
+				
+				if(! _allowBounceHorizontally){
+					
+					int maxX = _contentSizeWidth - getMeasuredWidth();
+	    			
+	    			if(maxX < 0){
+	    				maxX = 0;
+	    			}
+	    			
+					if(scrollX < - _contentEdgeLeft){
+						scrollX = - _contentEdgeLeft;
+					}
+					if(scrollX > maxX + _contentEdgeRight){
+						scrollX = maxX + _contentEdgeRight;
+					}
+				}
+				
+				if(! _allowBounceVertically){
+					
+					int maxY = _contentSizeHeight - getMeasuredHeight();
+	    			
+	    			if(maxY < 0){
+	    				maxY = 0;
+	    			}
+	    			
+					if(scrollY < - _contentEdgeTop){
+						scrollY = - _contentEdgeTop;
+					}
+					if(scrollY > maxY + _contentEdgeBottom){
+						scrollY = maxY + _contentEdgeBottom;
+					}
+				}
+				
+				if(!_dragging){
+					_dragging = true;
+					onDraggingStart();
+				}
+				
+				scrollTo(scrollX, scrollY);
+			}
+		}
+			break;
+		case MotionEvent.ACTION_CANCEL:
+		case MotionEvent.ACTION_UP:
+		{
+			int touchIndex = -1;
+			int c = event.getPointerCount();
 			
-			int scrollY = (int)(_scrollY - dy);
-			int scrollX = (int)(_scrollX - dx);
+			for(int i=0;i<c;i++){
+				if(event.getPointerId(i) == _touchId){
+					touchIndex = i;
+					break;
+				}
+			}
 			
-			if(! _allowBounceHorizontally){
+			if(touchIndex >=0 ){
+			
+				int scrollY = getScrollY();
+				int scrollX = getScrollX();
+				int toScrollX = scrollX;
+				int toScrollY = scrollY;
+				
+				VelocityTracker tracker = getTracker();
+				
+				tracker.addMovement(event);
+				
+				tracker.computeCurrentVelocity(VelocityUnits,_maximumVelocity);
+				
+				int velocityX = (int) tracker.getXVelocity();
+				int velocityY = (int) tracker.getYVelocity();
 				
 				int maxX = _contentSizeWidth - getMeasuredWidth();
-    			
-    			if(maxX < 0){
-    				maxX = 0;
-    			}
-    			
-				if(scrollX < - _contentEdgeLeft){
-					scrollX = - _contentEdgeLeft;
+				
+				if(maxX < 0){
+					maxX = 0;
 				}
-				if(scrollX > maxX + _contentEdgeRight){
-					scrollX = maxX + _contentEdgeRight;
-				}
-			}
-			
-			if(! _allowBounceVertically){
 				
 				int maxY = _contentSizeHeight - getMeasuredHeight();
-    			
-    			if(maxY < 0){
-    				maxY = 0;
-    			}
-    			
-				if(scrollY < - _contentEdgeTop){
-					scrollY = - _contentEdgeTop;
-				}
-				if(scrollY > maxY + _contentEdgeBottom){
-					scrollY = maxY + _contentEdgeBottom;
-				}
-			}
-			
-			int width = getMeasuredWidth();
-			int height = getMeasuredHeight();
-			
-			if(_allowScrollVerticallyBar 
-					&& (_allowBounceVertically || _contentSizeHeight > height || _contentEdgeTop > 0 || _contentEdgeBottom > 0)){
 				
-				View v = getScrollVerticallyBar();
+				if(maxY < 0){
+					maxY = 0;
+				}
 				
-				if(v != null){
+				toScrollX = scrollX - velocityX;
+				toScrollY = scrollY - velocityY;
+				
+				if(toScrollX < - _contentEdgeLeft){
+					toScrollX = - _contentEdgeLeft;
+				}
+				
+				if(toScrollX > maxX + _contentEdgeRight){
+					toScrollX = maxX + _contentEdgeRight ;
+				}
+				
+				if(toScrollY < - _contentEdgeTop){
+					toScrollY = - _contentEdgeTop;
+				}
+				
+				if(toScrollY > maxY + _contentEdgeBottom){
+					toScrollY = maxY + _contentEdgeBottom;
+				}
+				
+				velocityX = toScrollX - scrollX;
+				velocityY = toScrollY - scrollY;
+			
+				if(Math.abs(velocityY) > _minimumVelocity || Math.abs(velocityX) >_minimumVelocity){
 					
-					if(v.getParent() == null){
-						addView(v);
-						
-						v.setVisibility(View.VISIBLE);
-						v.setAlpha(0.6f);
-						
-						Animation anim = new Animation();
-						
-						anim.setDuration(300);
-						
-						anim.alpha(v, 0.0f, 0.6f);
-						
-						setScrollVerticallyBarAnimator( anim.submit() );
+					_decelerating = true;
+					
+					onDeceleratingStart();
+					
+					Scroller scroller = getScroller();
+	
+					int duration = Duration;
+					
+					int distanceX = getHeight() / 2;
+					int distanceY = getWidth() / 2;
+					
+					if(Math.abs(velocityX) < distanceX && Math.abs(velocityY) < distanceY){
+						duration = FastDuration;
 					}
 					
-				}
-			}
-			
-			if(_allowScrollHorizontallyBar
-					&& (_allowBounceHorizontally || _contentSizeWidth > width || _contentEdgeLeft > 0 || _contentEdgeRight > 0)){
-				
-				View v = getScrollHorizontallyBar();
-				
-				if(v != null){
+					scroller.startScroll(scrollX, scrollY, velocityX, velocityY,duration);
 					
-					if(v.getParent() == null){
-						
-						addView(v);
-						
-						v.setVisibility(View.VISIBLE);
-						v.setAlpha(0.6f);
-						
-						Animation anim = new Animation();
-						
-						anim.setDuration(300);
-						
-						anim.alpha(v, 0.0f, 0.6f);
-						
-						setScrollHorizontallyBarAnimator( anim.submit() );
+					invalidate();
+					
+					getHandler().postDelayed(new Runnable() {
+	
+						public void run() {
+							
+							if(_decelerating){
+								
+								Scroller scroller = getScroller();
+								
+								if(scroller.isFinished()){
+									_decelerating = false;
+									onDeceleratingStop();
+								}
+								else{
+									getHandler().postDelayed(this,Duration);
+								}
+								
+							}
+							
+						}}, duration);
+				}
+				else {
+					toScrollX = scrollX;
+					toScrollY = scrollY;
+					
+					if(toScrollX < - _contentEdgeLeft){
+						toScrollX = - _contentEdgeLeft;
 					}
 					
+					if(toScrollX > maxX + _contentEdgeRight){
+						toScrollX = maxX + _contentEdgeRight ;
+					}
+					
+					if(toScrollY < - _contentEdgeTop){
+						toScrollY = - _contentEdgeTop;
+					}
+					
+					if(toScrollY > maxY + _contentEdgeBottom){
+						toScrollY = maxY + _contentEdgeBottom;
+					}
+					if(toScrollY != scrollY || toScrollX != scrollX){
+						
+						_decelerating = true;
+						
+						onDeceleratingStart();
+						
+						Scroller scroller = getScroller();
+						
+						scroller.startScroll(scrollX, scrollY, velocityX, velocityY,FastDuration);
+						
+						invalidate();
+						
+						getHandler().postDelayed(new Runnable() {
+	
+							public void run() {
+								
+								if(_decelerating){
+									
+									Scroller scroller = getScroller();
+									
+									if(scroller.isFinished()){
+										_decelerating = false;
+										onDeceleratingStop();
+									}
+									else{
+										getHandler().postDelayed(this,FastDuration);
+									}
+									
+								}
+								
+							}}, FastDuration);
+					}
 				}
-			}
-			
-			scrollTo(scrollX, scrollY);
-
-			return true;
-		}
-		default:
-		{
-			int scrollY = getScrollY();
-			int scrollX = getScrollX();
-			int toScrollX = scrollX;
-			int toScrollY = scrollY;
-			
-			VelocityTracker tracker = getTracker();
-			
-			tracker.addMovement(event);
-			
-			tracker.computeCurrentVelocity(VelocityUnits);
-			
-			int velocityX = (int) tracker.getXVelocity();
-			int velocityY = (int) tracker.getYVelocity();
-			
-			int maxX = _contentSizeWidth - getMeasuredWidth();
-			
-			if(maxX < 0){
-				maxX = 0;
-			}
-			
-			int maxY = _contentSizeHeight - getMeasuredHeight();
-			
-			if(maxY < 0){
-				maxY = 0;
-			}
-			
-			toScrollX = scrollX - velocityX;
-			toScrollY = scrollY - velocityY;
-			
-			if(toScrollX < - _contentEdgeLeft){
-				toScrollX = - _contentEdgeLeft;
-			}
-			
-			if(toScrollX > maxX + _contentEdgeRight){
-				toScrollX = maxX + _contentEdgeRight ;
-			}
-			
-			if(toScrollY < - _contentEdgeTop){
-				toScrollY = - _contentEdgeTop;
-			}
-			
-			if(toScrollY > maxY + _contentEdgeBottom){
-				toScrollY = maxY + _contentEdgeBottom;
-			}
-			
-			velocityX = toScrollX - scrollX;
-			velocityY = toScrollY - scrollY;
-		
-			if(velocityX != 0 || velocityY != 0){
+	
+				_dragging = false;
 				
-				_decelerating = true;
+				onDraggingStop();
 				
-				onDeceleratingStart();
-				
-				OverScroller scroller = getScroller();
-
-				scroller.startScroll(scrollX, scrollY, velocityX, velocityY);
-				
-				invalidate();
-				
-				getHandler().postDelayed(new Runnable() {
-
-					public void run() {
-						
-						
-						if(_decelerating){
-							
-							OverScroller scroller = getScroller();
-							
-							if(scroller.isFinished()){
-								_decelerating = false;
-								onDeceleratingStop();
-							}
-							else{
-								getHandler().postDelayed(this,Duration);
-							}
-							
-						}
-						
-					}}, Duration);
+				_touchId = 0;
 			}
-
-			_dragging = false;
-			
-			onDraggingStop();
 		}
 		}
 		
-		return super.onTouchEvent(event);
+		return true;
+	}
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event){
+
+		boolean rs = scrollTouchEvent(event);
+
+		return super.dispatchTouchEvent(event) || rs;
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		
-		int height = b - t;
-		int width = r - l;
-		
-		if(height <=0 || width <=0){
-			return;
-		}
-		
-		int scrollX = getScrollX();
-		int scrollY = getScrollY();
-		
-		if(_allowScrollVerticallyBar && _scrollVerticallyBar != null && _scrollVerticallyBar.getParent() == this){
-			
-			int contentSizeHeight = _contentSizeHeight - height;
-			
-			if(contentSizeHeight < height){
-				contentSizeHeight = height;
-			}
-			
-			int h = (int) ((double) height * (double) height / (double) contentSizeHeight);
-			int w = _scrollVerticallyBar.getMeasuredWidth();
-			
-			int dy = 0;
-			
-			if(scrollY < 0){
-				dy = - scrollY;
-			}
-			
-			if(scrollY > contentSizeHeight){
-				dy = scrollY - contentSizeHeight;
-			}
-			
-			h = h - h * dy / contentSizeHeight;
-			
-			int top = scrollY;
-			
-			if(top < 0){
-				top = 0;
-			}
-			
-			if(top > contentSizeHeight){
-				top = contentSizeHeight;
-			}
-			
-			top = scrollY + (int)((double) top * (height - h)  / contentSizeHeight);
-		
-			_scrollVerticallyBar.layout(width - w - 1, top, width -1, top + h);
-			
-			
-		}
-		
-		if(_allowScrollHorizontallyBar && _scrollHorizontallyBar != null && _scrollHorizontallyBar.getParent() == this){
-			
-			int contentSizeWidth = _contentSizeWidth - width;
-			
-			if(contentSizeWidth < width){
-				contentSizeWidth = width;
-			}
-			
-			int w = (int) ((double) width * (double) width / (double) contentSizeWidth);
-			int h = _scrollHorizontallyBar.getMeasuredHeight();
-			
-			int dx = 0;
-			
-			if(scrollX < 0){
-				dx = - scrollX;
-			}
-			
-			if(scrollX > contentSizeWidth ){
-				dx = scrollX -  contentSizeWidth;
-			}
-			
-			w = w - w * dx / contentSizeWidth;
-			
-			int left = scrollX;
-			
-			if(left < 0){
-				left = 0;
-			}
-			
-			if(left > contentSizeWidth){
-				left = contentSizeWidth;
-			}
-			
-			left = scrollX + (int)((double) left * (width - w)  / contentSizeWidth);
-			
-			_scrollHorizontallyBar.layout(left,height - h - 1, left + w, height -1);
-			
-		}
-		
-	}
-	
-	public void refreshScrollBar(){
-
-		int height = getHeight();
-		int width = getWidth();
-		
-		if(height <=0 || width <=0){
-			return;
-		}
-		
-		int scrollY = getScrollY();
-		int scrollX = getScrollX();
-		
-		if(_allowScrollVerticallyBar && _scrollVerticallyBar != null && _scrollVerticallyBar.getParent() == this){
-			
-			int contentSizeHeight = _contentSizeHeight - height;
-			
-			if(contentSizeHeight < height){
-				contentSizeHeight = height;
-			}
-			
-			int top = scrollY;
-			
-			if(top < 0){
-				top = 0;
-			}
-			
-			if(top > contentSizeHeight){
-				top = contentSizeHeight;
-			}
-			
-			int h = _scrollVerticallyBar.getHeight();
-			
-			top = (int)((double) top * (height - h)  / contentSizeHeight);
-			
-			_scrollVerticallyBar.setY(scrollY + top);
-		
-			int dy = 0;
-			
-			if(scrollY < 0){
-				dy = - scrollY;
-				_scrollVerticallyBar.setPivotY(0.0f);
-			}
-			
-			if(scrollY > contentSizeHeight){
-				dy = scrollY - contentSizeHeight;
-				_scrollVerticallyBar.setPivotY(h);
-			}
-			
-			_scrollVerticallyBar.setScaleY(1.0f - (float)dy / contentSizeHeight);
-			
-		}
-		
-		if(_allowScrollHorizontallyBar && _scrollHorizontallyBar != null && _scrollHorizontallyBar.getParent() == this){
-			
-			int contentSizeWidth = _contentSizeWidth - width;
-			
-			if(contentSizeWidth < width){
-				contentSizeWidth = width;
-			}
-			
-			int left = scrollX;
-			
-			if(left < 0){
-				left = 0;
-			}
-			
-			if(left > contentSizeWidth){
-				left = contentSizeWidth;
-			}
-			
-			int w = _scrollHorizontallyBar.getWidth();
-			
-			left = (int)((double) left * (width - w)  / contentSizeWidth);
-			
-			_scrollVerticallyBar.setX(scrollX + left);
-			
-			int dx = 0;
-			
-			if(scrollX < 0){
-				dx = - scrollX;
-				_scrollVerticallyBar.setPivotX(0.0f);
-			}
-			
-			if(scrollX > contentSizeWidth ){
-				dx = scrollX -  contentSizeWidth;
-				_scrollVerticallyBar.setPivotX(w);
-			}
-
-			_scrollVerticallyBar.setScaleX(1.0f - (float)dx / contentSizeWidth);
-		}
-	}
-
-	private void hiddenScrollBar(){
-		
-		if(_allowScrollVerticallyBar){
-			View v = getScrollVerticallyBar();
-			
-			if(v != null){
-				
-				if(v.getParent() != null){
-					
-					v.setAlpha(0.0f);
-					
-					Animation anim = new Animation();
-				
-					anim.setDuration(300);
-					
-					anim.setListener(new AnimatorListener() {
-						
-						public void onAnimationStart(Animator arg0) {
-							
-						}
-						
-						public void onAnimationRepeat(Animator arg0) {
-						
-						}
-						
-						public void onEnd(){
-							View v = getScrollVerticallyBar();
-							if(v != null && v.getParent() != null){
-								removeView(v);
-							}
-						}
-						
-						public void onAnimationEnd(Animator arg0) {
-							onEnd();
-						}
-						
-						public void onAnimationCancel(Animator arg0) {
-							onEnd();
-						}
-					});
-					
-					anim.alpha(v, 0.6f, 0.0f);
-					
-					setScrollVerticallyBarAnimator( anim.submit() );
-				}
-				
-			}
-		}
-		
-		if(_allowScrollHorizontallyBar){
-			
-			View v = getScrollHorizontallyBar();
-			
-			if(v != null){
-				
-				if(v.getParent() != null){
-					
-					v.setAlpha(0.0f);
-					
-					Animation anim = new Animation();
-				
-					anim.setDuration(300);
-					
-					anim.setListener(new AnimatorListener() {
-						
-						public void onAnimationStart(Animator arg0) {
-							
-						}
-						
-						public void onAnimationRepeat(Animator arg0) {
-						
-						}
-						
-						public void onEnd(){
-							View v = getScrollVerticallyBar();
-							if(v != null && v.getParent() != null){
-								removeView(v);
-							}
-						}
-						
-						public void onAnimationEnd(Animator arg0) {
-							onEnd();
-						}
-						
-						public void onAnimationCancel(Animator arg0) {
-							onEnd();
-						}
-					});
-					
-					anim.alpha(v, 0.6f, 0.0f);
-					
-					setScrollHorizontallyBarAnimator( anim.submit() );
-				}
-				
-			}
-		}
-
-	}
-	
-	public boolean isAllowScrollHorizontallyBar(){
-		return _allowScrollHorizontallyBar;
-	}
-	
-	public void setAllowScrollHorizontallyBar(boolean allowScrollHorizontallyBar){
-		_allowScrollHorizontallyBar = allowScrollHorizontallyBar;
-	}
-	
-	public boolean isAllowScrollVerticallyBar(){
-		return _allowScrollVerticallyBar;
-	}
-	
-	public void setAllowScrollVerticallyBar(boolean allowScrollVerticallyBar){
-		_allowScrollVerticallyBar = allowScrollVerticallyBar;
 	}
 	
 	public boolean isDragging(){
@@ -783,36 +591,12 @@ public class ScrollView extends ViewGroup {
 		return _decelerating;
 	}
 	
-	protected ValueAnimator getScrollHorizontallyBarAnimator(){
-		return _scrollHorizontallyBarAnimator;
-	}
-	
-	protected void setScrollHorizontallyBarAnimator(ValueAnimator animator){
-		if(_scrollHorizontallyBarAnimator != null){
-			_scrollHorizontallyBarAnimator.cancel();
-		}
-		_scrollHorizontallyBarAnimator = animator;
-	}
-	
-	protected ValueAnimator getScrollVerticallyBarAnimator(){
-		return _scrollVerticallyBarAnimator;
-	}
-	
-	protected void setScrollVerticallyBarAnimator(ValueAnimator animator){
-		if(_scrollVerticallyBarAnimator != null){
-			_scrollVerticallyBarAnimator.cancel();
-		}
-		_scrollVerticallyBarAnimator = animator;
-	}
-	
 	protected void onDraggingStart(){
 		
 	}
 	
 	protected void onDraggingStop(){
-		if(! _decelerating){
-			hiddenScrollBar();
-		}
+		
 	}
 	
 	protected void onDeceleratingStart(){
@@ -820,6 +604,6 @@ public class ScrollView extends ViewGroup {
 	}
 	
 	protected void onDeceleratingStop(){
-		hiddenScrollBar();
+		
 	}
 }

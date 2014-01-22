@@ -81,7 +81,8 @@ public class Rect {
 		int index = v.indexOf("%");
 		
 		if(index >=0){
-			return (int) (baseValue * Double.valueOf(v.substring(0, index))) + Integer.valueOf(v.substring(index + 1));
+			String d = v.substring(index + 1);
+			return (int) (baseValue * Double.valueOf(v.substring(0, index))) + ( d != null && d.length() >0?Integer.valueOf(d) : 0);
 		}
 		
 		return Integer.valueOf(v);
