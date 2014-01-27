@@ -16,7 +16,7 @@ public class ScrollView extends ViewGroup {
 	private final static float Friction = 0.99f;
 	private final static int VelocityUnits = 1000;
 	private final static int Duration = 800;
-	private final static int FastDuration = 400;
+	private final static int FastDuration = 300;
 	private final static float Factor = 0.99f;
 	
 	/**
@@ -127,7 +127,7 @@ public class ScrollView extends ViewGroup {
 				return contentWidth - _contentOffsetX;
 			}
 			else if(_contentOffsetX > width){
-				return contentWidth + _contentOffsetX - width;
+				return contentWidth + (_contentOffsetX - width);
 			}
 			return contentWidth;
 		}
@@ -159,7 +159,7 @@ public class ScrollView extends ViewGroup {
 				return contentHeight - _contentOffsetY;
 			}
 			else if(_contentOffsetY > height){
-				return contentHeight + _contentOffsetY - height;
+				return contentHeight + (_contentOffsetY - height);
 			}
 			return contentHeight;
 		}
@@ -497,8 +497,12 @@ public class ScrollView extends ViewGroup {
 									_decelerating = false;
 									onDeceleratingStop();
 								}
-								else{
+								else if(getHandler() != null){
 									getHandler().postDelayed(this,Duration);
+								}
+								else{
+									_decelerating = false;
+									onDeceleratingStop();
 								}
 								
 							}
@@ -548,10 +552,13 @@ public class ScrollView extends ViewGroup {
 										_decelerating = false;
 										onDeceleratingStop();
 									}
-									else{
+									else if(getHandler() != null){
 										getHandler().postDelayed(this,FastDuration);
 									}
-									
+									else{
+										_decelerating = false;
+										onDeceleratingStop();
+									}
 								}
 								
 							}}, FastDuration);
