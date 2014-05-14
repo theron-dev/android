@@ -7,18 +7,18 @@ import org.hailong.core.URL;
 
 public class DOMDocument {
 
-	private DOMBundle _bundle;
+	private final DOMBundle _bundle;
 	private DOMElement _rootElement;
 	private URL _documentURL;
 	private Map<String,DOMElement> _elementsById;
 	private DOMStyleSheet _styleSheet;
 	
-	public DOMBundle getBundle(){
-		return _bundle;
+	public DOMDocument(DOMBundle bundle){
+		_bundle = bundle;
 	}
 	
-	public void setBundle(DOMBundle bundle){
-		_bundle = bundle;
+	public DOMBundle getBundle(){
+		return _bundle;
 	}
 	
 	public DOMElement getRootElement(){

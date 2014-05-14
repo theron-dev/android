@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hailong.core.Color;
+import org.hailong.core.Font;
 
 public class DOMElement  {
 
@@ -242,6 +242,22 @@ public class DOMElement  {
 		
 	}
 	
+	
+	public Font fontValue(String name,Font defaultValue){
+		
+		String v = getAttributeValue(name);
+		
+		if(v != null){
+			return Font.valueOf(v);
+		}
+		
+		if(_style != null){
+			return _style.fontValue(name, defaultValue);
+		}
+		
+		return defaultValue;
+	}
+	
 	public int getChildCount(){
 		return _childs != null ? _childs.size() : 0;
 	}
@@ -283,7 +299,7 @@ public class DOMElement  {
 		for(DOMElement element : getChilds()){
 			
 			if(element._viewEntity == null){
-				onViewEntityChanged(viewEntity);
+				element.onViewEntityChanged(viewEntity);
 			}
 			
 		}

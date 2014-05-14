@@ -1,6 +1,6 @@
 package org.hailong.core;
 
-public class Size {
+public final class Size {
 	
 	public Object width;
 	public Object height;
@@ -15,29 +15,29 @@ public class Size {
 	}
 	
 	
-	public int getWidth(int defaultValue,int baseValue){
+	public float getWidth(float defaultValue,float baseValue){
 		return Rect.getValue(width,defaultValue,baseValue);
 	}
 	
-	public int getHeight(int defaultValue,int baseValue){
+	public float getHeight(float defaultValue,float baseValue){
 		return Rect.getValue(height,defaultValue,baseValue);
 	}
 	
 	
-	public int getWidth(int defaultValue){
+	public float getWidth(float defaultValue){
 		return Rect.getValue(width,defaultValue);
 	}
 	
-	public int getHeight(int defaultValue){
+	public float getHeight(float defaultValue){
 		return Rect.getValue(height,defaultValue);
 	}
 
 	
-	public int getWidth(){
+	public float getWidth(){
 		return Rect.getValue(width,0);
 	}
 	
-	public int getHeight(){
+	public float getHeight(){
 		return Rect.getValue(height,0);
 	}
 }

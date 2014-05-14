@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class URL {
+public final class URL {
 
 	private Map<String,String> _queryValues;
 	private String _url;

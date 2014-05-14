@@ -27,4 +27,7 @@ public interface IDOMLayoutElement {
 	public Size layout(Size size);
 	
 	public Size layout();
+	
+	public boolean isLayouted();
+	
 }

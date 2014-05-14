@@ -12,6 +12,13 @@ public class DOMViewElement extends DOMLayoutElement {
 		return _view != null;
 	}
 	
+	public void setView(View view){
+		_view = view;
+		if(_view != null && _view instanceof IDOMView){
+			((IDOMView) _view).setElement(this);
+		}
+	}
+	
 	@Override
 	public void removeFromParent(){
 		
@@ -30,6 +37,9 @@ public class DOMViewElement extends DOMLayoutElement {
 	
 	protected void onViewEntityChanged(IDOMViewEntity viewEntity){
 		
+		if(viewEntity==null){
+			setView(null);
+		}
 		
 		super.onViewEntityChanged(viewEntity);
 	}

@@ -1,6 +1,6 @@
 package org.hailong.core;
 
-public class Edge {
+public final class Edge {
 	
 	public Object left;
 	public Object top;
@@ -25,51 +25,51 @@ public class Edge {
 		this.bottom = bottom;
 	}
 	
-	public int getLeft(int defaultValue,int baseValue){
+	public float getLeft(float defaultValue,float baseValue){
 		return Rect.getValue(left,defaultValue,baseValue);
 	}
 	
-	public int getTop(int defaultValue,int baseValue){
+	public float getTop(float defaultValue,float baseValue){
 		return Rect.getValue(top,defaultValue,baseValue);
 	}
 	
-	public int getRight(int defaultValue,int baseValue){
+	public float getRight(float defaultValue,float baseValue){
 		return Rect.getValue(right,defaultValue,baseValue);
 	}
 	
-	public int getBottom(int defaultValue,int baseValue){
+	public float getBottom(float defaultValue,float baseValue){
 		return Rect.getValue(bottom,defaultValue,baseValue);
 	}
 	
-	public int getLeft(int defaultValue){
+	public float getLeft(float defaultValue){
 		return Rect.getValue(left,defaultValue);
 	}
 	
-	public int getTop(int defaultValue){
+	public float getTop(float defaultValue){
 		return Rect.getValue(top,defaultValue);
 	}
 	
-	public int getRight(int defaultValue){
+	public float getRight(float defaultValue){
 		return Rect.getValue(right,defaultValue);
 	}
 	
-	public int getBottom(int defaultValue){
+	public float getBottom(float defaultValue){
 		return Rect.getValue(bottom,defaultValue);
 	}
 
-	public int getLeft(){
+	public float getLeft(){
 		return Rect.getValue(left,0);
 	}
 	
-	public int getTop(){
+	public float getTop(){
 		return Rect.getValue(top,0);
 	}
 	
-	public int getRight(){
+	public float getRight(){
 		return Rect.getValue(right,0);
 	}
 	
-	public int getBottom(){
+	public float getBottom(){
 		return Rect.getValue(bottom,0);
 	}
 }

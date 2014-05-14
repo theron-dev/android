@@ -1,6 +1,6 @@
 package org.hailong.core;
 
-public class Point {
+public final class Point {
 	
 	public Object x;
 	public Object y;
@@ -14,27 +14,27 @@ public class Point {
 		this.y = y;
 	}
 	
-	public int getX(int defaultValue,int baseValue){
+	public float getX(float defaultValue,float baseValue){
 		return Rect.getValue(x,defaultValue,baseValue);
 	}
 	
-	public int getY(int defaultValue,int baseValue){
+	public float getY(float defaultValue,float baseValue){
 		return Rect.getValue(y,defaultValue,baseValue);
 	}
 	
-	public int getX(int defaultValue){
+	public float getX(float defaultValue){
 		return Rect.getValue(x,defaultValue);
 	}
 	
-	public int getY(int defaultValue){
+	public float getY(float defaultValue){
 		return Rect.getValue(y,defaultValue);
 	}
 
-	public int getX(){
+	public float getX(){
 		return Rect.getValue(x,0);
 	}
 	
-	public int getY(){
+	public float getY(){
 		return Rect.getValue(y,0);
 	}
 

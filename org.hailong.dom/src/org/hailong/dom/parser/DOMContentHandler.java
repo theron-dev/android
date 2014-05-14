@@ -46,7 +46,7 @@ public class DOMContentHandler implements ContentHandler {
 		if(_textBuilder == null){
 			_textBuilder=  new StringBuilder();
 		}
-		
+	
 		_textBuilder.append(chars,index,length);
 	}
 
@@ -58,9 +58,13 @@ public class DOMContentHandler implements ContentHandler {
 	@Override
 	public void endElement(String arg0, String arg1, String arg2)
 			throws SAXException {
-		if(_textBuilder != null){
-			_curElement.setText(_textBuilder.toString());
-			_textBuilder = null;
+		if(_textBuilder != null && _textBuilder.length() >0 ){
+			
+			if(_curElement.getChildCount() ==0 ){
+				_curElement.setText(_textBuilder.toString());
+			}
+			
+			_textBuilder.delete(0, _textBuilder.length());
 		}
 		_curElement = _curElement.getParent();
 	}
@@ -107,14 +111,14 @@ public class DOMContentHandler implements ContentHandler {
 		
 		Class<?> elementClass;
 		
-		if(uri != null){
+		if(uri != null && uri.length() > 0){
 			
 			String className = uri.concat(".").concat(localName);
 			
 			try {
 				elementClass = Class.forName(className);
 			} catch (ClassNotFoundException e) {
-				throw new SAXException(e);
+				elementClass = null;
 			}
 		}
 		else {
@@ -150,6 +154,11 @@ public class DOMContentHandler implements ContentHandler {
 		}
 		
 		_curElement = element;
+		
+		if(_textBuilder != null){
+			_textBuilder.delete(0, _textBuilder.length());
+		}
+		
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package org.hailong.core;
 
-public class Color {
+public final class Color {
 
 	public float r;
 	public float g;
@@ -26,10 +26,11 @@ public class Color {
 	}
 	
 	public int intValue(){
+		int aa = (int) ( a * 0xff);
 		int rr = (int) ( r * 0xff);
 		int gg = (int) ( g * 0xff);
 		int bb = (int) ( b * 0xff);
-		return (rr <<16) | (gg << 8) | bb;
+		return (aa << 24) | (rr <<16) | (gg << 8) | bb;
 	}
 	
 	public int getAlpha(){

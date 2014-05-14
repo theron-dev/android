@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hailong.core.Color;
+import org.hailong.core.Font;
 
 public class DOMStyle {
 	
@@ -116,4 +117,16 @@ public class DOMStyle {
 		return defaultValue;
 		
 	}
+	
+	public Font fontValue(String name,Font defaultValue){
+		
+		String v = getValue(name);
+		
+		if(v != null){
+			return Font.valueOf(v);
+		}
+		
+		return defaultValue;
+	}
+	
 }

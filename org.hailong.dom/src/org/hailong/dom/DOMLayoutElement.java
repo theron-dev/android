@@ -199,68 +199,11 @@ public class DOMLayoutElement extends DOMElement implements IDOMLayoutElement {
 		
 		Edge insets = getPadding();
 	    
-	    Rect frame = new Rect(0,0,0,0);
+	    Rect frame = new Rect(0,0
+	    		,Rect.getValue(stringValue("width",null), 0.0f, size.getWidth())
+	    		,Rect.getValue(stringValue("height",null), 0.0f, size.getHeight()));
 	    
-	    String width = stringValue("width",null);
-	    String height = stringValue("height",null);
-	    
-	    if("auto".equals(width)){
-	        frame.width = Float.MAX_VALUE;
-	    }
-	    else if(width != null && width.endsWith("%")){
-	        frame.width = Float.valueOf(width) * size.getWidth() / 100.0f;
-	    }
-	    else if(width != null){
-	        
-	    	int index = width.indexOf("%+");
-
-	        if(index >=0 ){
-	            
-	            frame.width = Float.valueOf(width.substring(0,index)) * size.getWidth() / 100.0f + Float.valueOf(width.substring(index + 2));
-	            
-	        }
-	        else{
-	            
-	        	index = width.indexOf("%-");
-	            
-	            if(index >= 0){
-	                frame.width = Float.valueOf(width.substring(0,index)) * size.getWidth() / 100.0f -Float.valueOf(width.substring(index + 2));
-	            }
-	            else{
-	            	frame.width = Float.valueOf(width);
-	            }
-	        }
-	        
-	        
-	    }
-	    
-	    if("auto".equals(height)){
-	        frame.height = Float.MAX_VALUE;
-	    }
-	    else if(height != null && height.endsWith("%") ){
-	        frame.height = Float.valueOf(height) * size.getHeight() / 100.0f;
-	    }
-	    else if(height != null){
-	        
-	    	int index = height.indexOf("%+");
-
-	        if(index >=0 ){
-	            
-	            frame.height = Float.valueOf(height.substring(0,index)) * size.getHeight() / 100.0f + Float.valueOf(height.substring(index + 2));
-	            
-	        }
-	        else{
-	            
-	        	index = height.indexOf("%-");
-	            
-	            if(index >= 0){
-	                frame.height = Float.valueOf(height.substring(0,index)) * size.getHeight() / 100.0f -Float.valueOf(height.substring(index + 2));
-	            }
-	            else{
-	            	frame.height = Float.valueOf(height);
-	            }
-	        }
-	    }
+	
 	    
 	    setFrame(frame);
 	    
@@ -271,13 +214,15 @@ public class DOMLayoutElement extends DOMElement implements IDOMLayoutElement {
 	        if(frame.getWidth() == Float.MAX_VALUE){
 	        	
 	            frame.width = contentSize.width;
-	            String max = stringValue("max-width",null);
-	            String min = stringValue("min-width",null);
-	            if(max != null && frame.getWidth() > Float.valueOf(max)){
-	                frame.width = Float.valueOf(max);
+	            
+	            float max = Rect.getValue(stringValue("max-width",null), frame.getWidth(), size.getWidth());
+	            float min = Rect.getValue(stringValue("min-width",null), frame.getWidth(), size.getWidth());
+	            
+	            if(frame.getWidth() > max){
+	                frame.width = max;
 	            }
-	            if(min != null && frame.getWidth() < Float.valueOf(min)){
-	                frame.width = Float.valueOf(min);
+	            if(frame.getWidth() < min){
+	                frame.width = min;
 	            }
 	        }
 	        
@@ -285,13 +230,14 @@ public class DOMLayoutElement extends DOMElement implements IDOMLayoutElement {
 	        	
 	            frame.height = contentSize.height;
 	            
-	            String max = stringValue("max-height",null);
-	            String min = stringValue("min-height",null);
-	            if(max != null && frame.getHeight() > Float.valueOf(max)){
-	                frame.height = Float.valueOf(max);
+	            float max = Rect.getValue(stringValue("max-height",null), frame.getHeight(), size.getHeight());
+	            float min = Rect.getValue(stringValue("min-height",null), frame.getHeight(), size.getHeight());
+	          
+	            if(frame.getHeight() > max){
+	                frame.height = max;
 	            }
-	            if(min != null && frame.getHeight() < Float.valueOf(min)){
-	                frame.height = Float.valueOf(min);
+	            if(frame.getHeight() < min){
+	                frame.height = min;
 	            }
 	        }
 	        
@@ -309,4 +255,7 @@ public class DOMLayoutElement extends DOMElement implements IDOMLayoutElement {
 		return layoutChildren(getPadding());
 	}
 
+	public boolean isLayouted(){
+		return _frame != null;
+	}
 }

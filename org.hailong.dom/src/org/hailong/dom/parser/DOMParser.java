@@ -3,6 +3,10 @@ package org.hailong.dom.parser;
 import java.io.IOException;
 import java.io.Reader;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.hailong.dom.DOMDocument;
 import org.hailong.dom.DOMElement;
 import org.hailong.dom.DOMLayoutElement;
@@ -11,26 +15,26 @@ import org.hailong.dom.DOMStyleSheet;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-public class DOMParse {
+public class DOMParser {
 
-	public static void parseHTML(Reader reader, DOMElement toElement,int atIndex) throws SAXException, IOException{
+	public static void parseHTML(Reader reader, DOMElement toElement,int atIndex) throws SAXException, IOException, ParserConfigurationException{
 		
-		XMLReader xml = XMLReaderFactory.createXMLReader();
-		
+		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+		SAXParser newSAXParser = saxParserFactory.newSAXParser();
+		XMLReader xml = newSAXParser.getXMLReader();
 		xml.setContentHandler(new DOMContentHandler(toElement, atIndex));
 		xml.parse(new InputSource(reader));
 
 	}
 	
-	public static void parseHTML(Reader reader, DOMDocument document) throws SAXException, IOException {
+	public static void parseHTML(Reader reader, DOMDocument document) throws SAXException, IOException, ParserConfigurationException {
 		
 		DOMElement element = new DOMLayoutElement();
 		
 		element.setAttributeValue("width", "100%");
 		element.setAttributeValue("height", "100%");
-		
+
 		parseHTML(reader,element,0);
 		
 		if(element.getChildCount() ==1){

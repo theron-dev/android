@@ -15,7 +15,13 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 		
 		drawBackground(canvas);
 
+		onDrawElement(canvas);
+		
 		drawBorder(canvas);
+		
+	}
+	
+	protected void onDrawElement(Canvas canvas){
 		
 	}
 	
@@ -25,6 +31,8 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 		
 		if(backgroundColor.a != 0.0f){
 			
+			float displayScale = getDocument().getBundle().displayScale();
+			
 			Rect r = getFrame();
 			
 			Paint paint = new Paint();
@@ -33,7 +41,7 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 			paint.setAlpha(backgroundColor.getAlpha());
 			paint.setStyle(Style.FILL);
 	
-			canvas.drawRect(new RectF(0,0,r.getWidth(),r.getHeight()), paint);
+			canvas.drawRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), paint);
 		}
 	}
 
@@ -44,6 +52,8 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 		float borderWidth =  floatValue("border-width",0.0f);
 		
 		if(borderWidth > 0.0f){
+			
+			float displayScale = getDocument().getBundle().displayScale();
 			
 			Rect r = getFrame();
 			
@@ -57,10 +67,10 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 			paint.setStrokeWidth(borderWidth);
 			
 			if(radius == 0.0f){
-				canvas.drawRect(new RectF(0,0,r.getWidth(),r.getHeight()), paint);
+				canvas.drawRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), paint);
 			}
 			else {
-				canvas.drawRoundRect(new RectF(0,0,r.getWidth(),r.getHeight()), radius, radius, paint);
+				canvas.drawRoundRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), radius, radius, paint);
 			}
 			
 		}
@@ -69,7 +79,7 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 
 	@Override
 	public boolean isHidden() {
-		return booleanValue("hidden",true) || booleanValue("visable",false);
+		return booleanValue("hidden",false) || ! booleanValue("visable",true);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package org.hailong.core;
 
-public class Rect {
+public final class Rect {
 	
 	public Object x;
 	public Object y;
@@ -18,86 +18,96 @@ public class Rect {
 		this.height = height;
 	}
 	
-	public int getX(int defaultValue,int baseValue){
+	public float getX(float defaultValue,float baseValue){
 		return getValue(x,defaultValue,baseValue);
 	}
 	
-	public int getY(int defaultValue,int baseValue){
+	public float getY(float defaultValue,float baseValue){
 		return getValue(y,defaultValue,baseValue);
 	}
 	
-	public int getWidth(int defaultValue,int baseValue){
+	public float getWidth(float defaultValue,float baseValue){
 		return getValue(width,defaultValue,baseValue);
 	}
 	
-	public int getHeight(int defaultValue,int baseValue){
+	public float getHeight(float defaultValue,float baseValue){
 		return getValue(height,defaultValue,baseValue);
 	}
 	
-	public int getX(int defaultValue){
+	public float getX(float defaultValue){
 		return getValue(x,defaultValue);
 	}
 	
-	public int getY(int defaultValue){
+	public float getY(float defaultValue){
 		return getValue(y,defaultValue);
 	}
 	
-	public int getWidth(int defaultValue){
+	public float getWidth(float defaultValue){
 		return getValue(width,defaultValue);
 	}
 	
-	public int getHeight(int defaultValue){
+	public float getHeight(float defaultValue){
 		return getValue(height,defaultValue);
 	}
 
-	public int getX(){
-		return getValue(x,0);
+	public float getX(){
+		return getValue(x,0.0f);
 	}
 	
-	public int getY(){
-		return getValue(y,0);
+	public float getY(){
+		return getValue(y,0.0f);
 	}
 	
-	public int getWidth(){
-		return getValue(width,0);
+	public float getWidth(){
+		return getValue(width,0.0f);
 	}
 	
-	public int getHeight(){
-		return getValue(height,0);
+	public float getHeight(){
+		return getValue(height,0.0f);
 	}
 	
-	public static int getValue(Object value,int defaultValue,int baseValue){
+	public static float getValue(Object value,float defaultValue,float baseValue){
 		
 		if(value == null){
 			return defaultValue;
 		}
 		
 		if(value instanceof Number){
-			return ((Number) value).intValue();
+			return ((Number) value).floatValue();
 		}
 		
 		String v = value.toString();
+		
+		if("auto".equals(v)){
+			return Float.MAX_VALUE;
+		}
 		
 		int index = v.indexOf("%");
 		
 		if(index >=0){
 			String d = v.substring(index + 1);
-			return (int) (baseValue * Double.valueOf(v.substring(0, index))) + ( d != null && d.length() >0?Integer.valueOf(d) : 0);
+			return (baseValue * Float.valueOf(v.substring(0, index)) / 100.0f) + ( d != null && d.length() >0? Float.valueOf(d) : 0.0f);
 		}
 		
-		return Integer.valueOf(v);
+		return Float.valueOf(v);
 	}
 
-	public static int getValue(Object value,int defaultValue){
+	public static float getValue(Object value,float defaultValue){
 		
 		if(value == null){
 			return defaultValue;
 		}
 		
 		if(value instanceof Number){
-			return ((Number) value).intValue();
+			return ((Number) value).floatValue();
 		}
 		
-		return Integer.valueOf(value.toString());
+		String v = value.toString();
+		
+		if("auto".equals(v)){
+			return Float.MAX_VALUE;
+		}
+		
+		return Float.valueOf(value.toString());
 	}
 }
