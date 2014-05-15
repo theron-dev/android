@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="contentView" type="id"/>
+    <item name="index" type="id"/>
+    <item name="reuseIdentifier" type="id"/>
+</resources>

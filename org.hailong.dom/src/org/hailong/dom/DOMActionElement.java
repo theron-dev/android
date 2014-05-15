@@ -47,30 +47,7 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 			}
 			
 		}
-		else if(action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP){
-			
-			if(_actionView != null){
-				
-				ViewParent parent = _actionView.getParent();
-				if(parent != null && parent instanceof ViewGroup){
-					((ViewGroup) parent).removeView(_actionView);
-				}
-				_actionView = null;
-				
-				if(action ==  MotionEvent.ACTION_UP){
-					
-					if(_touchInset){
-						getViewEntity().doAction(this);
-					}
-					
-				}
-		
-				_touchInset = false;
-			}
-			
-			
-		}
-		else {
+		else if(action == MotionEvent.ACTION_MOVE){
 			
 			if(_actionView != null){
 				
@@ -90,6 +67,29 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 					_touchInset = false;
 				}
 				
+			}
+
+		}
+		else {
+			
+
+			if(_actionView != null){
+				
+				ViewParent parent = _actionView.getParent();
+				if(parent != null && parent instanceof ViewGroup){
+					((ViewGroup) parent).removeView(_actionView);
+				}
+				_actionView = null;
+				
+				if(action ==  MotionEvent.ACTION_UP){
+					
+					if(_touchInset){
+						getViewEntity().doAction(this);
+					}
+					
+				}
+		
+				_touchInset = false;
 			}
 			
 		}

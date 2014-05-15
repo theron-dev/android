@@ -580,9 +580,9 @@ public class ScrollView extends ViewGroup {
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent event){
 
-		boolean rs = scrollTouchEvent(event);
+		scrollTouchEvent(event);
 
-		return super.dispatchTouchEvent(event) || rs;
+		return super.dispatchTouchEvent(event);
 	}
 
 	@Override

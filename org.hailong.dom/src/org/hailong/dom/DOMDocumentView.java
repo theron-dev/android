@@ -41,18 +41,6 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 			_allowAutoLayout = attrs.getAttributeBooleanValue(null, "allowAutoLayout", false);
 		}
 		
-		setOnTouchListener(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View view, MotionEvent event) {
-				if(_element != null){
-					float displayScale = _element.getDocument().getBundle().displayScale();
-					return elementOnTouch(_element,view,event,0.0f,0.0f,displayScale);
-				}
-				return false;
-			}
-			
-		});
 	}
 	
 	public DOMDocumentView(Context context) {
@@ -75,45 +63,15 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		return _element;
 	}
 	
-	protected void resetEntityView(){
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event){
 		if(_element != null){
+			float displayScale = _element.getDocument().getBundle().displayScale();
+			boolean rs = elementOnTouch(_element,this,event,0.0f,0.0f,displayScale);
 			
-			_creatorViewsById = new HashMap<String,View>(4);
-			_creatorViewsByReuse = new HashMap<String,List<View>>(4);
-			
-			_dequeueViewsById = _viewsById;
-			_dequeueViewsByReuse = _viewsByReuse;
-			
-			_viewsById = null;
-			_viewsByReuse = null;
-			
-			_element.setViewEntity(this);
-			
-			if(_dequeueViewsById != null){
-				
-				for(View v : _dequeueViewsById.values()){
-					removeView(v);
-				}
-				
-				_dequeueViewsById = null;
-			}
-			
-			if(_dequeueViewsByReuse != null){
-				for(List<View> views : _dequeueViewsByReuse.values()){
-					for(View v : views){
-						removeView(v);
-					}
-				}
-				_dequeueViewsByReuse = null;
-			}
-			
-			_viewsById = _creatorViewsById;
-			_viewsByReuse = _creatorViewsByReuse;
-			
-			_creatorViewsById = null;
-			_creatorViewsByReuse = null;
-			
+			return super.dispatchTouchEvent(event) || rs;
 		}
+		return super.dispatchTouchEvent(event);
 	}
 	
 	public void setElement(DOMElement element){
@@ -127,11 +85,53 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 			
 			if(_element != null){
 				
-				_layoutSize = null;
-				
-				if(! _allowAutoLayout){
-					resetEntityView();
+				if(_layoutSize == null){
+					_layoutSize = new Size(getMeasuredWidth(),getMeasuredHeight());
 				}
+				else {
+					_layoutSize.width = getMeasuredWidth();
+					_layoutSize.height = getMeasuredHeight();
+				}
+
+
+				if(_allowAutoLayout && _element instanceof IDOMLayoutElement){
+					((IDOMLayoutElement) _element).layout(_layoutSize);
+				}
+				
+				_creatorViewsById = new HashMap<String,View>(4);
+				_creatorViewsByReuse = new HashMap<String,List<View>>(4);
+				
+				_dequeueViewsById = _viewsById;
+				_dequeueViewsByReuse = _viewsByReuse;
+				
+				_viewsById = null;
+				_viewsByReuse = null;
+				
+				_element.setViewEntity(this);
+				
+				if(_dequeueViewsById != null){
+					
+					for(View v : _dequeueViewsById.values()){
+						removeView(v);
+					}
+					
+					_dequeueViewsById = null;
+				}
+				
+				if(_dequeueViewsByReuse != null){
+					for(List<View> views : _dequeueViewsByReuse.values()){
+						for(View v : views){
+							removeView(v);
+						}
+					}
+					_dequeueViewsByReuse = null;
+				}
+				
+				_viewsById = _creatorViewsById;
+				_viewsByReuse = _creatorViewsByReuse;
+				
+				_creatorViewsById = null;
+				_creatorViewsByReuse = null;
 
 			}
 			
@@ -142,7 +142,8 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 	
 	protected boolean elementOnTouch(DOMElement element, View view,MotionEvent event,float dx,float dy,float displayScale){
 		
-		if(element != null && element instanceof IDOMLayoutElement 
+		if(element != null && element.isViewEntity(this) 
+				&& element instanceof IDOMLayoutElement 
 				&& ((IDOMLayoutElement) element).isLayouted()){
 			
 			if(element instanceof IDOMCanvasElement && ((IDOMCanvasElement) element).isHidden()){
@@ -215,7 +216,8 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		
 		Rect r = null;
 		
-		if(element instanceof IDOMLayoutElement && ((IDOMCanvasElement) element).isLayouted() ){
+		if(element != null  && element.isViewEntity(this)  
+				&& element instanceof IDOMLayoutElement && ((IDOMLayoutElement) element).isLayouted() ){
 			
 			if(element instanceof IDOMCanvasElement){
 
@@ -453,8 +455,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 				if(_element instanceof IDOMLayoutElement){
 					((IDOMLayoutElement) _element).layout(_layoutSize);
 				}
-				
-				resetEntityView();
+
 			}
 
 		}
@@ -490,5 +491,51 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		public void onAction(DOMDocumentView documentView , DOMElement element);
 		
 	}
+
+	@Override
+	public void elementLayoutView(DOMElement element, View view) {
+
+		float x = 0.0f,y = 0.0f,width = Float.MAX_VALUE,height = Float.MAX_VALUE;
+		
+		DOMElement el = element;
+		
+		while(el != null && el != _element){
+			
+			if(el instanceof IDOMLayoutElement){
+				
+				Rect r = ((IDOMLayoutElement) el).getFrame();
+				
+				x += r.getX();
+				y += r.getY();
+				
+				if(width == Float.MAX_VALUE){
+					width = r.getWidth();
+				}
+				
+				if(height == Float.MAX_VALUE){
+					height = r.getHeight();
+				}
+				
+			}
+			
+			el = el.getParent();
+		}
+		
+		float displayScale = _element.getDocument().getBundle().displayScale();
+
+		view.setLeft((int) (x * displayScale));
+		view.setTop((int) (y * displayScale));
+		view.setRight((int) ((x + width) * displayScale));
+		view.setBottom((int) ((y + height) * displayScale));
+		
+	}
+
+	@Override
+	public void elementDetach(DOMElement element) {
+		if(_element == element){
+			_element = null;
+		}
+	}
+
 	
 }

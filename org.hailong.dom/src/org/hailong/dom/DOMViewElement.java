@@ -1,11 +1,12 @@
 package org.hailong.dom;
 
+import org.hailong.core.Size;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-public class DOMViewElement extends DOMLayoutElement {
+public class DOMViewElement extends DOMLayoutElement{
 
 	private View _view;
 	
@@ -58,10 +59,36 @@ public class DOMViewElement extends DOMLayoutElement {
 		if(viewEntity==null){
 			setView(null);
 		}
-		else {
+		else if(_view == null){
 			setView(viewEntity.elementViewOf(this, getViewClass()));
 		}
 		
 		super.onViewEntityChanged(viewEntity);
+	}
+	
+	public Size layout(Size size){
+		Size s = super.layout(size);
+		
+		if(isViewLoaded()){
+			
+			IDOMViewEntity viewEntity =getViewEntity();
+			
+			if(viewEntity != null){
+				viewEntity.elementLayoutView(this, getView());
+			}
+			
+		}
+		
+		return s;
+	}
+
+	@Override
+	protected IDOMViewEntity elementViewEntity(DOMElement element){
+		return null;
+	}
+	
+	@Override
+	public boolean isViewEntity(IDOMViewEntity viewEntity){
+		return false;
 	}
 }

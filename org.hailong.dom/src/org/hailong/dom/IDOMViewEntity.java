@@ -10,4 +10,8 @@ public interface IDOMViewEntity {
 	
 	public View elementViewOf(DOMElement element,Class<?> viewClass);
 	
+	public void elementLayoutView(DOMElement element,View view);
+	
+	public void elementDetach(DOMElement element);
+	
 }

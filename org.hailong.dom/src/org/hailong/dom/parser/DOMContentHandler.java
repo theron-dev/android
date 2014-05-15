@@ -6,10 +6,13 @@ import java.util.Map;
 
 import org.hailong.dom.DOMActionElement;
 import org.hailong.dom.DOMCanvasElement;
+import org.hailong.dom.DOMContainerElement;
 import org.hailong.dom.DOMElement;
 import org.hailong.dom.DOMImageElement;
 import org.hailong.dom.DOMLabelElement;
 import org.hailong.dom.DOMLinkElement;
+import org.hailong.dom.DOMListElement;
+import org.hailong.dom.DOMVScrollElement;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -37,7 +40,9 @@ public class DOMContentHandler implements ContentHandler {
 		_elementClasss.put("label", DOMLabelElement.class);
 		_elementClasss.put("a", DOMLinkElement.class);
 		_elementClasss.put("action", DOMActionElement.class);
-		
+		_elementClasss.put("container", DOMContainerElement.class);
+		_elementClasss.put("vscroll", DOMVScrollElement.class);
+		_elementClasss.put("list", DOMListElement.class);
 	}
 	
 	public void putElementClass(String name,Class<?> elementClass){

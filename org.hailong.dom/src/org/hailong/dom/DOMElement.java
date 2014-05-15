@@ -266,15 +266,25 @@ public class DOMElement  {
 		return _childs != null && index >=0 && index<_childs.size() ? _childs.get(index) : null;
 	}
 	
+	protected IDOMViewEntity elementViewEntity(DOMElement element){
+		if(_viewEntity == null && _parent != null){
+			_parent.elementViewEntity(element);
+		}
+		return _viewEntity;
+	}
+	
 	public IDOMViewEntity getViewEntity(){
 		if(_viewEntity==null && _parent != null){
-			return _parent.getViewEntity();
+			return _parent.elementViewEntity(this);
 		}
 		return _viewEntity;
 	}
 	
 	public void setViewEntity(IDOMViewEntity viewEntity){
 		if(_viewEntity != viewEntity){
+			if(_viewEntity != null){
+				_viewEntity.elementDetach(this);
+			}
 			_viewEntity = viewEntity;
 			onViewEntityChanged(_viewEntity);
 		}
@@ -284,7 +294,6 @@ public class DOMElement  {
 		IDOMViewEntity viewEntity = getViewEntity();
 		if(viewEntity != null){
 			viewEntity.doNeedsDisplay(this);
-			onViewEntityChanged(viewEntity);
 		}
 	}
 	
@@ -304,6 +313,10 @@ public class DOMElement  {
 			
 		}
 		
+	}
+	
+	public boolean isViewEntity(IDOMViewEntity viewEntity){
+		return _viewEntity == null || _viewEntity == viewEntity;
 	}
 	
 }

@@ -581,7 +581,7 @@ public class ScrollView extends ViewGroup {
 
 		boolean rs = scrollTouchEvent(event);
 
-		return super.dispatchTouchEvent(event) || rs;
+		return super.dispatchTouchEvent(event) ||  rs;
 	}
 
 	@Override
@@ -612,4 +612,5 @@ public class ScrollView extends ViewGroup {
 	protected void onDeceleratingStop(){
 		
 	}
+	
 }

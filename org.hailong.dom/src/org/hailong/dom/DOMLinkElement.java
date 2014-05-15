@@ -19,7 +19,7 @@ public class DOMLinkElement extends DOMLabelElement implements
 	public boolean onTouch(IDOMViewEntity viewEntity, int action, float touchX,
 			float touchY) {
 	
-		if(action == MotionEvent.ACTION_DOWN){
+if(action == MotionEvent.ACTION_DOWN){
 			
 			Rect r = getFrame();
 			float displayScale = getDocument().getBundle().displayScale();
@@ -49,30 +49,7 @@ public class DOMLinkElement extends DOMLabelElement implements
 			}
 			
 		}
-		else if(action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP){
-			
-			if(_actionView != null){
-				
-				ViewParent parent = _actionView.getParent();
-				if(parent != null && parent instanceof ViewGroup){
-					((ViewGroup) parent).removeView(_actionView);
-				}
-				_actionView = null;
-				
-				if(action ==  MotionEvent.ACTION_UP){
-					
-					if(_touchInset){
-						getViewEntity().doAction(this);
-					}
-					
-				}
-		
-				_touchInset = false;
-			}
-			
-			
-		}
-		else {
+		else if(action == MotionEvent.ACTION_MOVE){
 			
 			if(_actionView != null){
 				
@@ -92,6 +69,29 @@ public class DOMLinkElement extends DOMLabelElement implements
 					_touchInset = false;
 				}
 				
+			}
+
+		}
+		else {
+			
+
+			if(_actionView != null){
+				
+				ViewParent parent = _actionView.getParent();
+				if(parent != null && parent instanceof ViewGroup){
+					((ViewGroup) parent).removeView(_actionView);
+				}
+				_actionView = null;
+				
+				if(action ==  MotionEvent.ACTION_UP){
+					
+					if(_touchInset){
+						getViewEntity().doAction(this);
+					}
+					
+				}
+		
+				_touchInset = false;
 			}
 			
 		}
