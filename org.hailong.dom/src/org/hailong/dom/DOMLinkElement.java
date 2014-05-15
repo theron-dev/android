@@ -12,6 +12,7 @@ import android.view.ViewParent;
 public class DOMLinkElement extends DOMLabelElement implements
 		IDOMControlElement {
 
+	private boolean _touchInset;
 	private View _actionView = null;
 
 	@Override
@@ -21,8 +22,12 @@ public class DOMLinkElement extends DOMLabelElement implements
 		if(action == MotionEvent.ACTION_DOWN){
 			
 			Rect r = getFrame();
+			float displayScale = getDocument().getBundle().displayScale();
+
+			float width = r.getWidth() * displayScale;
+			float height = r.getHeight() * displayScale;
 			
-			if(touchX >=0 && touchX < r.getWidth() && touchY >=0 && touchY < r.getHeight()){
+			if(touchX >=0 && touchX < width && touchY >=0 && touchY < height){
 				
 				if(_actionView != null) {
 					ViewParent parent = _actionView.getParent();
@@ -38,6 +43,8 @@ public class DOMLinkElement extends DOMLabelElement implements
 				
 				_actionView.setBackgroundColor(color.intValue());
 				
+				_touchInset = true;
+				
 				return true;
 			}
 			
@@ -45,12 +52,24 @@ public class DOMLinkElement extends DOMLabelElement implements
 		else if(action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP){
 			
 			if(_actionView != null){
+				
 				ViewParent parent = _actionView.getParent();
 				if(parent != null && parent instanceof ViewGroup){
 					((ViewGroup) parent).removeView(_actionView);
 				}
 				_actionView = null;
+				
+				if(action ==  MotionEvent.ACTION_UP){
+					
+					if(_touchInset){
+						getViewEntity().doAction(this);
+					}
+					
+				}
+		
+				_touchInset = false;
 			}
+			
 			
 		}
 		else {
@@ -59,11 +78,18 @@ public class DOMLinkElement extends DOMLabelElement implements
 				
 				Rect r = getFrame();
 				
-				if(touchX >=0 && touchX < r.getWidth() && touchY >=0 && touchY < r.getHeight()){
+				float displayScale = getDocument().getBundle().displayScale();
+
+				float width = r.getWidth() * displayScale;
+				float height = r.getHeight() * displayScale;
+				
+				if(touchX >=0 && touchX < width && touchY >=0 && touchY < height){
 					_actionView.setVisibility(View.VISIBLE);
+					_touchInset = true;
 				}
 				else {
 					_actionView.setVisibility(View.GONE);
+					_touchInset = false;
 				}
 				
 			}

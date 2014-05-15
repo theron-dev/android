@@ -20,8 +20,12 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 		if(action == MotionEvent.ACTION_DOWN){
 			
 			Rect r = getFrame();
+			float displayScale = getDocument().getBundle().displayScale();
+
+			float width = r.getWidth() * displayScale;
+			float height = r.getHeight() * displayScale;
 			
-			if(touchX >=0 && touchX < r.getWidth() && touchY >=0 && touchY < r.getHeight()){
+			if(touchX >=0 && touchX < width && touchY >=0 && touchY < height){
 				
 				if(_actionView != null) {
 					ViewParent parent = _actionView.getParent();
@@ -72,7 +76,12 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 				
 				Rect r = getFrame();
 				
-				if(touchX >=0 && touchX < r.getWidth() && touchY >=0 && touchY < r.getHeight()){
+				float displayScale = getDocument().getBundle().displayScale();
+
+				float width = r.getWidth() * displayScale;
+				float height = r.getHeight() * displayScale;
+				
+				if(touchX >=0 && touchX < width && touchY >=0 && touchY < height){
 					_actionView.setVisibility(View.VISIBLE);
 					_touchInset = true;
 				}
