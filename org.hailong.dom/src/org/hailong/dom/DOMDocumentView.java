@@ -75,14 +75,8 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		return _element;
 	}
 	
-	public void setElement(DOMElement element){
-		if(_element != element){
-			
-			if(_element != null && _element.getViewEntity() == this){
-				_element.setViewEntity(null);
-			}
-			
-			_element = element;
+	protected void resetEntityView(){
+		if(_element != null){
 			
 			_creatorViewsById = new HashMap<String,View>(4);
 			_creatorViewsByReuse = new HashMap<String,List<View>>(4);
@@ -93,12 +87,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 			_viewsById = null;
 			_viewsByReuse = null;
 			
-			if(_element != null){
-				
-				_layoutSize = null;
-				
-				_element.setViewEntity(this);
-			}
+			_element.setViewEntity(this);
 			
 			if(_dequeueViewsById != null){
 				
@@ -123,6 +112,29 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 			
 			_creatorViewsById = null;
 			_creatorViewsByReuse = null;
+			
+		}
+	}
+	
+	public void setElement(DOMElement element){
+		if(_element != element){
+			
+			if(_element != null && _element.getViewEntity() == this){
+				_element.setViewEntity(null);
+			}
+			
+			_element = element;
+			
+			if(_element != null){
+				
+				_layoutSize = null;
+				
+				if(! _allowAutoLayout){
+					resetEntityView();
+				}
+
+			}
+			
 			
 			invalidate();
 		}
@@ -386,7 +398,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 				}
 				
 				if(height == Float.MAX_VALUE){
-					height = r.getWidth();
+					height = r.getHeight();
 				}
 				
 			}
@@ -396,7 +408,10 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		
 		float displayScale = _element.getDocument().getBundle().displayScale();
 
-		view.setLayoutParams(new LayoutParams((int) (x * displayScale),(int) (y * displayScale),(int) ((x + width) * displayScale),(int) ((y + height) * displayScale)));
+		view.setLeft((int) (x * displayScale));
+		view.setTop((int) (y * displayScale));
+		view.setRight((int) ((x + width) * displayScale));
+		view.setBottom((int) ((y + height) * displayScale));
 		
 		addView(view);
 		
@@ -418,7 +433,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		
-		if(_allowAutoLayout && _element != null && _element instanceof IDOMLayoutElement){
+		if(_allowAutoLayout && _element != null ){
 			
 			float displayScale = _element.getDocument().getBundle().displayScale();
 			float width = (r - l) / displayScale;
@@ -435,24 +450,20 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 					_layoutSize.height = height;
 				}
 				
-				((IDOMLayoutElement) _element).layout(_layoutSize);
-
+				if(_element instanceof IDOMLayoutElement){
+					((IDOMLayoutElement) _element).layout(_layoutSize);
+				}
+				
+				resetEntityView();
 			}
-			
+
 		}
 		
 		int c = getChildCount();
 		
 		for(int i=0;i<c;i++){
 			View v = getChildAt(i);
-			ViewGroup.LayoutParams layoutParams = v.getLayoutParams();
-			if(layoutParams instanceof LayoutParams){
-				LayoutParams params = (LayoutParams) layoutParams;
-				v.layout(params.left,params.top,params.right,params.bottom);
-			}
-			else {
-				v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-			}
+			v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
 		}
 	
 	}
@@ -480,28 +491,4 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		
 	}
 	
-	public static class LayoutParams extends ViewGroup.LayoutParams{
-
-		public int left;
-		public int top;
-		public int right;
-		public int bottom;
-		
-		public LayoutParams(Context context, AttributeSet attrSet) {
-			super(context, attrSet);
-			this.left = attrSet.getAttributeIntValue("", "left", 0);
-			this.top = attrSet.getAttributeIntValue("", "top", 0);
-			this.right = attrSet.getAttributeIntValue("", "right", this.left + this.width);
-			this.bottom = attrSet.getAttributeIntValue("", "bottom", this.top + this.height);
-		}
-		
-		public LayoutParams(int left,int top,int right,int bottom){
-			super(right - left,bottom - top);
-			this.left = left;
-			this.top = top;
-			this.right = right;
-			this.bottom = bottom;
-		}
-		
-	}
 }

@@ -40,6 +40,10 @@ public class DOMContentHandler implements ContentHandler {
 		
 	}
 	
+	public void putElementClass(String name,Class<?> elementClass){
+		_elementClasss.put(name, elementClass);
+	}
+	
 	@Override
 	public void characters(char[] chars, int index, int length) throws SAXException {
 		

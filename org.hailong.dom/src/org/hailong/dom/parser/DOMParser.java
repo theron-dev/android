@@ -2,6 +2,8 @@ package org.hailong.dom.parser;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -18,17 +20,48 @@ import org.xml.sax.XMLReader;
 
 public class DOMParser {
 
-	public static void parseHTML(Reader reader, DOMElement toElement,int atIndex) throws SAXException, IOException, ParserConfigurationException{
+	private static DOMParser _defaultParser;
+	
+	public static DOMParser defaultParser(){
+		if(_defaultParser == null){
+			_defaultParser = new DOMParser();
+		}
+		return _defaultParser;
+	}
+	
+	public static void setDefaultParser(DOMParser parser){
+		_defaultParser = parser;
+	}
+	
+	private Map<String,Class<?>> _elementClasss;
+	
+	public void putElementClass(String name,Class<?> elementClass){
+		if(_elementClasss == null){
+			_elementClasss = new HashMap<String,Class<?>>(4);
+		}
+		_elementClasss.put(name, elementClass);
+	}
+	
+	public void parseHTML(Reader reader, DOMElement toElement,int atIndex) throws SAXException, IOException, ParserConfigurationException{
 		
 		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		SAXParser newSAXParser = saxParserFactory.newSAXParser();
 		XMLReader xml = newSAXParser.getXMLReader();
+		
+		DOMContentHandler contentHandler = new DOMContentHandler(toElement, atIndex);
+		
+		if(_elementClasss != null){
+			for(String key : _elementClasss.keySet()){
+				contentHandler.putElementClass(key, _elementClasss.get(key));
+			}
+		}
+		
 		xml.setContentHandler(new DOMContentHandler(toElement, atIndex));
 		xml.parse(new InputSource(reader));
 
 	}
 	
-	public static void parseHTML(Reader reader, DOMDocument document) throws SAXException, IOException, ParserConfigurationException {
+	public void parseHTML(Reader reader, DOMDocument document) throws SAXException, IOException, ParserConfigurationException {
 		
 		DOMElement element = new DOMLayoutElement();
 		
@@ -51,7 +84,7 @@ public class DOMParser {
 		
 	}
 	
-	public static void parseCSS(String css, DOMStyleSheet styleSheet) {
+	public void parseCSS(String css, DOMStyleSheet styleSheet) {
 		
 		DOMCSSTokenizer tokenizer = new DOMCSSTokenizer(css);
 		

@@ -212,11 +212,11 @@ public class DOMLabelElement extends DOMCanvasElement {
 	        }
 	        else{
 	            if(r.getWidth() == Float.MAX_VALUE){
-	                r.width = 0;
+	                r.width = floatValue("min-width",0);;
 	            }
 	            
 	            if(r.getHeight() == Float.MAX_VALUE){
-	                r.height = 0;
+	                r.height = floatValue("min-height",0);;
 	            }
 	        }
 	        

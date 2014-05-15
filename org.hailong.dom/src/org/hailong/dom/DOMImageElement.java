@@ -1,5 +1,8 @@
 package org.hailong.dom;
 
+import org.hailong.core.Edge;
+import org.hailong.core.Rect;
+import org.hailong.core.Size;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
@@ -9,6 +12,11 @@ public class DOMImageElement extends DOMCanvasElement {
 	private Drawable _defaultImage;
 	
 	public Drawable getImage(){
+		
+		if(_image == null && getDocument() !=null){
+			_image = getDocument().getBundle().getImageForURI(getAttributeValue("src"));
+		}
+		
 		return _image;
 	}
 	
@@ -17,6 +25,11 @@ public class DOMImageElement extends DOMCanvasElement {
 	}
 	
 	public Drawable getDefaultImage(){
+		
+		if(_defaultImage == null && getDocument() !=null){
+			_defaultImage = getDocument().getBundle().getImageForURI(getAttributeValue("default-src"));
+		}
+		
 		return _defaultImage;
 	}
 	
@@ -89,10 +102,55 @@ public class DOMImageElement extends DOMCanvasElement {
 //	            layer.contentsGravity = kCAGravityResizeAspectFill;
 //	        }
 			
+			
+			Rect r = getFrame();
+			float displayScale = getDocument().getBundle().displayScale();
+			
+			image.setBounds(0, 0, (int) ( r.getWidth() * displayScale), (int) (r.getHeight() * displayScale));
+			
 			image.draw(canvas);
 			
 		}
 		
+	}
+	
+	@Override
+	public Size layoutChildren(Edge padding){
+		
+		Rect r = getFrame();
+	    
+	    if(r.getWidth() == Float.MAX_VALUE || r.getHeight() == Float.MAX_VALUE){
+
+	    	Drawable image = getImage();
+	
+	        if(image != null ){
+	            
+	        	float displayScale = getDocument().getBundle().displayScale();
+	        	
+	        	float width = image.getIntrinsicWidth();
+	        	float height = image.getIntrinsicHeight();
+	        
+	        	if(r.getWidth() == Float.MAX_VALUE){
+	                r.width = width / displayScale;
+	            }
+	            
+	        	if(r.getHeight() == Float.MAX_VALUE){
+		            r.height = height / displayScale;
+		        }
+	        	 
+	        }
+	        else{
+	            if(r.getWidth() == Float.MAX_VALUE){
+	                r.width = floatValue("min-width",0);
+	            }
+	            
+	            if(r.getHeight() == Float.MAX_VALUE){
+	                r.height = floatValue("min-height",0);;
+	            }
+	        }
+	        
+	    }
+	    return new Size(r.getWidth(),r.getHeight());
 	}
 	
 }
