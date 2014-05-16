@@ -19,7 +19,7 @@ public class DOMLinkElement extends DOMLabelElement implements
 	public boolean onTouch(IDOMViewEntity viewEntity, int action, float touchX,
 			float touchY) {
 	
-if(action == MotionEvent.ACTION_DOWN){
+		if(action == MotionEvent.ACTION_DOWN){
 			
 			Rect r = getFrame();
 			float displayScale = getDocument().getBundle().displayScale();
@@ -86,7 +86,10 @@ if(action == MotionEvent.ACTION_DOWN){
 				if(action ==  MotionEvent.ACTION_UP){
 					
 					if(_touchInset){
-						getViewEntity().doAction(this);
+					
+						if(viewEntity != null){
+							viewEntity.doAction(viewEntity, this);
+						}
 					}
 					
 				}

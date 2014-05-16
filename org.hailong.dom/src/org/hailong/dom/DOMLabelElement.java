@@ -5,10 +5,8 @@ import org.hailong.core.Rect;
 import org.hailong.core.Size;
 import org.hailong.core.Font;
 import org.hailong.core.Color;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
 
 public class DOMLabelElement extends DOMCanvasElement {
 
@@ -48,95 +46,139 @@ public class DOMLabelElement extends DOMCanvasElement {
 	        float maxWidth = floatValue("max-width",r.getWidth()) * displayScale;
 	        float maxHeight = floatValue("max-height",r.getHeight()) * displayScale;
 	        
-	        android.graphics.Rect bounds = new android.graphics.Rect(0,0
-	        		, (int) (maxWidth + 0.999999f)
-	        		, (int) (maxHeight + 0.999999f));
+	        Size textSize = getTextSize(text,paint,maxWidth);
 	        
-	        paint.getTextBounds(text, 0, text.length(), bounds);
+	        float w = textSize.getWidth();
+	        float h = textSize.getHeight();
 	        
-	        FontMetrics metrics = paint.getFontMetrics();
-	        
-	        float w = bounds.width();
-	        float h = bounds.height() + metrics.descent;
-	        
-	        float dx = w - width,dy = h - height;
-	        
-	        if((dx > 0.0f || dy >0.0f ) && booleanValue("font-scale",false)){
-	        	
-	        	float scale = 1.0f;
-	        	
-	        	if(dx >= dy){
-	        		
-	        		scale = width /  w;
-	        		dx = 0.0f;
-	        		dy = h * scale;
-	        		
-	        		String valign = stringValue("valign","top");
-	        		
-	        		if("center".equals(valign)){
-	        			dy = ( height - dy ) / 2.0f;
-	        		}
-	        		else if("bottom".equals(valign)){
-	        			dy = ( height - dy ) ;
-	        		}
-	        		else {
-	        			dy = 0.0f;
-	        		}
-	        		
-	        	}
-	        	else {
-	        		
-	        		scale = height /  h;
-	        		dy = 0.0f;
-	        		dx = h * scale;
-	        		
-	        		String align = stringValue("align","left");
-	        		
-	        		if("center".equals(align)){
-	        			dx = ( width - dx ) / 2.0f;
-	        		}
-	        		else if("right".equals("align")){
-	        			dx = ( width - dx ) ;
-	        		}
-	        		else {
-	        			dx = 0.0f;
-	        		}
-	        	}
-	        	
-	        	canvas.scale(scale, scale);
-	        	canvas.drawText(text, dx, dy + h - metrics.descent, paint);
-	        	
+	        if(h > maxHeight){
+	        	h = maxHeight;
 	        }
-	        else {
-	        	
-	        	String valign = stringValue("valign","top");
-        		
-        		if("center".equals(valign)){
-        			dy = ( height - h ) / 2.0f;
-        		}
-        		else if("bottom".equals(valign)){
-        			dy = ( height - h ) ;
-        		}
-        		else {
-        			dy = 0.0f;
-        		}
-        		
-        		String align = stringValue("align","left");
-        		
-        		if("center".equals(align)){
-        			dx = ( width - w ) / 2.0f;
-        		}
-        		else if("right".equals("align")){
-        			dx = ( width - w ) ;
-        		}
-        		else {
-        			dx = 0.0f;
-        		}
 
-        		canvas.drawText(text, dx, dy + h - metrics.descent, paint);
-	        }
+	        float dy = 0.0f;
+	        
+        	String valign = stringValue("valign","top");
+    		
+    		if("center".equals(valign)){
+    			dy = ( height - h ) / 2.0f;
+    		}
+    		else if("bottom".equals(valign)){
+    			dy = ( height - h ) ;
+    		}
+    		
+    		String align = stringValue("align","left");
+    		
+    		if("center".equals(align)){
+    			
+    			{
+    				
+    				float[] widths = new float[1];
+    				
+    				int start = 0;
+    				int end = text.length();
+    				int len;
+    				
+    				while(start < end ){
+    					
+    					len = paint.breakText(text, start, end, false, w, widths);
+
+    					canvas.drawText(text, start, start + len, (width - widths[0]) / 2.0f, dy - paint.ascent(), paint);
+    					
+    					dy +=  - paint.ascent() + paint.descent();
+    					
+    					start += len;
+    					
+    				}
+    			}
+
+    		}
+    		else if("right".equals("align")){
+    			
+    			{
+    				
+    				float[] widths = new float[1];
+    				
+    				int start = 0;
+    				int end = text.length();
+    				int len;
+    				
+    				while(start < end ){
+    					
+    					len = paint.breakText(text, start, end, false, w, widths);
+
+    					canvas.drawText(text, start, start +  len, width - widths[0], dy - paint.ascent(), paint);
+    					
+    					dy +=  - paint.ascent() + paint.descent();
+    					
+    					start += len;
+    					
+    				}
+    			}
+
+    		}
+    		else {
+    			{
+    				
+    				float[] widths = new float[1];
+    				
+    				int start = 0;
+    				int end = text.length();
+    				int len;
+    				
+    				while(start < end ){
+    					
+    					len = paint.breakText(text, start, end, false, w, widths);
+
+    					canvas.drawText(text, start, start +  len, 0.0f, dy - paint.ascent(), paint);
+    					
+    					dy +=  - paint.ascent() + paint.descent();
+    					
+    					start += len;
+    					
+    				}
+    			}
+    		}
+
 	        
 		}
+		
+	}
+	
+	public Size getTextSize(String text,Paint paint,float maxWidth){
+		
+		Size size = new Size();
+		
+		if(maxWidth == Float.MAX_VALUE){
+			
+			android.graphics.Rect bounds = new android.graphics.Rect();
+			paint.getTextBounds(text, 0, text.length(), bounds);
+			
+			size.width = bounds.width();
+			size.height = - paint.ascent() + paint.descent();
+			
+		}
+		else {
+			float[] widths = new float[1];
+			
+			int start = 0;
+			int end = text.length();
+			int len;
+			
+			while(start < end ){
+				
+				len = paint.breakText(text, start, end, false, maxWidth, widths);
+	
+				if(widths[0] > size.getWidth()){
+					size.width = widths[0];
+				}
+				
+				size.height = size.getHeight() - paint.ascent() + paint.descent();
+				
+				start += len;
+			}
+		}
+
+		return size;
 		
 	}
 	
@@ -159,6 +201,8 @@ public class DOMLabelElement extends DOMCanvasElement {
 	            
 	            paint.setTextSize(font.fontSize * displayScale);
 	            paint.setFakeBoldText(font.isFontStyleBold());
+	      
+	            paint.breakText(text, 0, 0, false, 0, null);
 	            
 		        float maxWidth = floatValue("max-width",r.getWidth());
 		        float maxHeight = floatValue("max-height",r.getHeight());
@@ -171,16 +215,14 @@ public class DOMLabelElement extends DOMCanvasElement {
 		        	maxHeight *= displayScale;
 		        }
 		      
-	            android.graphics.Rect bounds = new android.graphics.Rect(0,0
-	            		, (int) (maxWidth + 0.999999f)
-	            		, (int) (maxHeight +  0.999999f));
+		        Size textSize = getTextSize(text,paint,maxWidth);
 	            
-	            FontMetrics metrics = paint.getFontMetrics();
-	            
-	            paint.getTextBounds(text, 0, text.length(), bounds);
-	            
-		        float w = bounds.width() / displayScale;
-		        float h = (bounds.height() + metrics.descent) / displayScale;
+		        float w = textSize.getWidth() / displayScale;
+		        float h = textSize.getHeight() / displayScale;
+		        
+		        if(h > maxHeight){
+		        	h = maxHeight;
+		        }
 		        
 	            if(r.getWidth() == Float.MAX_VALUE){
 	                r.width = w + padding.getLeft() + padding.getRight();

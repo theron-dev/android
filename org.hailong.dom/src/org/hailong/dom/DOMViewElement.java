@@ -1,5 +1,6 @@
 package org.hailong.dom;
 
+import org.hailong.core.Color;
 import org.hailong.core.Size;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,11 @@ public class DOMViewElement extends DOMLayoutElement{
 	
 	public void setView(View view){
 		_view = view;
+		
+		if(_view != null){
+			_view.setBackgroundColor(colorValue("background-color",new Color()).intValue());
+		}
+		
 		if(_view != null && _view instanceof IDOMView){
 			((IDOMView) _view).setElement(this);
 		}
@@ -63,7 +69,6 @@ public class DOMViewElement extends DOMLayoutElement{
 			setView(viewEntity.elementViewOf(this, getViewClass()));
 		}
 		
-		super.onViewEntityChanged(viewEntity);
 	}
 	
 	public Size layout(Size size){
@@ -91,4 +96,5 @@ public class DOMViewElement extends DOMLayoutElement{
 	public boolean isViewEntity(IDOMViewEntity viewEntity){
 		return false;
 	}
+	
 }

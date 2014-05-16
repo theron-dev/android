@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 
 
-public class DOMContainerElement extends DOMViewElement implements DOMDocumentView.OnActionListener ,DOMContainerView.OnScrollListener{
+public class DOMContainerElement extends DOMViewElement implements DOMDocumentView.OnElementActionListener ,DOMContainerView.OnScrollListener{
 
 	private List<DOMContainerItemView> _dequeueItemViews;
 	
@@ -150,7 +150,7 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 						
 						if(itemView == null){
 							itemView = new DOMContainerItemView(context);
-							itemView.setOnActionListener(this);
+							itemView.setOnElementActionListener(this);
 						}
 						
 						itemView.setLeft((int) (r.getX() * displayScale));
@@ -244,14 +244,14 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 		return right - left > 0.0f && bottom - top >0.0f;
 	}
 
-	@Override
-	public void onAction(DOMDocumentView documentView, DOMElement element) {
-		
-		getViewEntity().doAction(element);
-		
-	}
 
 	protected void onElementVisable(DOMElement element,int index,DOMContainerItemView itemView){
+		
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.elementVisable(itemView, element);
+		}
 		
 	}
 
@@ -259,6 +259,18 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 	public void onScroll(DOMContainerView containerView, int scrollX,
 			int scrollY) {
 		reloadData(false);
+	}
+
+	@Override
+	public void onElementAction(DOMDocumentView documentView,
+			IDOMViewEntity viewEntity, DOMElement element) {
+
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.doAction(viewEntity,this);
+		}
+		
 	}
 
 }

@@ -5,6 +5,8 @@ import org.hailong.framework.Controller;
 import org.hailong.framework.Framework;
 import org.hailong.framework.IServiceContext;
 import org.hailong.framework.URL;
+import org.hailong.framework.tasks.IImageTask;
+import org.hailong.framework.tasks.ILocalResourceTask;
 import org.hailong.framework.value.Value;
 import org.hailong.framework.views.ViewLayout;
 
@@ -490,5 +492,105 @@ public class ViewController<T extends IServiceContext> extends Controller<T> imp
 	
 	public Handler getHandler(){
 		return _handler;
+	}
+	
+
+	public void downloadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isNeedDownload() && !imageTask.isLoading()){
+				
+				try {
+					getServiceContext().handle(IImageTask.class, imageTask, 0);
+				} catch (Exception e) {
+					Log.d(Framework.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+		
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				downloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+		
+	}
+
+	public void loadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isNeedDownload() && !imageTask.isLoading()){
+				
+				try {
+					
+					getServiceContext().handle(ILocalResourceTask.class, imageTask, 0);
+					
+				} catch (Exception e) {
+					Log.d(Framework.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				loadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+	}
+
+	public void cancelDownloadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isLoading()){
+				
+				try {
+					getServiceContext().cancelHandle(IImageTask.class, imageTask);
+				} catch (Exception e) {
+					Log.d(Framework.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				cancelDownloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
 	}
 }

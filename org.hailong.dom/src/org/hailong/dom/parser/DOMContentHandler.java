@@ -13,6 +13,7 @@ import org.hailong.dom.DOMLabelElement;
 import org.hailong.dom.DOMLinkElement;
 import org.hailong.dom.DOMListElement;
 import org.hailong.dom.DOMVScrollElement;
+import org.hailong.dom.DOMViewElement;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -43,6 +44,7 @@ public class DOMContentHandler implements ContentHandler {
 		_elementClasss.put("container", DOMContainerElement.class);
 		_elementClasss.put("vscroll", DOMVScrollElement.class);
 		_elementClasss.put("list", DOMListElement.class);
+		_elementClasss.put("view", DOMViewElement.class);
 	}
 	
 	public void putElementClass(String name,Class<?> elementClass){

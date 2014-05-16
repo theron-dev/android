@@ -35,7 +35,7 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 					_actionView = null;
 				}
 				
-				_actionView = getViewEntity().elementViewOf(this, View.class);
+				_actionView = viewEntity.elementViewOf(this, View.class);
 				
 				Color color = colorValue("action-color",new Color(1.0f,1.0f,1.0f,0.4f));
 				
@@ -84,7 +84,9 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 				if(action ==  MotionEvent.ACTION_UP){
 					
 					if(_touchInset){
-						getViewEntity().doAction(this);
+						if(viewEntity != null){
+							viewEntity.doAction(viewEntity, this);
+						}
 					}
 					
 				}
@@ -98,4 +100,18 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 	}
 
 
+	protected void onViewEntityChanged(IDOMViewEntity viewEntity){
+		
+		if(_actionView != null){
+			
+			ViewParent parent = _actionView.getParent();
+			if(parent != null && parent instanceof ViewGroup){
+				((ViewGroup) parent).removeView(_actionView);
+			}
+		
+			_actionView = null;
+		}
+		
+		super.onViewEntityChanged(viewEntity);
+	}
 }

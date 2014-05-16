@@ -139,6 +139,9 @@ public class DOMLayoutElement extends DOMElement implements IDOMLayoutElement {
 	    }
 	    else{
 	        
+	    	size.width = padding.getLeft() + padding.getRight();
+	    	size.height = padding.getTop() + padding.getBottom();
+	    	
 	        for(DOMElement element : getChilds()){
 	            
 	        	if(element instanceof IDOMLayoutElement){

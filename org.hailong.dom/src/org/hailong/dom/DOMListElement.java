@@ -1,5 +1,7 @@
 package org.hailong.dom;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
@@ -10,8 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class DOMListElement extends DOMViewElement implements ListAdapter , DOMDocumentView.OnActionListener{
+public class DOMListElement extends DOMViewElement implements ListAdapter , DOMDocumentView.OnElementActionListener{
 
+	private List<DataSetObserver> _dataSetObservers;
+	
 	public Class<?> getViewClass(){
 		
 		try {
@@ -43,13 +47,12 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		
 		if(v != null){
 			
-			v.setScrollbarFadingEnabled(true);
-			v.setScrollContainer(true);
-			v.setVerticalScrollBarEnabled(true);
-
 			v.setDividerHeight(0);
 			v.setEnabled(true);
-			v.setAdapter(this);
+			if(isLayouted()){
+				v.setAdapter(this);
+			}
+			
 		}
 	}
 
@@ -93,11 +96,15 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		}
 		
 		if(isViewLoaded()){
-			
+	
 			ListView contentView = getContentView();
 			
-			contentView.setAdapter(this);
-			
+			if(contentView.getAdapter() == null){
+				contentView.setAdapter(this);
+			}
+			else {
+				onChanged();
+			}
 		}
 		
 		return contentSize;
@@ -136,25 +143,34 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		DOMElement element = getChildAt(index);
 		
 		if(element instanceof IDOMLayoutElement){
-			
+
 			float displayScale = getDocument().getBundle().displayScale();
 			
 			IDOMLayoutElement layoutElement = (IDOMLayoutElement) element;
 			
 			Rect r = layoutElement.getFrame();
 			
-			documentView.setLayoutParams(new ListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (r.getHeight() * displayScale)));
-		
+			Rect frame = getFrame();
+			
+			documentView.setLayoutParams(new ListView.LayoutParams((int) (frame.getWidth() * displayScale), (int) (r.getHeight() * displayScale)));
+			
 			documentView.setElement(element);
 			
-			documentView.setOnActionListener(this);
+			documentView.setOnElementActionListener(this);
 			
 		}
 		else {
 			documentView.setLayoutParams(null);
 			documentView.setElement(null);
-			documentView.setOnActionListener(null);
+			documentView.setOnElementActionListener(null);
 		}
+
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.elementVisable(entity, element);
+		}
+		
 		
 		return contentView;
 	}
@@ -174,14 +190,32 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		return getChildCount() ==0;
 	}
 
+	
+	public void onChanged(){
+		
+		if(_dataSetObservers != null){
+			for(DataSetObserver observer : _dataSetObservers){
+				observer.onChanged();
+			}
+		}
+		
+	}
+	
 	@Override
-	public void registerDataSetObserver(DataSetObserver arg0) {
-
+	public void registerDataSetObserver(DataSetObserver dataSetObserver) {	
+		
+		if(_dataSetObservers == null){
+			_dataSetObservers = new ArrayList<DataSetObserver>(4);
+		}
+		
+		_dataSetObservers.add(dataSetObserver);
 	}
 
 	@Override
-	public void unregisterDataSetObserver(DataSetObserver arg0) {
-		
+	public void unregisterDataSetObserver(DataSetObserver dataSetObserver) {
+		if(_dataSetObservers != null){
+			_dataSetObservers.remove(dataSetObserver);
+		}
 	}
 
 	@Override
@@ -191,12 +225,20 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 
 	@Override
 	public boolean isEnabled(int index) {
-		return false;
+		return true;
 	}
 
+
 	@Override
-	public void onAction(DOMDocumentView documentView, DOMElement element) {
-		getViewEntity().doAction(element);
+	public void onElementAction(DOMDocumentView documentView,
+			IDOMViewEntity viewEntity, DOMElement element) {
+		
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.doAction(viewEntity,element);
+		}
+		
 	}
 	
 

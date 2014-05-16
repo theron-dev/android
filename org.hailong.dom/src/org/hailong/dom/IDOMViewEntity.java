@@ -4,7 +4,7 @@ import android.view.View;
 
 public interface IDOMViewEntity {
 
-	public void doAction(DOMElement element);
+	public void doAction(IDOMViewEntity viewEntity, DOMElement element);
 	
 	public void doNeedsDisplay(DOMElement element);
 	
@@ -13,5 +13,7 @@ public interface IDOMViewEntity {
 	public void elementLayoutView(DOMElement element,View view);
 	
 	public void elementDetach(DOMElement element);
+	
+	public void elementVisable(IDOMViewEntity viewEntity,DOMElement element);
 	
 }

@@ -47,7 +47,6 @@ public class DOMParser {
 		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 		SAXParser newSAXParser = saxParserFactory.newSAXParser();
 		XMLReader xml = newSAXParser.getXMLReader();
-		
 		DOMContentHandler contentHandler = new DOMContentHandler(toElement, atIndex);
 		
 		if(_elementClasss != null){

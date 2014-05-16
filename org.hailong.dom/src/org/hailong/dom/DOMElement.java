@@ -298,8 +298,9 @@ public class DOMElement  {
 	}
 	
 	public void doAction(){
-		if(_viewEntity != null){
-			_viewEntity.doAction(this);
+		IDOMViewEntity viewEntity = getViewEntity();
+		if(viewEntity != null){
+			viewEntity.doAction(viewEntity,this);
 		}
 	}
 	
