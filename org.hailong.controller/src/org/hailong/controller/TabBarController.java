@@ -2,17 +2,19 @@ package org.hailong.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hailong.core.URL;
+import org.hailong.core.Value;
 import org.hailong.service.IServiceContext;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.util.Log;
 
-public class NavigationController<T extends IServiceContext> extends
+public class TabBarController<T extends IServiceContext> extends
 		Controller<T> {
 
 	private List<Controller<T>> _controllers;
+	private int _selectedIndex;
 	
 	public void setControllers(List<Controller<T>> controllers){
 		setControllers(controllers, false);
@@ -79,7 +81,7 @@ public class NavigationController<T extends IServiceContext> extends
 			int i;
 			
 			if(addSize + removeSize > 0){
-			
+				
 				for(i=0; i< removeSize;i++){
 					
 					Controller<T> viewController = removeViewControllers.get(i);
@@ -107,18 +109,16 @@ public class NavigationController<T extends IServiceContext> extends
 					_controllers.add(viewController);
 					
 					getFragmentManager().beginTransaction()
-						.setCustomAnimations(R.animator.in_left, R.animator.out_left)
 						.replace(getContentViewId(), viewController)
 						.commit();
 					
 				}
 				
-				Controller<T> viewController = getVisableController();
+				Controller<T> viewController = getSelectedController();
 				
 				if(viewController !=null && !viewController.isAdded()){
 					
 					fragmentManager.beginTransaction()
-					.setCustomAnimations(R.animator.in_right, R.animator.out_right)
 					.replace(getContentViewId(), viewController)
 					.commit();
 				}
@@ -131,12 +131,18 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			FragmentTransaction transaction = fragmentManager.beginTransaction();
 			
-			transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+			transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
 			
 			for(Controller<T> viewController : removeViewControllers){
 				
 				viewController.setParentController(null);
-
+				
+				if(viewController.isAdded()){
+					
+					transaction.remove(viewController);
+					
+				}
+				
 			}
 			
 			transaction.commit();
@@ -155,15 +161,13 @@ public class NavigationController<T extends IServiceContext> extends
 				.commit();
 			}
 		}
-		
-		onTopControllerChanged();
 	}
 	
 	 @Override  
     public void onAttach(Activity activity) {  
         super.onAttach(activity);  
        
-        Controller<T> topViewController = getVisableController();
+        Controller<T> topViewController = getSelectedController();
         
         if(topViewController != null){
         	getFragmentManager().beginTransaction()
@@ -172,61 +176,42 @@ public class NavigationController<T extends IServiceContext> extends
         }
         
     } 
+
 	
-	protected void onTopControllerChanged(){
-		
+	public int getSelectedIndex(){
+		return _selectedIndex;
 	}
 	
-	public Controller<T> getVisableController(){
-		if(_controllers != null && _controllers.size() > 0){
-			return _controllers.get(_controllers.size() - 1);
+	public void setSelectedIndex(int selectedIndex){
+		if(_selectedIndex != selectedIndex){
+			
+			Controller<T> controller = getSelectedController();
+			
+			if(controller != null && controller.isAdded()){
+				getFragmentManager().beginTransaction()
+				.setTransition(FragmentTransaction.TRANSIT_NONE)
+				.remove( controller)
+				.commit();
+			}
+			
+			_selectedIndex = selectedIndex;
+			
+			Controller<T> topViewController = getSelectedController();
+	        
+	        if(isAdded() && topViewController != null){
+	        	getFragmentManager().beginTransaction()
+				.setTransition(FragmentTransaction.TRANSIT_NONE)
+				.replace(getContentViewId(), topViewController)
+				.commit();
+	        }
+		}
+	}
+	
+	public Controller<T> getSelectedController(){
+		if(_controllers != null &&_selectedIndex >=0 && _selectedIndex < _controllers.size()){
+			return _controllers.get(_selectedIndex);
 		}
 		return null;
-	}
-	
-	@Override
-	public String loadURL(URL url,String basePath,boolean animated){
-		
-		ArrayList<Controller<T>> viewControllers = new ArrayList<Controller<T>>(4);
-		
-		basePath = URL.stringAddPathComponent(basePath, getAlias());
-		
-		String alias = url.firstPathComponent(basePath);
-		
-		int index = 0;
-		
-		while(alias != null){
-			
-			if(_controllers !=null &&  index >= 0 && index < _controllers.size()){
-				
-				Controller<T> viewController = _controllers.get(index);
-				
-				if(alias.equals(viewController.getAlias())){
-					basePath = viewController.loadURL(url, basePath, animated);
-					viewControllers.add(viewController);
-					index ++;
-				}
-				else{
-					index = -1;
-				}
-			}
-			else{
-				Controller<T> viewController = getControllerContext().getController(url, basePath);
-				if(viewController != null){
-					basePath = viewController.loadURL(url, basePath, animated);
-					viewControllers.add(viewController);
-				}
-				else{
-					break;
-				}
-			}
-			alias = url.firstPathComponent(basePath);
-		}
-		
-		setControllers(viewControllers, animated);
-		
-		return basePath;
-
 	}
 	
 	@Override
@@ -235,41 +220,61 @@ public class NavigationController<T extends IServiceContext> extends
 		String scheme = getScheme();
 		
 		if(scheme == null){
-			scheme = "nav";
+			scheme = "tab";
 		}
 		
 		if(scheme.equals(url.getScheme())){
 
-			Log.d(C.TAG, url.toString());
+			String alias = url.firstPathComponent(getBasePath());
+			int index = 0;
 			
-			setURL(url);
-			
-			loadURL(url, getBasePath(), animated);
-			
-			return true;
+			if(_controllers != null){
+				for(Controller<T> controller : _controllers){
+					if(controller.getAlias().equals(alias)){
+						break;
+					}
+					index ++;
+				}
+			}
 
+			setSelectedIndex(index);
 		}
 		
 		return super.openURL(url, animated);
 	}
-
+	
 	public int getContentViewId(){
-		return R.id.navigationContentView;
+		return R.id.tabBarContentView;
 	}
 	
-	@Override
-	public boolean onPressBack(){
+	public void setConfig(Object config){
+		super.setConfig(config);
 		
-		if(_controllers != null && _controllers.size() > 1){
-			return true;
+		List<?> items = Value.listValueForKey(config, "items");
+		
+		List<Controller<T>> controllers = new ArrayList<Controller<T>>(4);
+		
+		if(items != null){
+			
+			for(Object item : items){
+				
+				String url = Value.stringValueForKey(item, "url");
+				
+				if(url != null){
+					
+					Controller<T> controller = getControllerContext().getController(new URL(url), "/");
+					
+					if(controller != null){
+						controllers.add(controller);
+					}
+					
+				}
+				
+			}
+			
 		}
 		
-		Controller<T> controller = getParentController();
+		setControllers(controllers,false);
 		
-		if(controller != null){
-			return controller.onPressBack();
-		}
-		
-		return super.onPressBack();
 	}
 }

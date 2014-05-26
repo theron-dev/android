@@ -5,6 +5,8 @@ import org.hailong.service.IServiceContext;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +22,11 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	private String _title;
 	private ViewLayout _viewLayout;
 	private IControllerContext<T> _controllerContext;
+	private Handler _handler;
 	
+	public Controller(){
+		_handler = new Handler();
+	}
 	@Override  
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {  
         return _viewLayout != null ? _viewLayout.getView(inflater, container) : null;  
@@ -135,5 +141,40 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	
 	public void setViewLayout(ViewLayout viewLayout){
 		_viewLayout = viewLayout;
+	}
+	
+	public boolean onPressBack(){
+		
+		Controller<T> controller = getParentController();
+		
+		if(controller != null){
+			
+			return controller.onPressBack();
+		}
+		
+		return false;
+	}
+	
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
+	    if (keyCode == KeyEvent.KEYCODE_BACK 
+	    		&& event.getRepeatCount() == 0 ) {
+	    	
+	    	if(onPressBack()){
+	    		_handler.post(new Runnable(){
+
+					public void run() {
+						openURL(new URL(".", getURL()),true);
+					}});
+	    		
+	    	}
+	    	return true;
+	    }
+
+	    return false;
+	}
+	
+	public Handler getHandler(){
+		return _handler;
 	}
 }

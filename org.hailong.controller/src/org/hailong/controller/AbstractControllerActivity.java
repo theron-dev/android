@@ -18,6 +18,7 @@ import org.hailong.service.IServiceContext;
 import org.w3c.dom.Document;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 
 public abstract class AbstractControllerActivity<T extends IServiceContext> extends
 		AbstractActivity<T> implements IControllerContext<T>{
@@ -46,7 +47,7 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 			
 			if(_rootController != null){
 				
-				getFragmentManager().beginTransaction().replace(R.id.contentView, _rootController).commit();
+				getFragmentManager().beginTransaction().replace(R.id.rootContentView, _rootController).commit();
 				
 				_rootController.loadURL(u, "/", false);
 			}
@@ -259,6 +260,17 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 		}
 		
 		return _config;
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)  {
+	    if(_rootController != null){
+	    	if(! _rootController.getTopController().onKeyDown(keyCode, event)){
+	    		return super.onKeyDown(keyCode, event);
+	    	}
+	    	return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 
 }
