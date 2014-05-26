@@ -81,14 +81,14 @@ public class ViewLayout {
 				try {
 					XmlPullParser parser = Xml.newPullParser();
 					parser.setInput(inputStream, "utf-8");
-					return inflater.inflate(parser, parent);
+					return inflater.inflate(parser, parent,false);
 				} catch (Exception e) {
 					Log.d(C.TAG, Log.getStackTraceString(e));
 				}
 			}
 		}
 		else if(_layout != 0){
-			return inflater.inflate(_layout, parent);
+			return inflater.inflate(_layout, parent,false);
 		}
 		
 		return null;

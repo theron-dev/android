@@ -1,0 +1,52 @@
+
+{
+	"services":[
+		{
+			"class":"org.hailong.service.impl.HttpService",
+			"taskTypes":["org.hailong.service.tasks.IHttpAPITask"],
+			"timeout": 30,
+			"maxThreadCount": 5
+		},
+		{
+			"class":"org.hailong.service.impl.HttpService",
+			"taskTypes":["org.hailong.service.tasks.IHttpResourceTask"],
+			"timeout": 30,
+			"maxThreadCount": 20
+		},
+		{
+			"class":"org.hailong.service.impl.HttpService",
+			"taskTypes":["org.hailong.service.tasks.IHttpTask"],
+			"timeout": 30,
+			"maxThreadCount": 5
+		}
+		,
+		{
+			"class":"org.hailong.service.impl.ResourceService",
+			"taskTypes":[
+				"org.hailong.service.tasks.ILocalResourceTask"
+				,"org.hailong.service.tasks.IResourceTask"
+				,"org.hailong.service.tasks.IImageTask"
+			]
+		},
+		{
+			"class":"org.hailong.service.impl.URLDownlinkService",
+			"taskTypes":["org.hailong.service.tasks.IURLDownlinkTask"]
+		}
+	],
+	"ui":{
+	
+		"root":{
+			"class":"org.hailong.controller.NavigationController",
+			"view":"org.hailong.controller.R.layout.navigation",
+			"title":"Home",
+			"scheme":"root"
+		},
+		"home":{
+			"class":"org.hailong.controller.sample.SampleController",
+			"view":"org.hailong.controller.sample.R.layout.t",
+			"title":"Home"
+		},
+		
+	},
+	"url":"root:///root/home"
+}

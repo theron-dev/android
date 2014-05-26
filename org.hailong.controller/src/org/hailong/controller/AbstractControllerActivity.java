@@ -18,7 +18,6 @@ import org.hailong.service.IServiceContext;
 import org.w3c.dom.Document;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.LinearLayout;
 
 public abstract class AbstractControllerActivity<T extends IServiceContext> extends
 		AbstractActivity<T> implements IControllerContext<T>{
@@ -32,8 +31,8 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		
-		setContentView(new LinearLayout(this));
+
+		setContentView(R.layout.main);
 		
 		Object config = getConfig();
 		
@@ -47,7 +46,7 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 			
 			if(_rootController != null){
 				
-				getFragmentManager().beginTransaction().add(_rootController, _rootController.getAlias()).commit();
+				getFragmentManager().beginTransaction().replace(R.id.contentView, _rootController).commit();
 				
 				_rootController.loadURL(u, "/", false);
 			}
@@ -116,8 +115,10 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 				
 				if(controller != null){
 					
-					String view = Value.stringValueForKey(cfg, "view");
+					controller.setControllerContext(this);
 					
+					String view = Value.stringValueForKey(cfg, "view");
+
 					if(view != null){
 						controller.setViewLayout(new ViewLayout(view));
 					}

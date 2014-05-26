@@ -19,6 +19,7 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	private String _scheme;
 	private String _title;
 	private ViewLayout _viewLayout;
+	private IControllerContext<T> _controllerContext;
 	
 	@Override  
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {  
@@ -28,6 +29,10 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	@SuppressWarnings("unchecked")
 	public IControllerContext<T> getControllerContext(){
 		
+		if(_controllerContext != null){
+			return  _controllerContext;
+		}
+		
 		Activity activity = getActivity();
 		
 		if(activity != null && activity instanceof IControllerContext ){
@@ -35,6 +40,10 @@ public class Controller<T extends IServiceContext> extends Fragment {
 		}
 		
 		return null;
+	}
+	
+	public void setControllerContext(IControllerContext<T> controllerContext){
+		_controllerContext = controllerContext;
 	}
 	
 	public T getServiceContext(){
