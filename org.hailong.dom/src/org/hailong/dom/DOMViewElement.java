@@ -97,4 +97,29 @@ public class DOMViewElement extends DOMLayoutElement{
 		return false;
 	}
 	
+	@Override
+	public void setAttributeValue(String name ,String value){
+		super.setAttributeValue(name, value);
+		
+		if(isViewLoaded()){
+			View v = getView();
+			if(v instanceof IDOMView){
+				((IDOMView) v).onElementAttributeChanged(this, name, value);
+			}
+		}
+		
+	}
+	
+	@Override
+	public void removeAttributeValue(String name){
+		super.removeAttributeValue(name);
+		
+		if(isViewLoaded()){
+			View v = getView();
+			if(v instanceof IDOMView){
+				((IDOMView) v).onElementAttributeChanged(this, name, null);
+			}
+		}
+		
+	}
 }

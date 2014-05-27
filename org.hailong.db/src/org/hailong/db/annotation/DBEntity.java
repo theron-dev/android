@@ -6,7 +6,7 @@ public @interface DBEntity {
 	
 	public String value();
 	
-	public String dataKey() default "rowId";
+	public String dataKey() default "rowid";
 	
 	public DBField[] fields() default {};
 	

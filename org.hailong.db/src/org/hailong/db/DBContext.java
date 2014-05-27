@@ -1,36 +1,50 @@
 package org.hailong.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.hailong.db.annotation.DBEntity;
 import org.hailong.db.annotation.DBField;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+
 public class DBContext {
 
 	private Map<DBEntity,Map<String,IDBObjectValues>> _dataObjects;
-	private IDBStorage _storage;
+	private final SQLiteDatabase _database;
 	
-	public DBContext(IDBStorage storage){
-		_storage = storage;
+	public DBContext(SQLiteDatabase database){
+		_database = database;
 	}
 	
-	public IDBStorage getStorage(){
-		return _storage;
+	public SQLiteDatabase getDatabase(){
+		return _database;
 	}
 	
-	public void destroy(){
-		if(_storage != null){
-			_storage.destroy();
-			_storage = null;
-		}
-		if(_dataObjects != null){
-			_dataObjects = null;
-		}
-	}
-	
-	public String[] dataKeys(DBEntity dbEntity, String sql, Object[] args) throws Throwable{
+	public String[] dataKeys(DBEntity dbEntity, String selection, String[] selectionArgs,String groupBy,String having,String orderBy,String limit) throws Throwable{
 		
-		return null;
+		Cursor cursor = _database.query(dbEntity.value(), new String[]{dbEntity.dataKey()}, selection, selectionArgs, groupBy, having, orderBy,limit);
+		
+		List<String> dataKeys = new ArrayList<String>(4);
+		
+		if(cursor.moveToFirst()){
+			do {
+				
+				String dataKey= cursor.getString(0);
+				
+				if(dataKey != null){
+					dataKeys.add(dataKey);
+				}
+				
+			} while(cursor.moveToNext());
+		}
+		
+		cursor.close();
+		
+		return dataKeys.toArray(new String[dataKeys.size()]);
 	}
 	
 	public DBObject dataObject(DBEntity dbEntity, String dataKey) throws Throwable{
@@ -50,6 +64,9 @@ public class DBContext {
 		}
 		
 		if(objectValues == null){
+			
+			
+	
 			
 			Map<String,Object> values = _storage.get(dbEntity, dataKey);
 			

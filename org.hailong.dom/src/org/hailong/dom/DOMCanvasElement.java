@@ -98,4 +98,12 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 		super.setStyle(style);
 		setNeedsDisplay();
 	}
+	
+	@Override
+	public void setAttributeValue(String name,String value){
+		super.setAttributeValue(name, value);
+		if("hidden".equals(name) || "visable".equals(name)){
+			setNeedsDisplay();
+		}
+	}
 }
