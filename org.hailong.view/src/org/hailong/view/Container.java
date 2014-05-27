@@ -4,6 +4,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import org.hailong.core.Value;
+
 import android.view.View;
 import android.view.ViewGroup;
 
