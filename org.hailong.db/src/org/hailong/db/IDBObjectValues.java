@@ -5,7 +5,7 @@ import org.hailong.db.annotation.DBField;
 
 public interface IDBObjectValues {
 	
-	public long getRowId();
+	public long rowid();
 	
 	public boolean isDeleted();
 	
@@ -17,15 +17,17 @@ public interface IDBObjectValues {
 	
 	public int intValue(String field, int defaultValue);
 	
-	public double doubleValue(String field, long defaultValue);
+	public double doubleValue(String field, double defaultValue);
 	
 	public String stringValue(String field, String defaultValue);
+	
+	public byte[] bytesValue(String field,byte[] defaultValue);
 	
 	public void setValue(DBField field,Object value);
 	
 	public int retainCount();
 	
-	public void retain();
+	public IDBObjectValues retain();
 	
 	public void release();
 	

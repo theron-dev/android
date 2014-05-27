@@ -1,11 +1,10 @@
 package org.hailong.service.impl;
 
+
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import org.hailong.db.DBContext;
 import org.hailong.db.DBObject;
 import org.hailong.db.annotation.DBEntity;
@@ -15,8 +14,7 @@ import org.hailong.service.AbstractService;
 import org.hailong.service.IServiceContext;
 import org.hailong.service.ITask;
 import org.hailong.service.tasks.IDownlinkTask;
-
-
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 
 public class DownlinkService extends AbstractService {
@@ -24,13 +22,17 @@ public class DownlinkService extends AbstractService {
 	private DBContext _dbContext = null;
 	private ThreadPoolExecutor _poolExcutor = null;
 	
-	private DBContext getDBContext(){
+	private DBContext dbContext(){
 		
 		IServiceContext ctx = getContext();
 		
 		if(_dbContext == null && ctx != null){
 			
-	
+			SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(ctx.getDatabasePath(getClass().getSimpleName().concat(".sqlite")), null);
+			
+			_dbContext = new DBContext(database);
+			
+			_dbContext.registerObjectClass(DataObject.class);
 			
 		}
 		
@@ -74,44 +76,23 @@ public class DownlinkService extends AbstractService {
 			
 			public void run() {
 				
-//				DBContext dbContext = getDataContext();
-//				
-//				DataFetchRequest<DownlinkService.DataObject> request = new DataFetchRequest<DownlinkService.DataObject>();
-//				
-//				request.setDataPredicate(new Field(DataObject.DF_DATAKEY).eq(new Value(dataKey)));
-//				request.setFetchLimit(1);
-//				
-//				try {
-//					
-//					List<DownlinkService.DataObject> dataObjects = dataContext.executeFetchRequest(request, 1);
-//					
-//					if(dataObjects != null && dataObjects.size() >0){
-//						
-//						DownlinkService.DataObject dataObject = dataObjects.get(0);
-//						
-//						final Object resultsData = JSON.decodeString(dataObject.getContent());
-//						
-//						final long timestamp = dataObject.getTimestamp();
-//						
-//						if(resultsData != null){
-//							handler.post(new Runnable(){
-//
-//								public void run() {
-//									task.onDidLoadedFromCached(type, resultsData, timestamp);
-//								}});
-//						}
-//						
-//						
-//					}
-//					
-//				} catch (Exception e) {
-//				}
+				DBContext dbContext = dbContext();
+	
+				final DataObject dataObject = (DataObject) dbContext.dataObject(DataObject.Entity, dataKey);
+
+				if(dataObject != null){
+					handler.post(new Runnable(){
+
+						public void run() {
+							task.onDidLoadedFromCached(type, dataObject.getContent(), dataObject.getTimestamp());
+						}});
+				}
 				
 			}
 		});
 	}
 	
-	public void didLoaded(IDownlinkTask downlinkTask,Class<?> taskType,Object resultsData,boolean isCached){
+	public void didLoaded(IDownlinkTask downlinkTask,Class<?> taskType,final Object resultsData,boolean isCached){
 		
 		final Handler handler = new Handler();
 		final String dataKey = dataKey(downlinkTask,taskType);
@@ -127,34 +108,24 @@ public class DownlinkService extends AbstractService {
 				
 				public void run() {
 					
-//					DataContext dataContext = getDataContext();
-//					
-//					DataFetchRequest<DownlinkService.DataObject> request = new DataFetchRequest<DownlinkService.DataObject>();
-//					
-//					request.setDataPredicate(new Field(DataObject.DF_DATAKEY).eq(new Value(dataKey)));
-//					request.setFetchLimit(1);
-//					
-//					try {
-//						
-//						DownlinkService.DataObject dataObject = null;
-//						
-//						List<DownlinkService.DataObject> dataObjects = dataContext.executeFetchRequest(request, 1);
-//						
-//						if(dataObjects != null && dataObjects.size() >0){
-//							dataObject = dataObjects.get(0);
-//						}
-//						else{
-//							dataObject = dataContext.insertDataItem(DownlinkService.DataObject.class);
-//						}
-//						
-//						dataObject.setDataKey(dataKey);
-//						dataObject.setContent(JSON.encodeObject(data));
-//						dataObject.setTimestamp(new Date().getTime());
-//						
-//						dataContext.save();
-//						
-//					} catch (Exception e) {
-//					}
+					DBContext dbContext = dbContext();
+					
+					DataObject dataObject = (DataObject) dbContext.dataObject(DataObject.Entity, dataKey);
+					
+					if(dataObject == null){
+						dataObject = new DataObject();
+						dataObject.setDataKey(dataKey);
+					}
+					
+					dataObject.setContent(resultsData);
+					dataObject.setTimestamp(new Date().getTime());
+					
+					if(dataObject.rowid() == 0){
+						dbContext.insertObject(dataObject);
+					}
+					else {
+						dbContext.updateObject(dataObject);
+					}
 					
 					handler.post(new Runnable(){
 
@@ -192,9 +163,9 @@ public class DownlinkService extends AbstractService {
 		return taskType.getName();
 	}
 
-	@DBEntity(value = "DataObject",fields={
+	@DBEntity(value = "DataObject",dataKey="dataKey", fields={
 				@DBField(value = "dataKey",length = 128,index = true),
-				@DBField(value = "content",type = DBFieldType.TEXT),
+				@DBField(value = "content",type = DBFieldType.OBJECT),
 				@DBField(value = "timestmap",type = DBFieldType.BIGINT)
 			})
 	private static class DataObject extends DBObject{
@@ -216,23 +187,23 @@ public class DownlinkService extends AbstractService {
 		}
 		
 		public void setDataKey(String value){
-			setObjectValue(DF_DATAKEY, value);
+			setValue(DF_DATAKEY, value);
 		}
 		
-		public String getContent(){
-			return (String) getObjectValue(DF_CONTENT);
+		public Object getContent(){
+			return getValue(DF_CONTENT);
 		}
 		
-		public void setContent(String value){
-			setObjectValue(DF_CONTENT,value);
+		public void setContent(Object value){
+			setValue(DF_CONTENT,value);
 		}
 		
 		public long getTimestamp(){
-			return (Long) getObjectValue(DF_TIMESTAMP);
+			return longValue(DF_TIMESTAMP,0);
 		}
 		
 		public void setTimestamp(long timestamp){
-			setObjectValue(DF_TIMESTAMP, timestamp);
+			setValue(DF_TIMESTAMP, timestamp);
 		}
 	}
 }
