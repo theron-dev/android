@@ -7,6 +7,7 @@ import org.hailong.core.Value;
 import org.hailong.service.IServiceContext;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 public class TabBarController<T extends IServiceContext> extends
 		Controller<T> {
@@ -71,85 +72,45 @@ public class TabBarController<T extends IServiceContext> extends
 			_controllers = new ArrayList<Controller<T>>(4);
 		}
 
-		if(isVisible() && animated){
+		if(isAdded()){
 			
 			FragmentManager fragmentManager = getChildFragmentManager();
 			
-			int addSize = addViewControllers.size();
-			int removeSize = removeViewControllers.size();
-			int i;
-			
-			if(addSize + removeSize > 0){
-				
-				for(i=0; i< removeSize;i++){
-					
-					Controller<T> viewController = removeViewControllers.get(i);
-					
-					viewController.setParentController(null);
-
-				}
-				
-				for(i=0; i< addSize -1;i++){
-					
-					Controller<T> viewController = addViewControllers.get(i);
-					
-					viewController.setParentController(this);
-					
-					_controllers.add(viewController);
-					
-				}
-
-				if(i < addSize){
-					
-					Controller<T> viewController = addViewControllers.get(i);
-		
-					viewController.setParentController(this);
-					
-					_controllers.add(viewController);
-					
-					fragmentManager.beginTransaction()
-						.replace(R.id.contentView, viewController)
-						.commit();
-					
-				}
-				
-				Controller<T> viewController = getSelectedController();
-				
-				if(viewController !=null && !viewController.isAdded()){
-					
-					fragmentManager.beginTransaction()
-					.replace(R.id.contentView, viewController)
-					.commit();
-				}
-				
-			}
-			
-			
-		}
-		else if(isAdded()){
-			
-			FragmentManager fragmentManager = getChildFragmentManager();
+			FragmentTransaction transaction = fragmentManager.beginTransaction();
 			
 			for(Controller<T> viewController : removeViewControllers){
 				
 				viewController.setParentController(null);
 			
+				if(viewController.isAdded()){
+					transaction.remove(viewController);
+				}
+				
 			}
-
-			
-			Controller<T> topViewController = null;
 			
 			for(Controller<T> viewController : addViewControllers){
 				viewController.setParentController(this);
 				_controllers.add(viewController);
-				topViewController = viewController;
 			}
 			
-			if(topViewController != null){
-				fragmentManager.beginTransaction()
-				.replace(R.id.contentView, topViewController)
-				.commit();
+			Controller<T> topViewController = getSelectedController();
+			
+			for(Controller<T> viewController : _controllers){
+				if(viewController == topViewController){
+					if(viewController.isAdded()){
+						transaction.show(viewController);
+					}
+					else{
+						transaction.add(R.id.contentView, viewController);
+					}
+				}
+				else if(viewController.isAdded()){
+					transaction.hide(viewController);
+				}
 			}
+			
+			transaction.commit();
+			
 		}
 		else {
 			
@@ -224,14 +185,31 @@ public class TabBarController<T extends IServiceContext> extends
 			
 			_selectedIndex = selectedIndex;
 			
-			Controller<T> topViewController = getSelectedController();
-	        
-	        if(isAdded() && topViewController != null){
-	        	FragmentManager fragmentManager = getChildFragmentManager();
-	        	fragmentManager.beginTransaction()
-				.replace(R.id.contentView, topViewController)
-				.commit();
-	        }
+			if(isAdded()){
+				
+				FragmentManager fragmentManager = getChildFragmentManager();
+				
+				FragmentTransaction transaction = fragmentManager.beginTransaction();
+				
+				Controller<T> topViewController = getSelectedController();
+				
+				for(Controller<T> viewController : _controllers){
+					if(viewController == topViewController){
+						if(viewController.isAdded()){
+							transaction.show(viewController);
+						}
+						else{
+							transaction.add(R.id.contentView, viewController);
+						}
+					}
+					else if(viewController.isAdded()){
+						transaction.hide(viewController);
+					}
+				}
+				
+				transaction.commit();
+			}
+			
 		}
 	}
 	

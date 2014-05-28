@@ -99,7 +99,7 @@ public class ResourceService extends AbstractService{
 					resTask.setResourceObject(_resourceCache.get(md5));
 				}
 				else{
-					File dir = getContext().getDir("resources", 0x0777);
+					File dir = getContext().getDir("resources", 0777);
 					if(!dir.exists()){
 						dir.mkdirs();
 					}
@@ -140,7 +140,7 @@ public class ResourceService extends AbstractService{
 					
 					if(httpTask == null){
 					
-						File dir = getContext().getDir("resources", 0x0777);
+						File dir = getContext().getDir("resources", 0777);
 						
 						if(!dir.exists()){
 							dir.mkdirs();
@@ -253,7 +253,7 @@ public class ResourceService extends AbstractService{
 		@Override
 		public void onLoaded(File result){
 			
-			File dir = getContext().getDir("resources", 0x0777);
+			File dir = getContext().getDir("resources", 0777);
 			
 			if(!dir.exists()){
 				dir.mkdirs();

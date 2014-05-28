@@ -6,6 +6,7 @@ import org.hailong.core.URL;
 import org.hailong.service.IServiceContext;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 public class NavigationController<T extends IServiceContext> extends
@@ -79,15 +80,27 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			if(addSize + removeSize > 0){
 			
+				FragmentTransaction transaction = fragmentManager.beginTransaction();
+				
+				if(addSize >0 ){
+					transaction.setCustomAnimations(R.anim.in_left, R.anim.out_left);
+				}
+				else {
+					transaction.setCustomAnimations(R.anim.in_right, R.anim.out_right);
+				}
+				
 				for(i=0; i< removeSize;i++){
 					
 					Controller<T> viewController = removeViewControllers.get(i);
 					
 					viewController.setParentController(null);
-
+					
+					if(viewController.isAdded()){
+						transaction.remove(viewController);
+					}
 				}
 				
-				for(i=0; i< addSize -1;i++){
+				for(i=0; i< addSize;i++){
 					
 					Controller<T> viewController = addViewControllers.get(i);
 					
@@ -97,30 +110,24 @@ public class NavigationController<T extends IServiceContext> extends
 					
 				}
 
-				if(i < addSize){
-					
-					Controller<T> viewController = addViewControllers.get(i);
-		
-					viewController.setParentController(this);
-					
-					_controllers.add(viewController);
-					
-					fragmentManager.beginTransaction()
-						.setCustomAnimations(R.animator.in_left, R.animator.out_left)
-						.replace(R.id.contentView, viewController)
-						.commit();
-					
-				}
 				
-				Controller<T> viewController = getTopViewController();
+				Controller<T> topViewController = getTopViewController();
 				
-				if(viewController !=null && !viewController.isAdded()){
-					
-					fragmentManager.beginTransaction()
-					.setCustomAnimations(R.animator.in_right, R.animator.out_right)
-					.replace(R.id.contentView, viewController)
-					.commit();
+				for(Controller<T> viewController : _controllers){
+					if(topViewController != viewController){
+						if(viewController.isAdded()){
+							transaction.hide( viewController);
+						}
+					}
+					else if(topViewController.isAdded()){
+						transaction.show( topViewController);
+					}
+					else {
+						transaction.add(R.id.contentView, topViewController);
+					}
 				}
+
+				transaction.commit();
 				
 			}
 			
@@ -130,8 +137,13 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			FragmentManager fragmentManager = getChildFragmentManager();
 			
+			FragmentTransaction transaction = fragmentManager.beginTransaction();
+			
 			for(Controller<T> viewController : removeViewControllers){
 				viewController.setParentController(null);
+				if(viewController.isAdded()){
+					transaction.remove(viewController);
+				}
 			}
 			
 			Controller<T> topViewController = null;
@@ -142,11 +154,23 @@ public class NavigationController<T extends IServiceContext> extends
 				topViewController = viewController;
 			}
 			
-			if(  topViewController != null){
-				fragmentManager.beginTransaction()
-				.replace(R.id.contentView, topViewController)
-				.commit();
+			for(Controller<T> viewController : _controllers){
+				if(topViewController != viewController){
+					if(viewController.isAdded()){
+						transaction.hide( viewController);
+					}
+				}
+				else if(topViewController.isAdded()){
+					transaction.show(topViewController);
+				}
+				else{
+					transaction.add(R.id.contentView, topViewController);
+				}
 			}
+			
+			
+			transaction.commit();
+
 		}
 		else {
 			
