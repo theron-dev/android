@@ -2,13 +2,11 @@ package org.hailong.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hailong.core.URL;
 import org.hailong.core.Value;
 import org.hailong.service.IServiceContext;
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 
 public class TabBarController<T extends IServiceContext> extends
 		Controller<T> {
@@ -68,13 +66,14 @@ public class TabBarController<T extends IServiceContext> extends
 			}
 		}
 		
+		
 		if(_controllers == null){
 			_controllers = new ArrayList<Controller<T>>(4);
 		}
-		
-		FragmentManager fragmentManager = getFragmentManager();
-		
+
 		if(isVisible() && animated){
+			
+			FragmentManager fragmentManager = getChildFragmentManager();
 			
 			int addSize = addViewControllers.size();
 			int removeSize = removeViewControllers.size();
@@ -108,8 +107,8 @@ public class TabBarController<T extends IServiceContext> extends
 					
 					_controllers.add(viewController);
 					
-					getFragmentManager().beginTransaction()
-						.replace(getContentViewId(), viewController)
+					fragmentManager.beginTransaction()
+						.replace(R.id.contentView, viewController)
 						.commit();
 					
 				}
@@ -119,7 +118,7 @@ public class TabBarController<T extends IServiceContext> extends
 				if(viewController !=null && !viewController.isAdded()){
 					
 					fragmentManager.beginTransaction()
-					.replace(getContentViewId(), viewController)
+					.replace(R.id.contentView, viewController)
 					.commit();
 				}
 				
@@ -127,25 +126,16 @@ public class TabBarController<T extends IServiceContext> extends
 			
 			
 		}
-		else{
+		else if(isAdded()){
 			
-			FragmentTransaction transaction = fragmentManager.beginTransaction();
-			
-			transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
+			FragmentManager fragmentManager = getChildFragmentManager();
 			
 			for(Controller<T> viewController : removeViewControllers){
 				
 				viewController.setParentController(null);
-				
-				if(viewController.isAdded()){
-					
-					transaction.remove(viewController);
-					
-				}
-				
-			}
 			
-			transaction.commit();
+			}
+
 			
 			Controller<T> topViewController = null;
 			
@@ -155,23 +145,70 @@ public class TabBarController<T extends IServiceContext> extends
 				topViewController = viewController;
 			}
 			
-			if( isAdded() && topViewController != null){
+			if(topViewController != null){
 				fragmentManager.beginTransaction()
-				.replace(getContentViewId(), topViewController)
+				.replace(R.id.contentView, topViewController)
 				.commit();
 			}
 		}
+		else {
+			
+			for(Controller<T> viewController : removeViewControllers){
+				viewController.setParentController(null);
+			}
+
+			for(Controller<T> viewController : addViewControllers){
+				viewController.setParentController(this);
+				_controllers.add(viewController);
+			}
+
+		}
+		
 	}
 	
-	 @Override  
-    public void onAttach(Activity activity) {  
-        super.onAttach(activity);  
-       
+	@Override  
+	public void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+		
+		List<?> items = Value.listValueForKey(getConfig(), "items");
+			
+		List<Controller<T>> controllers = new ArrayList<Controller<T>>(4);
+		
+		if(items != null){
+			
+			for(Object item : items){
+				
+				String url = Value.stringValueForKey(item, "url");
+				
+				if(url != null){
+					
+					Controller<T> controller = getControllerContext().getController(new URL(url), "/");
+					
+					if(controller != null){
+						controllers.add(controller);
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		setControllers(controllers,false);
+	}
+	
+	@Override  
+    public void onActivityCreated(Bundle savedInstanceState) {  
+        super.onActivityCreated(savedInstanceState);  
+
         Controller<T> topViewController = getSelectedController();
         
         if(topViewController != null){
-        	getFragmentManager().beginTransaction()
-			.replace(getContentViewId(), topViewController)
+        	
+        	FragmentManager fragmentManager = getChildFragmentManager();
+        	
+        	fragmentManager.beginTransaction()
+			.replace(R.id.contentView, topViewController)
 			.commit();
         }
         
@@ -185,23 +222,14 @@ public class TabBarController<T extends IServiceContext> extends
 	public void setSelectedIndex(int selectedIndex){
 		if(_selectedIndex != selectedIndex){
 			
-			Controller<T> controller = getSelectedController();
-			
-			if(controller != null && controller.isAdded()){
-				getFragmentManager().beginTransaction()
-				.setTransition(FragmentTransaction.TRANSIT_NONE)
-				.remove( controller)
-				.commit();
-			}
-			
 			_selectedIndex = selectedIndex;
 			
 			Controller<T> topViewController = getSelectedController();
 	        
 	        if(isAdded() && topViewController != null){
-	        	getFragmentManager().beginTransaction()
-				.setTransition(FragmentTransaction.TRANSIT_NONE)
-				.replace(getContentViewId(), topViewController)
+	        	FragmentManager fragmentManager = getChildFragmentManager();
+	        	fragmentManager.beginTransaction()
+				.replace(R.id.contentView, topViewController)
 				.commit();
 	        }
 		}
@@ -243,38 +271,12 @@ public class TabBarController<T extends IServiceContext> extends
 		return super.openURL(url, animated);
 	}
 	
-	public int getContentViewId(){
-		return R.id.tabBarContentView;
-	}
 	
-	public void setConfig(Object config){
-		super.setConfig(config);
-		
-		List<?> items = Value.listValueForKey(config, "items");
-		
-		List<Controller<T>> controllers = new ArrayList<Controller<T>>(4);
-		
-		if(items != null){
-			
-			for(Object item : items){
-				
-				String url = Value.stringValueForKey(item, "url");
-				
-				if(url != null){
-					
-					Controller<T> controller = getControllerContext().getController(new URL(url), "/");
-					
-					if(controller != null){
-						controllers.add(controller);
-					}
-					
-				}
-				
-			}
-			
+	@SuppressWarnings("unchecked")
+	public Controller<T>[] getControllers(){
+		if(_controllers != null){
+			return _controllers.toArray( new Controller[_controllers.size()]);
 		}
-		
-		setControllers(controllers,false);
-		
+		return new Controller[0];
 	}
 }

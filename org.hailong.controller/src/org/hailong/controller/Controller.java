@@ -2,10 +2,13 @@ package org.hailong.controller;
 
 import org.hailong.core.URL;
 import org.hailong.service.IServiceContext;
+import org.hailong.service.tasks.IImageTask;
+import org.hailong.service.tasks.ILocalResourceTask;
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +26,12 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	private ViewLayout _viewLayout;
 	private IControllerContext<T> _controllerContext;
 	private Handler _handler;
-	
+
 	public Controller(){
 		_handler = new Handler();
 	}
 	@Override  
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {  
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return _viewLayout != null ? _viewLayout.getView(inflater, container) : null;  
     }  
 	
@@ -38,7 +41,7 @@ public class Controller<T extends IServiceContext> extends Fragment {
 		if(_controllerContext != null){
 			return  _controllerContext;
 		}
-		
+
 		Activity activity = getActivity();
 		
 		if(activity != null && activity instanceof IControllerContext ){
@@ -51,6 +54,12 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	public void setControllerContext(IControllerContext<T> controllerContext){
 		_controllerContext = controllerContext;
 	}
+
+	@Override  
+    public void onActivityCreated(Bundle savedInstanceState) {  
+        super.onActivityCreated(savedInstanceState);  
+
+    } 
 	
 	public T getServiceContext(){
 		IControllerContext<T> context = getControllerContext();
@@ -177,4 +186,104 @@ public class Controller<T extends IServiceContext> extends Fragment {
 	public Handler getHandler(){
 		return _handler;
 	}
+	
+	public void downloadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isNeedDownload() && !imageTask.isLoading()){
+				
+				try {
+					getServiceContext().handle(IImageTask.class, imageTask, 0);
+				} catch (Exception e) {
+					Log.d(C.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+		
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				downloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+		
+	}
+
+	public void loadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isNeedDownload() && !imageTask.isLoading()){
+				
+				try {
+					
+					getServiceContext().handle(ILocalResourceTask.class, imageTask, 0);
+					
+				} catch (Exception e) {
+					Log.d(C.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				loadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+	}
+
+	public void cancelDownloadImagesForView(View view){
+		
+		if(view instanceof IImageTask){
+			
+			IImageTask imageTask = (IImageTask) view;
+			
+			if(imageTask.isLoading()){
+				
+				try {
+					getServiceContext().cancelHandle(IImageTask.class, imageTask);
+				} catch (Exception e) {
+					Log.d(C.TAG, Log.getStackTraceString(e));
+				}
+				
+			}
+		}
+
+		if(view instanceof ViewGroup){
+			
+			ViewGroup viewGroup = (ViewGroup) view;
+			
+			int c = viewGroup.getChildCount();
+			
+			for(int i=0;i<c;i++){
+				
+				cancelDownloadImagesForView(viewGroup.getChildAt(i));
+				
+			}
+			
+		}
+	}
+	
 }

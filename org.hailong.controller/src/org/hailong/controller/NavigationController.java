@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hailong.core.URL;
 import org.hailong.service.IServiceContext;
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
 public class NavigationController<T extends IServiceContext> extends
@@ -70,9 +69,9 @@ public class NavigationController<T extends IServiceContext> extends
 			_controllers = new ArrayList<Controller<T>>(4);
 		}
 		
-		FragmentManager fragmentManager = getFragmentManager();
-		
 		if(isVisible() && animated){
+			
+			FragmentManager fragmentManager = getChildFragmentManager();
 			
 			int addSize = addViewControllers.size();
 			int removeSize = removeViewControllers.size();
@@ -106,20 +105,20 @@ public class NavigationController<T extends IServiceContext> extends
 					
 					_controllers.add(viewController);
 					
-					getFragmentManager().beginTransaction()
+					fragmentManager.beginTransaction()
 						.setCustomAnimations(R.animator.in_left, R.animator.out_left)
-						.replace(getContentViewId(), viewController)
+						.replace(R.id.contentView, viewController)
 						.commit();
 					
 				}
 				
-				Controller<T> viewController = getVisableController();
+				Controller<T> viewController = getTopViewController();
 				
 				if(viewController !=null && !viewController.isAdded()){
 					
 					fragmentManager.beginTransaction()
 					.setCustomAnimations(R.animator.in_right, R.animator.out_right)
-					.replace(getContentViewId(), viewController)
+					.replace(R.id.contentView, viewController)
 					.commit();
 				}
 				
@@ -127,19 +126,13 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			
 		}
-		else{
+		else if(isAdded()){
 			
-			FragmentTransaction transaction = fragmentManager.beginTransaction();
-			
-			transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+			FragmentManager fragmentManager = getChildFragmentManager();
 			
 			for(Controller<T> viewController : removeViewControllers){
-				
 				viewController.setParentController(null);
-
 			}
-			
-			transaction.commit();
 			
 			Controller<T> topViewController = null;
 			
@@ -149,35 +142,52 @@ public class NavigationController<T extends IServiceContext> extends
 				topViewController = viewController;
 			}
 			
-			if( isAdded() && topViewController != null){
+			if(  topViewController != null){
 				fragmentManager.beginTransaction()
-				.replace(getContentViewId(), topViewController)
+				.replace(R.id.contentView, topViewController)
 				.commit();
 			}
+		}
+		else {
+			
+			for(Controller<T> viewController : removeViewControllers){
+				viewController.setParentController(null);
+			}
+			
+			for(Controller<T> viewController : addViewControllers){
+				viewController.setParentController(this);
+				_controllers.add(viewController);
+			}
+			
 		}
 		
 		onTopControllerChanged();
 	}
+
 	
-	 @Override  
-    public void onAttach(Activity activity) {  
-        super.onAttach(activity);  
-       
-        Controller<T> topViewController = getVisableController();
+	@Override  
+    public void onActivityCreated(Bundle savedInstanceState) {  
+        super.onActivityCreated(savedInstanceState);  
+
+        
+		Controller<T> topViewController = getTopViewController();
         
         if(topViewController != null){
-        	getFragmentManager().beginTransaction()
-			.replace(getContentViewId(), topViewController)
+        	
+        	FragmentManager fragmentManager = getChildFragmentManager();
+        	
+        	fragmentManager.beginTransaction()
+			.replace(R.id.contentView, topViewController)
 			.commit();
+        	
         }
-        
     } 
 	
 	protected void onTopControllerChanged(){
 		
 	}
 	
-	public Controller<T> getVisableController(){
+	public Controller<T> getTopViewController(){
 		if(_controllers != null && _controllers.size() > 0){
 			return _controllers.get(_controllers.size() - 1);
 		}
@@ -211,7 +221,9 @@ public class NavigationController<T extends IServiceContext> extends
 				}
 			}
 			else{
+				
 				Controller<T> viewController = getControllerContext().getController(url, basePath);
+				
 				if(viewController != null){
 					basePath = viewController.loadURL(url, basePath, animated);
 					viewControllers.add(viewController);
@@ -253,10 +265,6 @@ public class NavigationController<T extends IServiceContext> extends
 		return super.openURL(url, animated);
 	}
 
-	public int getContentViewId(){
-		return R.id.navigationContentView;
-	}
-	
 	@Override
 	public boolean onPressBack(){
 		
@@ -271,5 +279,13 @@ public class NavigationController<T extends IServiceContext> extends
 		}
 		
 		return super.onPressBack();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Controller<T>[] getControllers(){
+		if(_controllers != null){
+			return _controllers.toArray( new Controller[_controllers.size()]);
+		}
+		return new Controller[0];
 	}
 }

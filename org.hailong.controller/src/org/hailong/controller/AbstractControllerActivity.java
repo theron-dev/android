@@ -8,12 +8,11 @@ import java.util.Stack;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.hailong.core.JSON;
 import org.hailong.core.PLIST;
 import org.hailong.core.URL;
 import org.hailong.core.Value;
-import org.hailong.service.AbstractActivity;
+import org.hailong.service.AbstractFragmentActivity;
 import org.hailong.service.IServiceContext;
 import org.w3c.dom.Document;
 import android.os.Bundle;
@@ -21,7 +20,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 
 public abstract class AbstractControllerActivity<T extends IServiceContext> extends
-		AbstractActivity<T> implements IControllerContext<T>{
+	AbstractFragmentActivity<T> implements IControllerContext<T>{
 
 	private Map<String,Object> _values;
 	private Stack<IResultCallback> _resultsCallbacks;
@@ -35,6 +34,22 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 
 		setContentView(R.layout.main);
 		
+		if(getServiceContext() != null){
+			loadRootController();
+		}
+		
+	}
+	
+	protected void onServiceContextStart(){
+		super.onServiceContextStart();
+		
+		if(_rootController == null){
+			loadRootController();
+		}
+	}
+	
+	protected void loadRootController() {
+		
 		Object config = getConfig();
 		
 		String url = Value.stringValueForKey(config, "url");
@@ -47,14 +62,16 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 			
 			if(_rootController != null){
 				
-				getFragmentManager().beginTransaction().replace(R.id.rootContentView, _rootController).commit();
-				
 				_rootController.loadURL(u, "/", false);
+				
+				getSupportFragmentManager().beginTransaction().replace(R.id.contentView, _rootController).commit();
+				
 			}
 			
 		}
 		
 	}
+
 	
 	@Override
 	public void onDestroy(){
