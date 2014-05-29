@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.hailong.core.JSON;
@@ -18,6 +17,7 @@ import org.w3c.dom.Document;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 public abstract class AbstractControllerActivity<T extends IServiceContext> extends
 	AbstractFragmentActivity<T> implements IControllerContext<T>{
@@ -27,6 +27,7 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 	private Controller<T> _rootController;
 	private Map<String,Class<?>> _controllerClasss;
 	private Object _config;
+	private boolean _idleTimerDisabled;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -281,13 +282,35 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)  {
-	    if(_rootController != null){
-	    	if(! _rootController.getTopController().onKeyDown(keyCode, event)){
-	    		return super.onKeyDown(keyCode, event);
+	    if(!_idleTimerDisabled ){
+	    	if(_rootController != null &&  _rootController.getTopController().onKeyDown(keyCode, event)){
+	    		return true;
 	    	}
-	    	return true;
 	    }
-	    return super.onKeyDown(keyCode, event);
+	    return false;
+	}
+	
+	
+	public boolean dispatchTouchEvent(MotionEvent event){
+		if(!_idleTimerDisabled){
+			return super.dispatchTouchEvent(event);
+		}
+		return false;
+	}
+	
+	public boolean dispatchKeyEvent(KeyEvent event){
+		if(!_idleTimerDisabled){
+			return super.dispatchKeyEvent(event);
+		}
+		return false;
 	}
 
+
+	public boolean isIdleTimerDisabled(){
+		return _idleTimerDisabled;
+	}
+	
+	public void setIdleTimerDisabled(boolean idleTimerDisabled){
+		_idleTimerDisabled = idleTimerDisabled;
+	}
 }

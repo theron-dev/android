@@ -21,6 +21,10 @@ public class TabBarController<T extends IServiceContext> extends
 	
 	public void setControllers(List<Controller<T>> controllers,boolean animated){
 		
+		if(getControllerContext().isIdleTimerDisabled()){
+			return;
+		}
+		
 		ArrayList<Controller<T>> removeViewControllers = new ArrayList<Controller<T>>(4);
 		ArrayList<Controller<T>> addViewControllers = new ArrayList<Controller<T>>(4);
 		

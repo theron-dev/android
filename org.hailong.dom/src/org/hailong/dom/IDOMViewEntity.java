@@ -1,5 +1,6 @@
 package org.hailong.dom;
 
+import android.os.Handler;
 import android.view.View;
 
 public interface IDOMViewEntity {
@@ -16,4 +17,5 @@ public interface IDOMViewEntity {
 	
 	public void elementVisable(IDOMViewEntity viewEntity,DOMElement element);
 	
+	public Handler getHandler();
 }

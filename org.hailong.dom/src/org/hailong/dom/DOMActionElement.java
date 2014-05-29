@@ -40,6 +40,7 @@ public class DOMActionElement extends DOMCanvasElement implements IDOMControlEle
 				Color color = colorValue("action-color",new Color(1.0f,1.0f,1.0f,0.4f));
 				
 				_actionView.setBackgroundColor(color.intValue());
+				_actionView.setVisibility(View.VISIBLE);
 				
 				_touchInset = true;
 				

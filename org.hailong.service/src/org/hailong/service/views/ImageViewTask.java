@@ -1,4 +1,4 @@
-package org.haiong.service.views;
+package org.hailong.service.views;
 
 import java.io.File;
 

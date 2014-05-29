@@ -37,7 +37,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 	private void DOMDocumentViewInit(Context context,AttributeSet attrs){
 		
 		setWillNotDraw(false);
-		
+
 		if(attrs != null){
 			_allowAutoLayout = attrs.getAttributeBooleanValue(null, "allowAutoLayout", false);
 		}
@@ -239,7 +239,8 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 					}
 					else {
 						Path path = new Path();
-						path.addRoundRect(new RectF(0,0,width * displayScale,height * displayScale), radius * displayScale, radius * displayScale, Path.Direction.CW);
+						path.addRoundRect(new RectF(0,0,width * displayScale,height * displayScale)
+							, radius * displayScale, radius * displayScale, Path.Direction.CW);
 						canvas.clipPath(path);
 					}
 
@@ -390,7 +391,7 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		view.setLayoutParams(layoutParams);
 		
 		if(view.getParent() == null){
-			addView(view);
+			addView(view, layoutParams);
 		}
 		
 		return view;
@@ -399,13 +400,10 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 	@Override  
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {  
 	      
-	    int widthSize = MeasureSpec.getSize(widthMeasureSpec);  
-	    int heightSize = MeasureSpec.getSize(heightMeasureSpec);  
-	  
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		
 	    measureChildren(widthMeasureSpec, heightMeasureSpec);   
-	    
-	    setMeasuredDimension(widthSize, heightSize);  
-	    
+
 	}  
 
 	@SuppressLint("DrawAllocation")
@@ -440,17 +438,16 @@ public class DOMDocumentView extends ViewGroup implements IDOMViewEntity{
 		int c = getChildCount();
 		
 		for(int i=0;i<c;i++){
+			
 			View v = getChildAt(i);
 		 	
 			ViewGroup.LayoutParams params = v.getLayoutParams();
-		 	if(params != null && params instanceof LayoutParams){
+			
+		 	if(v.getVisibility() != GONE && params != null && params instanceof LayoutParams){
 			
 		 		LayoutParams layoutParams = (LayoutParams) params;
+		 		v.layout(layoutParams.left, layoutParams.top, layoutParams.right, layoutParams.bottom);
 		 		
-		 		if(v.getLeft() != layoutParams.left || v.getTop() != layoutParams.top 
-		 				|| v.getRight() != layoutParams.right || v.getBottom() != layoutParams.bottom){
-		 			v.layout(layoutParams.left, layoutParams.top, layoutParams.right, layoutParams.bottom);
-		 		}
 		 	}
 		}
 

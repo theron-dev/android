@@ -37,11 +37,21 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 			
 			Paint paint = new Paint();
 			
+			paint.setAntiAlias(true);
 			paint.setColor(backgroundColor.intValue());
 			paint.setAlpha(backgroundColor.getAlpha());
 			paint.setStyle(Style.FILL);
 	
-			canvas.drawRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), paint);
+			float radius = getCornerRadius();
+			
+			if(radius == 0.0f){
+				canvas.drawRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), paint);
+			}
+			else {
+				canvas.drawRoundRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale)
+					, radius * displayScale, radius * displayScale, paint);
+			}
+			
 		}
 	}
 
@@ -61,6 +71,7 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 			
 			Paint paint = new Paint();
 			
+			paint.setAntiAlias(true);
 			paint.setColor(borderColor.intValue());
 			paint.setAlpha(borderColor.getAlpha());
 			paint.setStyle(Style.STROKE);
@@ -70,7 +81,8 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 				canvas.drawRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), paint);
 			}
 			else {
-				canvas.drawRoundRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale), radius, radius, paint);
+				canvas.drawRoundRect(new RectF(0,0,r.getWidth() * displayScale,r.getHeight() * displayScale)
+					, radius * displayScale, radius * displayScale, paint);
 			}
 			
 		}

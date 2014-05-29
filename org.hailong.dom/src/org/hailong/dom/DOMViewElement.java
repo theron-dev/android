@@ -42,6 +42,7 @@ public class DOMViewElement extends DOMLayoutElement{
 				((ViewGroup)v).removeView(_view);
 			}
 			
+			_view = null;
 		}
 		
 		super.removeFromParent();

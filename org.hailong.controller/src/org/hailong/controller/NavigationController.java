@@ -20,6 +20,10 @@ public class NavigationController<T extends IServiceContext> extends
 	
 	public void setControllers(List<Controller<T>> controllers,boolean animated){
 		
+		if(getControllerContext().isIdleTimerDisabled()){
+			return;
+		}
+		
 		ArrayList<Controller<T>> removeViewControllers = new ArrayList<Controller<T>>(4);
 		ArrayList<Controller<T>> addViewControllers = new ArrayList<Controller<T>>(4);
 		
@@ -80,6 +84,8 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			if(addSize + removeSize > 0){
 			
+				getControllerContext().setIdleTimerDisabled(true);
+				
 				FragmentTransaction transaction = fragmentManager.beginTransaction();
 				
 				if(addSize >0 ){
@@ -129,6 +135,12 @@ public class NavigationController<T extends IServiceContext> extends
 
 				transaction.commit();
 				
+				getHandler().postDelayed(new Runnable(){
+
+					@Override
+					public void run() {
+						getControllerContext().setIdleTimerDisabled(false);
+					}}, 300);
 			}
 			
 			
@@ -170,7 +182,6 @@ public class NavigationController<T extends IServiceContext> extends
 			
 			
 			transaction.commit();
-
 		}
 		else {
 			

@@ -176,8 +176,9 @@ public class Controller<T extends IServiceContext> extends Fragment {
 						openURL(new URL(".", getURL()),true);
 					}});
 	    		
+	    		return true;
 	    	}
-	    	return true;
+	    	return false;
 	    }
 
 	    return false;

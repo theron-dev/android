@@ -2,7 +2,7 @@ package org.hailong.app.views;
 
 import org.hailong.dom.DOMElement;
 import org.hailong.dom.IDOMView;
-import org.haiong.service.views.ImageViewTask;
+import org.hailong.service.views.ImageViewTask;
 import android.content.Context;
 
 public class ImageView extends ImageViewTask implements IDOMView {

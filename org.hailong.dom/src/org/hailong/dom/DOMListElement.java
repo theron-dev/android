@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-public class DOMListElement extends DOMViewElement implements ListAdapter , DOMDocumentView.OnElementActionListener{
+public class DOMListElement extends DOMViewElement implements ListAdapter , DOMDocumentView.OnElementActionListener, DOMDocumentView.OnElementVisableListener{
 
 	private List<DataSetObserver> _dataSetObservers;
 	
@@ -49,6 +49,7 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 			
 			v.setDividerHeight(0);
 			v.setEnabled(true);
+			
 			if(isLayouted()){
 				v.setAdapter(this);
 			}
@@ -157,18 +158,20 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 			documentView.setElement(element);
 			
 			documentView.setOnElementActionListener(this);
+			documentView.setOnElementVisableListener(this);
 			
 		}
 		else {
 			documentView.setLayoutParams(null);
 			documentView.setElement(null);
 			documentView.setOnElementActionListener(null);
+			documentView.setOnElementVisableListener(null);
 		}
 
 		IDOMViewEntity entity = getViewEntity();
 		
 		if(entity != null){
-			entity.elementVisable(entity, element);
+			entity.elementVisable(documentView, element);
 		}
 		
 		
@@ -239,6 +242,17 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 			entity.doAction(viewEntity,element);
 		}
 		
+	}
+
+	@Override
+	public void onElementVisable(DOMDocumentView documentView,
+			IDOMViewEntity viewEntity, DOMElement element) {
+		
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.elementVisable(viewEntity, element);
+		}
 	}
 	
 

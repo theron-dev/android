@@ -4,12 +4,15 @@ import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
 import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
 public class DOMImageElement extends DOMCanvasElement {
 
 	private Drawable _image;
 	private Drawable _defaultImage;
+	private Object _imageLoader;
 	
 	public Drawable getImage(){
 		
@@ -22,6 +25,7 @@ public class DOMImageElement extends DOMCanvasElement {
 	
 	public void setImage(Drawable image){
 		_image = image;
+		setNeedsDisplay();
 	}
 	
 	public Drawable getDefaultImage(){
@@ -46,9 +50,17 @@ public class DOMImageElement extends DOMCanvasElement {
 		}
 		else if("src".equals(name)){
 			_image = null;
+			_imageLoader = null;
 			setNeedsDisplay();
 		}
-		
+	}
+	
+	public Object getImageLoader(){
+		return _imageLoader;
+	}
+	
+	public void setImageLoader(Object imageLoader){
+		_imageLoader = imageLoader;
 	}
 	
 	@Override
@@ -63,50 +75,162 @@ public class DOMImageElement extends DOMCanvasElement {
 		
 		if(image != null){
 			
-//			String gravity = stringValue("gravity","aspect-fill");
-//	        image.getBounds()
-//	        if("center".equals(gravity)){
-//	        	canvas.drawPicture(image);
-//	        }
-//	        else if([gravity isEqualToString:@"resize"]){
-//	            layer.contentsGravity = kCAGravityResize;
-//	        }
-//	        else if([gravity isEqualToString:@"top"]){
-//	            layer.contentsGravity = kCAGravityTop;
-//	        }
-//	        else if([gravity isEqualToString:@"bottom"]){
-//	            layer.contentsGravity = kCAGravityBottom;
-//	        }
-//	        else if([gravity isEqualToString:@"left"]){
-//	            layer.contentsGravity = kCAGravityLeft;
-//	        }
-//	        else if([gravity isEqualToString:@"right"]){
-//	            layer.contentsGravity = kCAGravityRight;
-//	        }
-//	        else if([gravity isEqualToString:@"topleft"]){
-//	            layer.contentsGravity = kCAGravityTopLeft;
-//	        }
-//	        else if([gravity isEqualToString:@"topright"]){
-//	            layer.contentsGravity = kCAGravityTopRight;
-//	        }
-//	        else if([gravity isEqualToString:@"bottomleft"]){
-//	            layer.contentsGravity = kCAGravityBottomLeft;
-//	        }
-//	        else if([gravity isEqualToString:@"bottomright"]){
-//	            layer.contentsGravity = kCAGravityBottomRight;
-//	        }
-//	        else if([gravity isEqualToString:@"aspect"]){
-//	            layer.contentsGravity = kCAGravityResizeAspect;
-//	        }
-//	        else{
-//	            layer.contentsGravity = kCAGravityResizeAspectFill;
-//	        }
 			
 			
 			Rect r = getFrame();
+			float imageWidth = image.getIntrinsicWidth();
+			float imageHeight = image.getIntrinsicHeight();
+			float width = r.getWidth();
+			float height = r.getHeight();
 			float displayScale = getDocument().getBundle().displayScale();
 			
-			image.setBounds(0, 0, (int) ( r.getWidth() * displayScale), (int) (r.getHeight() * displayScale));
+			float radius = getCornerRadius();
+			
+			if(radius == 0.0f){
+				canvas.clipRect(0, 0, width * displayScale, height * displayScale);
+			}
+			else {
+				Path path = new Path();
+				path.addRoundRect(new RectF(0,0,width * displayScale,height * displayScale)
+					, radius * displayScale, radius * displayScale, Path.Direction.CW);
+				canvas.clipPath(path);
+			}
+		
+			String gravity = stringValue("gravity","aspect-fill");
+
+	        if("center".equals(gravity)){
+	        	float dx = (imageWidth - width) / 2.0f;
+	        	float dy = (imageHeight - height) / 2.0f;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("resize".equals(gravity)){
+	        	image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        }
+	        else if("top".equals(gravity)){
+	        	float dx = (imageWidth - width) / 2.0f;
+	        	float dy = 0;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("bottom".equals(gravity)){
+	        	float dx = (imageWidth - width) / 2.0f;
+	        	float dy = (imageHeight - height);
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("left".equals(gravity)){
+	        	float dx =0;
+	        	float dy = (imageHeight - height) / 2.0f;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("right".equals(gravity)){
+	        	float dx = (imageWidth - width) ;
+	        	float dy = (imageHeight - height) / 2.0f;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("topleft".equals(gravity)){
+	        	float dx = 0 ;
+	        	float dy = 0;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("topright".equals(gravity)){
+	        	float dx = (imageWidth - width) ;
+	        	float dy = 0;
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("bottomleft".equals(gravity)){
+	        	float dx = 0 ;
+	        	float dy = (imageHeight - height);
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("bottomright".equals(gravity)){
+	        	float dx = (imageWidth - width) ;
+	        	float dy = (imageHeight - height);
+	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
+	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        }
+	        else if("aspect".equals(gravity)){
+	        	float r0 = imageWidth / imageHeight;
+	        	float r1 = width / height;
+	        	if(r0 == r1){
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 > r1){
+	        		imageHeight = width / r0;
+	        		imageWidth = width;
+	        		image.setBounds(0, (int) (imageHeight - height), (int) ( width * displayScale), (int) (height * displayScale));
+	        	}
+	        	else if(r0 < r1){
+	        		imageWidth = height * r0;
+	        		imageHeight = height;
+	        		image.setBounds((int) (imageWidth - width),0, (int) ( width * displayScale), (int) (height * displayScale));
+	        	}
+	        }
+	        else if("aspect-top".equals(gravity)){
+	        	float r0 = imageWidth / imageHeight;
+	        	float r1 = width / height;
+	        	if(r0 == r1){
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 < r1){
+	        		imageHeight = width / r0;
+	        		imageWidth = width;
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 > r1){
+	        		imageWidth = height * r0;
+	        		imageHeight = height;
+	        		image.setBounds(0,0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        }
+	        else if("aspect-bottom".equals(gravity)){
+	        	
+	        	float r0 = imageWidth / imageHeight;
+	        	float r1 = width / height;
+	        	if(r0 == r1){
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 < r1){
+	        		imageHeight = width / r0;
+	        		imageWidth = width;
+	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale));
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 > r1){
+	        		imageWidth = height * r0;
+	        		imageHeight = height;
+	        		canvas.translate((int) ((width - height) * displayScale),0);
+	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	
+	        }
+	        else {
+	        	
+	        	float r0 = imageWidth / imageHeight;
+	        	float r1 = width / height;
+	        	if(r0 == r1){
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 < r1){
+	        		imageHeight = width / r0;
+	        		imageWidth = width;
+	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale * 0.5));
+	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	else if(r0 > r1){
+	        		imageWidth = height * r0;
+	        		imageHeight = height;
+	        		canvas.translate((int) ((width - height) * displayScale * 0.5),0);
+	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	}
+	        	
+	        }
 			
 			image.draw(canvas);
 			

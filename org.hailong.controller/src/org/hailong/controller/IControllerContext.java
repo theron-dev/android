@@ -24,4 +24,7 @@ public interface IControllerContext <T extends IServiceContext>{
 	
 	public Object getConfig();
 
+	public boolean isIdleTimerDisabled();
+	
+	public void setIdleTimerDisabled(boolean idleTimerDisabled);
 }
