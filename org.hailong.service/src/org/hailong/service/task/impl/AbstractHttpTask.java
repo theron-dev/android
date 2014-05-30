@@ -12,11 +12,20 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 	
 	private final static int WHAT_FINISH = 1;
 	private final static int WHAT_ERROR = 2;
-	
+	private final static int WHAT_WILLREQUEST = 3;
 	
 	protected HttpUriRequest httpRequest;
 	private Object waiter;
 	private boolean canceled;
+	private Object _source;
+	
+	public Object getSource(){
+		return _source;
+	}
+	
+	public void setSource(Object source){
+		_source = source;
+	}
 	
 	public AbstractHttpTask(HttpUriRequest httpRequest){
 		this.httpRequest = httpRequest;
@@ -24,6 +33,10 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 	
 	public HttpUriRequest getHttpRequest() {
 		return httpRequest;
+	}
+	
+	public void setHttpRequest(HttpUriRequest httpRequest){
+		this.httpRequest = httpRequest;
 	}
 
 
@@ -38,13 +51,19 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 			else if(message.what == WHAT_ERROR){
 				onException((Exception)message.obj);
 			}
+			else if(message.what == WHAT_WILLREQUEST){
+				onWillRequest();
+			}
 		}
 		
-		synchronized (waiter) {
-			waiter.notifyAll();
+		if(waiter != null){
+			
+			synchronized (waiter) {
+				waiter.notifyAll();
+			}
+			
+			waiter = null;
 		}
-		
-		waiter = null;
 	}
 	
 	public void onBackgroundLoaded(T result){
@@ -55,6 +74,9 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 	
 	public abstract void onException(Exception ex);
 	
+	public void onWillRequest(){
+		
+	}
 
 	public void sendFinishMessage(T result,Object waiter){
 		
@@ -79,6 +101,19 @@ public abstract class AbstractHttpTask<T> extends Handler implements IHttpTask<T
 		Message msg = new Message();
 		msg.what = WHAT_ERROR;
 		msg.obj = ex;
+		synchronized (waiter) {
+			sendMessage(msg);
+			try {
+				waiter.wait(1000);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+	
+	public void sendWillRequestMessage(Object waiter){
+		this.waiter = waiter;
+		Message msg = new Message();
+		msg.what = WHAT_WILLREQUEST;
 		synchronized (waiter) {
 			sendMessage(msg);
 			try {

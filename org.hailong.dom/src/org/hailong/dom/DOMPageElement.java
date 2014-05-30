@@ -38,7 +38,7 @@ public class DOMPageElement extends DOMViewElement implements DOMDocumentView.On
 	
 	protected PagerAdapter getPagerAdapter(){
 		if(_pagerAdapter == null){
-			
+
 			_pagerAdapter = new PagerAdapter() {
 				
 				private List<DOMDocumentView> _documentViews;

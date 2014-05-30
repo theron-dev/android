@@ -5,12 +5,12 @@ import java.util.List;
 import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 public class DOMListElement extends DOMViewElement implements ListAdapter , DOMDocumentView.OnElementActionListener, DOMDocumentView.OnElementVisableListener{
 
@@ -20,7 +20,7 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		
 		try {
 			
-			Class<?> clazz = Class.forName(stringValue("viewClass","android.widget.ListView"));
+			Class<?> clazz = Class.forName(stringValue("viewClass","org.hailong.dom.DOMListElement$ListView"));
 			
 			if( ! ListView.class.isAssignableFrom(clazz)){
 				return ListView.class;
@@ -255,5 +255,14 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		}
 	}
 	
+	
+	public static class ListView extends android.widget.ListView{
 
+		public ListView(Context context) {
+			super(context);
+			// TODO Auto-generated constructor stub
+		}
+		
+		
+	}
 }

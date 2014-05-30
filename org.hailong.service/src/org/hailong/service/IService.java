@@ -16,6 +16,8 @@ public interface IService {
 	
 	public <T extends ITask> boolean cancelHandle(Class<T> taskType,T task) throws Exception;
 	
+	public boolean cancelHandleForSource(Object source) throws Exception;
+	
 	public void didReceiveMemoryWarning();
 	
 	public ServiceState getServiceState();

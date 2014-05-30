@@ -7,8 +7,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.http.client.methods.HttpGet;
@@ -174,10 +176,10 @@ public class ResourceService extends AbstractService{
 				}
 			}
 			
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 
 	public <T extends ITask> boolean cancelHandle(Class<T> taskType, T task)
@@ -228,10 +230,44 @@ public class ResourceService extends AbstractService{
 					}
 				}
 			}
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
+	}
+	
+
+	@Override
+	public boolean cancelHandleForSource(Object source) throws Exception {
+		
+		if(_httpTasks != null){
+			
+			String[] keys = _httpTasks.keySet().toArray(new String[_httpTasks.size()]);
+			
+			for(String key : keys){
+				
+				HttpTask httpTask = _httpTasks.get(key);
+
+				List<IResourceTask> tasks = new ArrayList<IResourceTask>(4);
+		
+				for(IResourceTask resTask : httpTask.tasks){
+					if(resTask.getSource() == source){
+						resTask.setLoading(false);
+						tasks.add(resTask);
+					}
+				}
+				
+				if(httpTask.tasks.size() - tasks.size() == 0){
+					getContext().cancelHandle(IHttpResourceTask.class, httpTask);
+					_httpTasks.remove(key);
+				}
+				else {
+					httpTask.tasks.removeAll(tasks);
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	@Override
@@ -331,4 +367,5 @@ public class ResourceService extends AbstractService{
 			
 		}
 	}
+
 }

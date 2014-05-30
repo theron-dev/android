@@ -25,9 +25,13 @@ public class DOMCanvasElement extends DOMLayoutElement implements IDOMCanvasElem
 		
 	}
 	
+	public Color getBackgroundColor(){
+		return colorValue("background-color",new Color());
+	}
+	
 	protected void drawBackground(Canvas canvas){
 		
-		Color backgroundColor = colorValue("background-color",new Color());
+		Color backgroundColor = getBackgroundColor();
 		
 		if(backgroundColor.a != 0.0f){
 			

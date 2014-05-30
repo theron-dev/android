@@ -105,6 +105,7 @@ public class DOMImageElement extends DOMCanvasElement {
 	        			, (int) ( width * displayScale), (int) (height * displayScale));
 	        }
 	        else if("resize".equals(gravity)){
+	        	canvas.scale(width / imageWidth, height / imageHeight);
 	        	image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        }
 	        else if("top".equals(gravity)){
@@ -164,11 +165,13 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	else if(r0 > r1){
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
+	        		canvas.scale(width / imageWidth, width / imageWidth);
 	        		image.setBounds(0, (int) (imageHeight - height), (int) ( width * displayScale), (int) (height * displayScale));
 	        	}
 	        	else if(r0 < r1){
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
+	        		canvas.scale(height / imageHeight, height / imageHeight);
 	        		image.setBounds((int) (imageWidth - width),0, (int) ( width * displayScale), (int) (height * displayScale));
 	        	}
 	        }
@@ -176,16 +179,19 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
+	        		canvas.scale(width / imageWidth, height / imageHeight);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 < r1){
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
+	        		canvas.scale(width / imageWidth, width / imageWidth);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 > r1){
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
+	        		canvas.scale(height / imageHeight, height / imageHeight);
 	        		image.setBounds(0,0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        }
@@ -194,18 +200,21 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
+	        		canvas.scale(width / imageWidth, height / imageHeight);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 < r1){
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
 	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale));
+	        		canvas.scale(width / imageWidth, width / imageWidth);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 > r1){
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
 	        		canvas.translate((int) ((width - height) * displayScale),0);
+	        		canvas.scale(height / imageHeight, height / imageHeight);
 	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	
@@ -215,18 +224,21 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
+	        		canvas.scale(width / imageWidth, height / imageHeight);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 < r1){
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
 	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale * 0.5));
+	        		canvas.scale(width / imageWidth, width / imageWidth);
 	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	else if(r0 > r1){
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
 	        		canvas.translate((int) ((width - height) * displayScale * 0.5),0);
+	        		canvas.scale(height / imageHeight, height / imageHeight);
 	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
 	        	}
 	        	

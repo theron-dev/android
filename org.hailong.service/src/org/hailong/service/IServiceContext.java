@@ -9,6 +9,8 @@ public interface IServiceContext {
 	
 	public <T extends ITask> boolean cancelHandle(Class<T> taskType,T task) throws Exception;
 	
+	public boolean cancelHandleForSource(Object source) throws Exception;
+	
 	public File getDir(String name,int mode);
 	
 	public File getDatabasePath(String name);

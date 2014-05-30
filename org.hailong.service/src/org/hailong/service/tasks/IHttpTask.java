@@ -13,4 +13,6 @@ public interface IHttpTask<T> extends ITask {
 	public void setCanceled(boolean canceled);
 	public void sendFinishMessage(T result,Object waiter);
 	public void sendErrorMessage(Exception ex,Object waiter);
+	public void sendWillRequestMessage(Object waiter);
+	
 }

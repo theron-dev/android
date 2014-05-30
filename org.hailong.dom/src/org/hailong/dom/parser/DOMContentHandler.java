@@ -8,11 +8,13 @@ import org.hailong.dom.DOMActionElement;
 import org.hailong.dom.DOMCanvasElement;
 import org.hailong.dom.DOMContainerElement;
 import org.hailong.dom.DOMElement;
+import org.hailong.dom.DOMHScrollElement;
 import org.hailong.dom.DOMImageElement;
 import org.hailong.dom.DOMLabelElement;
 import org.hailong.dom.DOMLinkElement;
 import org.hailong.dom.DOMListElement;
 import org.hailong.dom.DOMPageElement;
+import org.hailong.dom.DOMStatusElement;
 import org.hailong.dom.DOMVScrollElement;
 import org.hailong.dom.DOMViewElement;
 import org.xml.sax.Attributes;
@@ -44,9 +46,11 @@ public class DOMContentHandler implements ContentHandler {
 		_elementClasss.put("action", DOMActionElement.class);
 		_elementClasss.put("container", DOMContainerElement.class);
 		_elementClasss.put("vscroll", DOMVScrollElement.class);
+		_elementClasss.put("hscroll", DOMHScrollElement.class);
 		_elementClasss.put("list", DOMListElement.class);
 		_elementClasss.put("view", DOMViewElement.class);
 		_elementClasss.put("page", DOMPageElement.class);
+		_elementClasss.put("status", DOMStatusElement.class);
 	}
 	
 	public void putElementClass(String name,Class<?> elementClass){

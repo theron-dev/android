@@ -198,10 +198,10 @@ public final class URL {
 				
 				if(index >= 0){
 					url += "&" ;
-					index = -1;
 				}
 				else{
 					url += "?";
+					index = 0;
 				}
 				
 				url += key + "=" + encodeQueryValue(queryValues.get(key));

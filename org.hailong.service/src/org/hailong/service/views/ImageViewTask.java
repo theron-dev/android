@@ -15,6 +15,8 @@ public class ImageViewTask extends ImageView implements IImageTask {
 	private boolean _forceDownload = false;
 	private boolean _hasImage = false;
 	private boolean _loading = false;
+	private Object _source;
+	
 	
 	public ImageViewTask(Context context) {
 		super(context);
@@ -30,6 +32,14 @@ public class ImageViewTask extends ImageView implements IImageTask {
 	public ImageViewTask(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
+	}
+	
+	public Object getSource(){
+		return _source;
+	}
+	
+	public void setSource(Object source){
+		_source = source;
 	}
 	
 	@android.view.ViewDebug.ExportedProperty

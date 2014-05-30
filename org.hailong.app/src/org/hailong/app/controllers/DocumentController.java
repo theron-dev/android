@@ -68,27 +68,32 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 	
 	public void loadXMLContent(Reader reader,URL documentURL){
 		
-		DOMDocument document = new DOMDocument(getBundle());
-
-		document.setDocumentURL(documentURL);
+		if(getActivity() != null){
 		
-		DOMParser parser = DOMParser.defaultParser();
-		
-		try {
-			parser.parseHTML(reader, document);
-		} catch (Exception e) {
-			Log.d(App.TAG, Log.getStackTraceString(e));
+			DOMDocument document = new DOMDocument(getBundle());
+	
+			document.setDocumentURL(documentURL);
+			
+			DOMParser parser = DOMParser.defaultParser();
+			
+			try {
+				parser.parseHTML(reader, document);
+			} catch (Exception e) {
+				Log.d(App.TAG, Log.getStackTraceString(e));
+			}
+			
+			document.setStyleSheet(getServiceContext().getStyleSheet());
+	
+			setDocument(document);
+			
+			if(_documentView != null){
+				_documentView.setElement(_document.getRootElement());
+				downloadImagesForView((View) _documentView);
+			}
 		}
-		
-		document.setStyleSheet(getServiceContext().getStyleSheet());
-
-		setDocument(document);
-		
-		if(_documentView != null){
-			_documentView.setElement(_document.getRootElement());
-			downloadImagesForView((View) _documentView);
+		else {
+			Log.e(App.TAG, "loadXMLContent not foud Activity");
 		}
-		
 	}
 
 	@Override
@@ -118,7 +123,7 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 				
 				String src = imageElement.getAttributeValue("src");
 				
-				if(src != null && src.length() >0){
+				if(src != null && (src.startsWith("http://") || src.startsWith("https://"))){
 					imageTask = new DOMImageElementTask(imageElement);
 					imageElement.setImageLoader(imageTask);
 				}
@@ -127,6 +132,7 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 			if(imageTask != null && ! imageTask.isLoading()){
 				
 				try {
+					imageTask.setSource(this);
 					getServiceContext().handle(IImageTask.class, imageTask,0);
 				} catch (Exception e) {
 					Log.d(C.TAG, Log.getStackTraceString(e));
@@ -200,6 +206,7 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 
 		private final DOMImageElement _element;
 		private boolean _loading;
+		private Object _source;
 		
 		public DOMImageElementTask(DOMImageElement element){
 			_element = element;
@@ -247,6 +254,14 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 
 		public void onException(Exception ex) {
 
+		}
+		
+		public Object getSource(){
+			return _source;
+		}
+		
+		public void setSource(Object source){
+			_source = source;
 		}
 		
 	}

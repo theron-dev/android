@@ -12,12 +12,11 @@ import org.hailong.db.annotation.DBField;
 import org.hailong.db.annotation.DBFieldType;
 import org.hailong.service.AbstractService;
 import org.hailong.service.IServiceContext;
-import org.hailong.service.ITask;
 import org.hailong.service.tasks.IDownlinkTask;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 
-public class DownlinkService extends AbstractService {
+public abstract class DownlinkService extends AbstractService {
 
 	private DBContext _dbContext = null;
 	private ThreadPoolExecutor _poolExcutor = null;
@@ -28,7 +27,7 @@ public class DownlinkService extends AbstractService {
 		
 		if(_dbContext == null && ctx != null){
 			
-			SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(ctx.getDatabasePath(getClass().getSimpleName().concat(".sqlite")), null);
+			SQLiteDatabase database = SQLiteDatabase.openOrCreateDatabase(ctx.getDatabasePath(getClass().getName().concat(".sqlite")), null);
 			
 			_dbContext = new DBContext(database);
 			
@@ -48,20 +47,6 @@ public class DownlinkService extends AbstractService {
 		return _poolExcutor;
 	}
 	
-	public <T extends ITask> boolean handle(Class<T> taskType, T task,
-			int priority) throws Exception {
-
-
-		 
-		
-		return false;
-	}
-
-	public <T extends ITask> boolean cancelHandle(Class<T> taskType, T task)
-			throws Exception {
-
-		return false;
-	}
 	
 	public void didLoadedFormCached(IDownlinkTask downlinkTask,Class<?> taskType){
 		
@@ -206,4 +191,5 @@ public class DownlinkService extends AbstractService {
 			setValue(DF_TIMESTAMP, timestamp);
 		}
 	}
+
 }

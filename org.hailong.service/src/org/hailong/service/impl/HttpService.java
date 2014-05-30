@@ -87,6 +87,26 @@ public class HttpService extends AbstractService {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean cancelHandleForSource(Object source) throws Exception {
+
+		ThreadPoolExecutor pool = getPoolExecutor();
+	
+		Object[] runnables = pool.getQueue().toArray();
+		
+		for(Object runnable : runnables){
+			if(runnable instanceof ConnectionRunnable){
+				ConnectionRunnable run = (ConnectionRunnable) runnable;
+				if(run.httpTask.getSource() == source){
+					run.httpTask.setCanceled(true);
+					pool.remove(run);
+				}
+			}
+		}
+		
+		return false;
+	}
 
 	@Override
 	public void destroy(){
@@ -122,6 +142,8 @@ public class HttpService extends AbstractService {
 			
 			try {
 				
+				httpTask.sendWillRequestMessage(waiter);
+	
 				Object result = httpClient.execute(httpTask.getHttpRequest(),httpTask.getResponseHandler());
 				
 				httpTask.sendFinishMessage(result,waiter);

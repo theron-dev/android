@@ -70,6 +70,8 @@ public class URLDownlinkService extends DownlinkService {
 				getContext().handle(IHttpAPITask.class, httpTask, 0);
 				
 			}
+			
+			return true;
 		}
 		 
 		
@@ -109,7 +111,27 @@ public class URLDownlinkService extends DownlinkService {
 				}
 			
 			}
+			
+			return true;
 		}
+		
+		return false;
+	}
+	
+	@Override
+	public boolean cancelHandleForSource(Object source) throws Exception {
+		
+		List<HttpTask> httpTasks = new ArrayList<HttpTask>(2);
+		
+		for(HttpTask httpTask :_httpTasks){
+			
+			if(httpTask.task.getSource() == source){
+				getContext().cancelHandle(IHttpAPITask.class, httpTask);
+				httpTasks.add(httpTask);
+			}
+		}
+
+		_httpTasks.removeAll(httpTasks);
 		
 		return false;
 	}
@@ -174,4 +196,6 @@ public class URLDownlinkService extends DownlinkService {
 		}
 		
 	}
+
+	
 }

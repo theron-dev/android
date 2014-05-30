@@ -3,21 +3,21 @@ package org.hailong.dom;
 import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
-import org.hailong.dom.DOMVScrollElement.ScrollView.OnScrollListener;
+import org.hailong.dom.DOMHScrollElement.ScrollView.OnScrollListener;
 
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
-public class DOMVScrollElement extends DOMContainerElement  {
+public class DOMHScrollElement extends DOMContainerElement {
 	
 	public Size onLayoutChildren(Edge padding){
 		
 		Rect frame = getFrame();
 		
-		Size contentSize = new Size(frame.getWidth(),0);
+		Size contentSize = new Size(0,frame.getHeight());
 
-		float width = frame.getWidth() - padding.getLeft() - padding.getRight();
+		float height = frame.getHeight() - padding.getTop() - padding.getBottom();
 		
 		for(DOMElement element : getChilds()){
 			
@@ -27,24 +27,24 @@ public class DOMVScrollElement extends DOMContainerElement  {
 				
 				Edge margin = layoutElement.getMargin();
 				
-				layoutElement.layout(new Size(width - margin.getLeft() - margin.getRight(),frame.getHeight()));
+				layoutElement.layout(new Size(frame.getWidth(), height - margin.getTop() - margin.getBottom()));
 				
 				Rect r = layoutElement.getFrame();
 				
-				r.x = padding.getLeft() + margin.getLeft();
-				r.y = padding.getTop() + margin.getTop() + contentSize.getHeight();
-				r.width = width - margin.getLeft() - margin.getRight();
+				r.y = padding.getTop() + margin.getTop();
+				r.x = padding.getLeft() + margin.getLeft() + contentSize.getWidth();
+				r.height = height - margin.getLeft() - margin.getRight();
 				
-				contentSize.height = contentSize.getHeight() + r.getHeight() + margin.getTop() + margin.getBottom();
+				contentSize.width = contentSize.getWidth() + r.getWidth() + margin.getLeft() + margin.getRight();
 				
 			}
 			
 		}
 
-		contentSize.height = contentSize.getHeight() + padding.getTop() + padding.getBottom();
+		contentSize.width = contentSize.getWidth() + padding.getLeft() + padding.getRight();
 		
-		if(contentSize.getHeight() < frame.getHeight()){
-			contentSize.height = frame.getHeight();
+		if(contentSize.getWidth() < frame.getWidth()){
+			contentSize.width = frame.getWidth();
 		}
 		
 		return contentSize;
@@ -54,7 +54,7 @@ public class DOMVScrollElement extends DOMContainerElement  {
 		
 		try {
 			
-			Class<?> clazz = Class.forName(stringValue("viewClass","org.hailong.dom.DOMVScrollElement$ScrollView"));
+			Class<?> clazz = Class.forName(stringValue("viewClass","org.hailong.dom.DOMHScrollElement$ScrollView"));
 			
 			if( ! ScrollView.class.isAssignableFrom(clazz)){
 				return ScrollView.class;
@@ -81,13 +81,13 @@ public class DOMVScrollElement extends DOMContainerElement  {
 		
 	}
 	
-	public static class ScrollView extends android.widget.ScrollView{
+	public static class ScrollView extends android.widget.HorizontalScrollView{
 
 		private OnScrollListener _OnScrollListener;
 		
 		public ScrollView(Context context) {
 			super(context);
-			// TODO Auto-generated constructor stub
+			setHorizontalScrollBarEnabled(false);
 		}
 		
 		public OnScrollListener getOnScrollListener(){
@@ -106,6 +106,7 @@ public class DOMVScrollElement extends DOMContainerElement  {
 			}
 		}
 		
+		
 		public static interface OnScrollListener {
 			
 			public void onScroll(int scrollX,int scrollY);
@@ -113,4 +114,5 @@ public class DOMVScrollElement extends DOMContainerElement  {
 		}
 		
 	}
+	
 }

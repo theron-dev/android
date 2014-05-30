@@ -21,10 +21,6 @@ public abstract class BaseHttpTask extends AbstractHttpTask<String> implements I
 		super(httpRequest);
 	}
 	
-	@Override
-	public HttpUriRequest getHttpRequest() {
-		return httpRequest;
-	}
 
 	public ResponseHandler<String> getResponseHandler() {
 		return this;

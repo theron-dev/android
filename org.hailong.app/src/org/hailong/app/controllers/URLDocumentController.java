@@ -59,7 +59,7 @@ public class URLDocumentController<T extends AppContext> extends DocumentControl
 	public URL getDocumentURL(){
 		String url = Value.stringValueForKey(getConfig(), "url");
 		if(url != null){
-			return new URL(url);
+			return new URL(url,null,this.getURL().getQueryValues());
 		}
 		return null;
 	}
@@ -132,6 +132,8 @@ public class URLDocumentController<T extends AppContext> extends DocumentControl
 			}
 			
 			HttpGet http = new HttpGet(url.toString());
+			
+			Log.d(App.TAG, url.toString());
 			
 			_httpTask = new BaseHttpTask(http) {
 

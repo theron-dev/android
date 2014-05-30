@@ -5,42 +5,154 @@ import java.util.List;
 import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
-import org.hailong.view.ScrollView;
 import android.content.Context;
-import android.util.Log;
-import android.util.SparseArray;
+import android.graphics.Canvas;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+public class DOMContainerElement extends DOMViewElement implements DOMDocumentView.OnElementActionListener,DOMDocumentView.OnElementVisableListener {
 
-public class DOMContainerElement extends DOMViewElement implements DOMDocumentView.OnElementActionListener ,DOMContainerView.OnScrollListener{
+	private DOMContainerView.Adapter _adapter = null;
+	private int _scrollX = 0;
+	private int _scrollY = 0;
+	private DOMContainerView _containerView = null;
+	
+	protected DOMContainerView.Adapter getAdapter(){
+		if(_adapter == null){
+			_adapter = new DOMContainerView.Adapter(){
 
-	private List<DOMContainerItemView> _dequeueItemViews;
+				private List<DOMContainerItemView> _documentViews;
+				
+				@Override
+				public int getCount() {
+					return getChildCount();
+				}
+
+				@Override
+				public Object getItem(int position) {
+					return getChildAt(position);
+				}
+
+				@Override
+				public Rect getItemRect(int position, Object object) {
 	
-	public Class<?> getViewClass(){
-		
-		try {
+					if(object instanceof IDOMLayoutElement){
+						float displayScale = getDocument().getBundle().displayScale();
+						Rect frame = ((IDOMLayoutElement) object).getFrame();
+						return new Rect(frame.getX() * displayScale,frame.getY() * displayScale
+								,frame.getWidth() * displayScale,frame.getHeight() * displayScale);
+					}
+					
+					return new Rect();
+				}
+
+
+				@Override
+				public boolean isViewFromObject(View view,int position, Object element) {
+					DOMContainerItemView documentView = (DOMContainerItemView) view; 
+					return documentView.getElement() == element;
+				}
+				
+	            public void destroyItem(ViewGroup container, int position,Object element) {
+					
+					if(_documentViews != null) {
+						for(DOMContainerItemView documentView : _documentViews){
+							if(documentView.getElement() == element){
+								documentView.setElement(null);
+								documentView.setOnElementActionListener(null);
+								documentView.setOnElementVisableListener(null);
+							}
+						}
+					}
+				}
+				
+				@Override  
+	            public View instantiateItemView(ViewGroup container, int position,Object object) {  
+					
+					DOMElement element = (DOMElement) object;
+					
+					DOMContainerItemView documentView = null;
+					
+					String reuse = element.getAttributeValue("reuse");
+					
+					if(_documentViews != null) {
+						
+						for(DOMContainerItemView docView : _documentViews){
+							
+							if(docView.getElement() == null 
+									&& (docView.reuse == reuse || (reuse != null && reuse.equals(docView.reuse)))){
+								documentView = docView;
+								break;
+							}
+
+						}
+						
+					}
+					
+					if(documentView == null){
+						documentView = new DOMContainerItemView(container.getContext());
+						documentView.reuse = reuse;
+						if(_documentViews == null){
+							_documentViews = new ArrayList<DOMContainerItemView>(4);
+						}
+						_documentViews.add(documentView);
+					}
+					
+					documentView.setElement(element);
+					
+					documentView.setOnElementActionListener(DOMContainerElement.this);
+					
+					documentView.setOnElementVisableListener(DOMContainerElement.this);
+					
+					IDOMViewEntity entity = getViewEntity();
+					
+					if(entity != null){
+						entity.elementVisable(documentView, element);
+					}
+					
+	                return documentView;
+	            }
+
+				@Override
+				public boolean isVisable(Rect rect) {
+					float displayScale = getDocument().getBundle().displayScale();
+					Rect frame = getFrame();
+					int left = _scrollX;
+					int top = _scrollY;
+					int right = left + (int) (frame.getWidth() * displayScale +0.999999f);
+					int bottom = top + (int) (frame.getHeight() * displayScale +0.999999f);
 			
-			Class<?> clazz = Class.forName(stringValue("viewClass","org.hailong.dom.DOMContainerView"));
-			
-			if( ! DOMContainerView.class.isAssignableFrom(clazz)){
-				return DOMContainerView.class;
-			}
-	
-		} catch (ClassNotFoundException e) {
-			Log.e(DOM.TAG, Log.getStackTraceString(e));
+					left = Math.max(left,(int) (rect.getX() + 0.999999f));
+					top = Math.max(top,(int) (rect.getY() + 0.999999f));
+					right = Math.min(right,(int) (rect.getX() + rect.getWidth() + 0.999999f));
+					bottom = Math.min(bottom,(int) (rect.getY() + rect.getHeight() + 0.999999f));
+					
+					return right - left > 0 && bottom - top > 0;
+				}
+
+				
+				};
 		}
-	
-		return DOMContainerView.class;
+		return _adapter;
 	}
 	
+	public void setScroll(int scrollX,int scrollY){
+		_scrollX = scrollX;
+		_scrollY = scrollY;
+		DOMContainerView v = getContentView();
+		if(v != null){
+			v.reloadData(false);
+		}
+	}
 	public void setView(View view){
 		
 		DOMContainerView v = getContentView();
 		
 		if(v != null){
-			v.setOnScrollListener(null);
+			v.setAdapter(null);
+			_containerView = null;
+			_scrollX = _scrollY = 0;
 		}
 		
 		super.setView(view);
@@ -48,164 +160,49 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 		v = getContentView();
 		
 		if(v != null){
-			v.setOnScrollListener(this);
+			
+			if(isLayouted()){
+				v.setAdapter(getAdapter());
+			}
 		}
 	}
 	
 	public DOMContainerView getContentView(){
-		return (DOMContainerView) getView();
+		if(_containerView == null){
+			View v = getView();
+			if(v instanceof ViewGroup){
+				_containerView = new DOMContainerView(v.getContext());
+				((ViewGroup)v).addView(_containerView);
+			}
+		}
+		return _containerView;
 	}
 	
-	protected void onViewEntityChanged(IDOMViewEntity viewEntity){
-		super.onViewEntityChanged(viewEntity);
-		reloadData(true);
+	protected Size onLayoutChildren(Edge padding){
+		return super.layoutChildren(padding);
 	}
 	
 	public Size layoutChildren(Edge padding){
 		
-		Size contentSize = super.layoutChildren(padding);
+		Size contentSize = onLayoutChildren(padding);
 		
 		if(isViewLoaded()){
 			
-			float displayScale = getDocument().getBundle().displayScale();
+			DOMContainerView v = getContentView();
 			
-			ScrollView contentView = getContentView();
-			
-			contentView.setContentSize((int) (contentSize.getWidth() * displayScale), (int) (contentSize.getHeight() * displayScale));
-			
-			reloadData(true);
+			if(v != null){
+				if(v.getAdapter() == null){
+					v.setAdapter(getAdapter());
+				}
+				else {
+					v.getAdapter().notifyDataSetChanged();
+				}
+			}
 		}
 		
 		return contentSize;
 	}
-	
-	public void reloadData(boolean reload){
 
-		if(isViewLoaded()){
-			
-			ScrollView contentView = getContentView();
-			
-			DOMBundle bundle = getDocument().getBundle();
-			
-			Context context = bundle.getContext();
-			
-			float displayScale = bundle.displayScale();
-			
-			float offsetX = contentView.getContentOffsetX();
-			float offsetY = contentView.getContentOffsetY();
-			
-			SparseArray<DOMContainerItemView> itemViews = new SparseArray<DOMContainerItemView>();
-			
-			int c = contentView.getChildCount();
-			int index = 0;
-			
-			for(index=0;index<c;index++){
-				
-				View v = contentView.getChildAt(index);
-				
-				if(v instanceof DOMContainerItemView){
-					itemViews.put(((DOMContainerItemView) v).getIndex(), (DOMContainerItemView) v);
-				}
-				
-			}
-			
-			if(_dequeueItemViews == null){
-				_dequeueItemViews = new ArrayList<DOMContainerItemView>(4);
-			}
-			
-			c = getChildCount();
-			
-			index = 0;
-			
-
-			for(DOMElement element : getChilds()){
-				
-				if(element instanceof IDOMLayoutElement){
-					
-					Rect r = ((IDOMLayoutElement) element).getFrame();
-					
-					if(isVisableRect(r, offsetX, offsetY,displayScale)){
-						
-						DOMContainerItemView itemView = itemViews.get(index);
-						
-						if(itemView == null){
-							
-							String reuse = element.getAttributeValue("reuse");
-							
-							int i = 0;
-							
-							for(DOMContainerItemView v :_dequeueItemViews){
-								
-								if(reuse == v.reuse || (reuse!= null && reuse.equals(v.reuse))){
-									itemView = v;
-									_dequeueItemViews.remove(i);
-									break;
-								}
-								
-								i ++;
-								
-							}
-
-						}
-						
-						if(itemView == null){
-							itemView = new DOMContainerItemView(context);
-							itemView.setOnElementActionListener(this);
-						}
-						
-						itemView.setLeft((int) (r.getX() * displayScale));
-						itemView.setTop((int) (r.getY() * displayScale));
-						itemView.setRight((int) ((r.getX() + r.getWidth()) * displayScale));
-						itemView.setBottom((int) ((r.getY() + r.getHeight()) * displayScale));
-						
-						if(itemView.getParent() == null){
-							contentView.addView(itemView);
-						}
-						
-						if(itemView.getElement() != element){
-							itemView.setElement(element);
-						}
-						else if(reload){
-							itemView.invalidate();
-						}
-						
-						onElementVisable(element,index,itemView);
-					}
-					else {
-						
-						DOMContainerItemView itemView = itemViews.get(index);
-		             
-		                if(itemView != null){
-		                	itemView.setIndex(-1);
-		                	itemView.setElement(null);
-		                	_dequeueItemViews.add(itemView);
-		                	itemViews.remove(index);
-		                }
-					}
-					index ++;
-				}
-			}
-			
-
-			for(DOMContainerItemView itemView :_dequeueItemViews){
-				itemView.removeFromParent();
-			}
-			
-			c = itemViews.size();
-			
-			for(int i=0;i<c;i++){
-				
-				DOMContainerItemView itemView = itemViews.valueAt(i);
-				itemView.setIndex(-1);
-				itemView.setElement(null);
-				_dequeueItemViews.add(itemView);
-				itemView.removeFromParent();
-			}
-
-		}
-
-	}
-	
 	public static class DOMContainerItemView extends DOMDocumentView {
 
 		public String reuse;
@@ -230,36 +227,13 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 		public void setIndex(int index){
 			setTag(R.id.index, index);
 		}
+		
+		@Override
+		protected void drawElement(Canvas canvas,Size size,DOMElement element,float displayScale){
+			super.drawElement(canvas, size, element, displayScale);
+		}
 	}
 	
-	protected boolean isVisableRect(Rect frame,float offsetX,float offsetY,float displayScale){
-
-		Rect r = getFrame();
-		
-		float left = Math.max(offsetX, frame.getX() * displayScale);
-		float top = Math.max(offsetY, frame.getY() * displayScale);
-		float right = Math.min(offsetX + r.getWidth() * displayScale, (frame.getX() + frame.getWidth()) * displayScale);
-		float bottom = Math.min(offsetY + r.getHeight() * displayScale, (frame.getY() + frame.getHeight()) * displayScale);
-		
-		return right - left > 0.0f && bottom - top >0.0f;
-	}
-
-
-	protected void onElementVisable(DOMElement element,int index,DOMContainerItemView itemView){
-		
-		IDOMViewEntity entity = getViewEntity();
-		
-		if(entity != null){
-			entity.elementVisable(itemView, element);
-		}
-		
-	}
-
-	@Override
-	public void onScroll(DOMContainerView containerView, int scrollX,
-			int scrollY) {
-		reloadData(false);
-	}
 
 	@Override
 	public void onElementAction(DOMDocumentView documentView,
@@ -268,9 +242,20 @@ public class DOMContainerElement extends DOMViewElement implements DOMDocumentVi
 		IDOMViewEntity entity = getViewEntity();
 		
 		if(entity != null){
-			entity.doAction(viewEntity,this);
+			entity.doAction(viewEntity,element);
 		}
 		
+	}
+
+	@Override
+	public void onElementVisable(DOMDocumentView documentView,
+			IDOMViewEntity viewEntity, DOMElement element) {
+
+		IDOMViewEntity entity = getViewEntity();
+		
+		if(entity != null){
+			entity.elementVisable(viewEntity, element);
+		}
 	}
 
 }

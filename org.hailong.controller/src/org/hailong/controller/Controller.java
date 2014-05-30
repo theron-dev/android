@@ -35,9 +35,25 @@ public class Controller<T extends IServiceContext> extends Fragment {
         return _viewLayout != null ? _viewLayout.getView(inflater, container) : null;  
     }  
 	
+	@Override
+	public void onDestroy(){
+		
+		T ctx = getServiceContext();
+		
+		if(ctx != null){
+			try {
+				ctx.cancelHandleForSource(this);
+			} catch (Exception e) {
+				Log.e(C.TAG, Log.getStackTraceString(e));
+			}
+		}
+		
+		super.onDestroy();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public IControllerContext<T> getControllerContext(){
-		
+
 		if(_controllerContext != null){
 			return  _controllerContext;
 		}
@@ -230,6 +246,8 @@ public class Controller<T extends IServiceContext> extends Fragment {
 			if(imageTask.isNeedDownload() && !imageTask.isLoading()){
 				
 				try {
+					
+					imageTask.setSource(this);
 					
 					getServiceContext().handle(ILocalResourceTask.class, imageTask, 0);
 					

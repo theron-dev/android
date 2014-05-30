@@ -18,6 +18,7 @@ public class DOMElement  {
 	private DOMDocument _document;
 	private DOMStyle _style;
 	private IDOMViewEntity _viewEntity;
+	private Map<String,Object> _values;
 	
 	public String getNamespace(){
 		return _namespace;
@@ -100,15 +101,7 @@ public class DOMElement  {
 	}
 	
 	public void addChild(DOMElement element){
-		if( element._parent != null){
-			element.removeFromParent();
-		}
-		element._parent = this;
-		element._document = _document;
-		if(_childs == null){
-			_childs = new ArrayList<DOMElement>();
-		}
-		_childs.add(element);
+		addChild(element,_childs == null ? 0 : _childs.size());
 	}
 	
 	public void addChild(DOMElement element,int index){
@@ -216,7 +209,7 @@ public class DOMElement  {
 		String v = getAttributeValue(name);
 		
 		if(v != null){
-			return !"false".equals(v) &&  ! "no".equals(v) &&  "".equals(v) && ! "0".equals(v);
+			return ! ("false".equals(v) ||  "no".equals(v) ||  "".equals(v) || "0".equals(v));
 		}
 		
 		if(_style != null){
@@ -319,5 +312,22 @@ public class DOMElement  {
 	public boolean isViewEntity(IDOMViewEntity viewEntity){
 		return _viewEntity == null || _viewEntity == viewEntity;
 	}
+
+	public Object getValue(String key){
+		return _values == null ? null : _values.get(key);
+	}
 	
+	public void setValue(String key,Object value){
+		if(value == null){
+			if(_values !=null){
+				_values.remove(key);
+			}
+		}
+		else {
+			if(_values == null){
+				_values = new HashMap<String,Object>(4);
+			}
+			_values.put(key, value);
+		}
+	}
 }

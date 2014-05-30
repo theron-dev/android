@@ -2,7 +2,6 @@ package org.hailong.dom;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -62,6 +61,19 @@ public class DOMBundle {
 					}
 					
 					
+				}
+				else if(_packageClass != null){
+					
+					String srcName = uri.substring(1);
+					
+					try {
+						InputStream in = _packageClass.getResourceAsStream(srcName);
+						Drawable image = Drawable.createFromStream(in, srcName);
+						in.close();
+						return image;
+					} catch (Throwable e) {
+						Log.e(DOM.TAG, Log.getStackTraceString(e));
+					}
 				}
 				
 			}

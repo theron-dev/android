@@ -47,6 +47,16 @@ public class ServiceContext extends Service implements IServiceContext {
 		return false;
 	}
 
+	public boolean cancelHandleForSource(Object source)  throws Exception{
+		for(ServiceContainer<?> serviceContainer : _serviceContainers){
+			if(serviceContainer.cancelHandleForSource(source)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return new LocalBinder() ;
@@ -236,7 +246,14 @@ public class ServiceContext extends Service implements IServiceContext {
 			if(_instance != null){
 				return _instance.cancelHandle(taskType, task);
 			}
-			return true;
+			return false;
+		}
+		
+		public boolean cancelHandleForSource(Object source) throws Exception{
+			if(_instance != null){
+				return _instance.cancelHandleForSource(source);
+			}
+			return false;
 		}
 
 		public void didReceiveMemoryWarning() {
@@ -327,4 +344,5 @@ public class ServiceContext extends Service implements IServiceContext {
 		
 		return _config;
 	}
+
 }

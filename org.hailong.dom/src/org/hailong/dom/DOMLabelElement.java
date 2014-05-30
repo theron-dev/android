@@ -225,7 +225,7 @@ public class DOMLabelElement extends DOMCanvasElement {
 		        }
 		        
 	            if(r.getWidth() == Float.MAX_VALUE){
-	                r.width = w + padding.getLeft() + padding.getRight();
+	                r.width = (w + padding.getLeft() + padding.getRight()) + 0.999999;
 	                float max = floatValue("max-width",r.getWidth());
 	                float min = floatValue("min-width",r.getWidth());
 	                if(r.getWidth() > max){
@@ -238,7 +238,7 @@ public class DOMLabelElement extends DOMCanvasElement {
 	            
 	            if(r.getHeight() == Float.MAX_VALUE){
 	                
-	            	r.height = h + padding.getTop() + padding.getBottom();
+	            	r.height = (h + padding.getTop() + padding.getBottom()) + 0.999999;
 	                
 	            	float max = floatValue("max-height",r.getHeight());
 	                float min = floatValue("min-height",r.getHeight());
