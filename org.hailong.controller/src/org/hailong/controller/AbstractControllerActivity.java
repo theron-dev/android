@@ -146,6 +146,7 @@ public abstract class AbstractControllerActivity<T extends IServiceContext> exte
 					controller.setURL(url);
 					controller.setBasePath(basePath);
 					controller.setScheme(Value.stringValueForKey(cfg, "scheme"));
+					controller.setTitle(Value.stringValueForKey(cfg, "title"));
 					controller.setConfig(cfg);
 
 					return controller;

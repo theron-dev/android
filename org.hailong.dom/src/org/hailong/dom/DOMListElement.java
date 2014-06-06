@@ -47,7 +47,10 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 		
 		if(v != null){
 			
+			v.setCacheColorHint(0x00000000);
 			v.setDividerHeight(0);
+			v.setHeaderDividersEnabled(false);
+			v.setFooterDividersEnabled(false);
 			v.setEnabled(true);
 			
 			if(isLayouted()){

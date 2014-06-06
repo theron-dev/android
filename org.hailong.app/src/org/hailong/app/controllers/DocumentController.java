@@ -123,7 +123,7 @@ public class DocumentController<T extends AppContext> extends Controller<T> impl
 				
 				String src = imageElement.getAttributeValue("src");
 				
-				if(src != null && (src.startsWith("http://") || src.startsWith("https://"))){
+				if(src != null && src.indexOf("://") >=0){
 					imageTask = new DOMImageElementTask(imageElement);
 					imageElement.setImageLoader(imageTask);
 				}

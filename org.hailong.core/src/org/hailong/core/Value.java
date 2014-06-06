@@ -115,8 +115,11 @@ public class Value {
 			if(object instanceof String){
 				return Boolean.valueOf((String) object);
 			}
+			else if(object instanceof Boolean){
+				return ((Boolean) object).booleanValue();
+			}
 			else if(object instanceof Number){
-				return ((Number) object).intValue() == 0 ? false : true;
+				return ((Number) object).doubleValue() == 0.0 ? false : true;
 			}
 
 		}

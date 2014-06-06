@@ -4,8 +4,12 @@ import org.hailong.core.Edge;
 import org.hailong.core.Rect;
 import org.hailong.core.Size;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public class DOMImageElement extends DOMCanvasElement {
@@ -74,125 +78,131 @@ public class DOMImageElement extends DOMCanvasElement {
 		}
 		
 		if(image != null){
-			
-			
-			
+	
 			Rect r = getFrame();
-			float imageWidth = image.getIntrinsicWidth();
-			float imageHeight = image.getIntrinsicHeight();
-			float width = r.getWidth();
-			float height = r.getHeight();
 			float displayScale = getDocument().getBundle().displayScale();
+			float imageWidth = image.getIntrinsicWidth() * displayScale;
+			float imageHeight = image.getIntrinsicHeight() * displayScale;
+			float width = r.getWidth() * displayScale;
+			float height = r.getHeight() * displayScale;
 			
-			float radius = getCornerRadius();
+			float radius = getCornerRadius() * displayScale;
+			float tx = 0,ty = 0,rx = 1.0f,ry = 1.0f;
 			
-			if(radius == 0.0f){
-				canvas.clipRect(0, 0, width * displayScale, height * displayScale);
-			}
-			else {
-				Path path = new Path();
-				path.addRoundRect(new RectF(0,0,width * displayScale,height * displayScale)
-					, radius * displayScale, radius * displayScale, Path.Direction.CW);
-				canvas.clipPath(path);
-			}
-		
 			String gravity = stringValue("gravity","aspect-fill");
 
 	        if("center".equals(gravity)){
 	        	float dx = (imageWidth - width) / 2.0f;
 	        	float dy = (imageHeight - height) / 2.0f;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("resize".equals(gravity)){
-	        	canvas.scale(width / imageWidth, height / imageHeight);
-	        	image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        	rx = width / imageWidth;
+	        	ry =  height / imageHeight;
+	        	image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        }
 	        else if("top".equals(gravity)){
 	        	float dx = (imageWidth - width) / 2.0f;
 	        	float dy = 0;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("bottom".equals(gravity)){
 	        	float dx = (imageWidth - width) / 2.0f;
 	        	float dy = (imageHeight - height);
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("left".equals(gravity)){
 	        	float dx =0;
 	        	float dy = (imageHeight - height) / 2.0f;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("right".equals(gravity)){
 	        	float dx = (imageWidth - width) ;
 	        	float dy = (imageHeight - height) / 2.0f;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("topleft".equals(gravity)){
 	        	float dx = 0 ;
 	        	float dy = 0;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("topright".equals(gravity)){
 	        	float dx = (imageWidth - width) ;
 	        	float dy = 0;
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("bottomleft".equals(gravity)){
 	        	float dx = 0 ;
 	        	float dy = (imageHeight - height);
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("bottomright".equals(gravity)){
 	        	float dx = (imageWidth - width) ;
 	        	float dy = (imageHeight - height);
-	        	image.setBounds((int) (dx * displayScale), (int) (dy * displayScale)
-	        			, (int) ( width * displayScale), (int) (height * displayScale));
+	        	image.setBounds((int) (dx  ), (int) (dy  )
+	        			, (int) ( width  ), (int) (height  ));
 	        }
 	        else if("aspect".equals(gravity)){
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 > r1){
+	        		
+	        		rx = width / imageWidth;
+	        		ry = width / imageWidth;
+	        		
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
-	        		canvas.scale(width / imageWidth, width / imageWidth);
-	        		image.setBounds(0, (int) (imageHeight - height), (int) ( width * displayScale), (int) (height * displayScale));
+
+	        		image.setBounds(0, (int) (imageHeight - height), (int) ( width  ), (int) (height  ));
 	        	}
 	        	else if(r0 < r1){
+	        		
+	        		rx = height / imageHeight;
+	        		ry = height / imageHeight;
+	        		
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
-	        		canvas.scale(height / imageHeight, height / imageHeight);
-	        		image.setBounds((int) (imageWidth - width),0, (int) ( width * displayScale), (int) (height * displayScale));
+
+	        		image.setBounds((int) (imageWidth - width),0, (int) ( width  ), (int) (height  ));
 	        	}
 	        }
 	        else if("aspect-top".equals(gravity)){
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
-	        		canvas.scale(width / imageWidth, height / imageHeight);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		rx = width / imageWidth;
+	        		ry = height / imageHeight;
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 < r1){
+
+	        		rx = width / imageWidth;
+	        		ry = width / imageWidth;
+	        		
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
-	        		canvas.scale(width / imageWidth, width / imageWidth);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 > r1){
+	        		
+	        		rx = height / imageHeight;
+	        		ry = height / imageHeight;
+	        		
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
-	        		canvas.scale(height / imageHeight, height / imageHeight);
-	        		image.setBounds(0,0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		image.setBounds(0,0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        }
 	        else if("aspect-bottom".equals(gravity)){
@@ -200,22 +210,34 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
-	        		canvas.scale(width / imageWidth, height / imageHeight);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		rx = width / imageWidth;
+	        		ry = height / imageHeight;
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 < r1){
+	        		
+	        		rx = width / imageWidth;
+	        		ry = width / imageWidth;
+	        		
 	        		imageHeight = width / r0;
 	        		imageWidth = width;
-	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale));
-	        		canvas.scale(width / imageWidth, width / imageWidth);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		
+	        		ty = (height - imageHeight)  ;
+
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 > r1){
+	        		
+	        		
+	        		rx = height / imageHeight;
+	        		ry = height / imageHeight;
+	        		
 	        		imageWidth = height * r0;
 	        		imageHeight = height;
-	        		canvas.translate((int) ((width - height) * displayScale),0);
-	        		canvas.scale(height / imageHeight, height / imageHeight);
-	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		
+	        		tx = (width - height)  ;
+
+	        		image.setBounds(0 , 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	
 	        }
@@ -224,28 +246,72 @@ public class DOMImageElement extends DOMCanvasElement {
 	        	float r0 = imageWidth / imageHeight;
 	        	float r1 = width / height;
 	        	if(r0 == r1){
-	        		canvas.scale(width / imageWidth, height / imageHeight);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		rx = width / imageWidth;
+	        		ry = height / imageHeight;
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 < r1){
-	        		imageHeight = width / r0;
-	        		imageWidth = width;
-	        		canvas.translate(0,  (int) ((height - imageHeight) * displayScale * 0.5));
-	        		canvas.scale(width / imageWidth, width / imageWidth);
-	        		image.setBounds(0, 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+	        		
+	        		rx = width / imageWidth;
+	        		ry = width / imageWidth;
+	        		
+	        		ty = (height - width / r0)   * 0.5f;
+	        		
+	        		image.setBounds(0, 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	else if(r0 > r1){
-	        		imageWidth = height * r0;
-	        		imageHeight = height;
-	        		canvas.translate((int) ((width - height) * displayScale * 0.5),0);
-	        		canvas.scale(height / imageHeight, height / imageHeight);
-	        		image.setBounds(0 , 0, (int) ( imageWidth * displayScale), (int) (imageHeight * displayScale));
+
+	        		rx = height / imageHeight;
+	        		ry = height / imageHeight;
+	        		
+	        		tx = (width - height * r0)   * 0.5f;
+	        		
+	        		image.setBounds(0 , 0, (int) ( imageWidth  ), (int) (imageHeight  ));
 	        	}
 	        	
 	        }
-			
-			image.draw(canvas);
-			
+	        
+	        if(radius != 0.0f && image instanceof BitmapDrawable){
+
+	        	int x = (int) (width );  
+	            int y = (int) (height );  
+	            float[] mOuter = new float[] { radius, radius, radius, radius,  
+	            		radius, radius, radius, radius };  
+	 
+
+	            // 新建一个矩形  
+	            RectF outerRect = new RectF(0, 0, x, y);  
+	            
+	            Paint paint = new Paint();
+	            
+	            paint.setAntiAlias(true);
+	            paint.setColor(0xffffffff);
+
+	            canvas.saveLayer(outerRect, paint, Canvas.CLIP_SAVE_FLAG);
+	            
+	            Path mPath = new Path();  
+	            // 创建一个圆角矩形路径  
+	            mPath.addRoundRect(outerRect, mOuter, Path.Direction.CW);  
+	      
+	            canvas.clipPath(mPath);
+	            
+	            canvas.drawRoundRect(outerRect, radius, radius, paint);
+	            
+	            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+	            
+	            canvas.translate(tx, ty);
+	        	canvas.scale(rx, ry);
+	            
+	            canvas.drawBitmap(((BitmapDrawable) image).getBitmap(), 0, 0, paint);
+
+	            canvas.restore();
+	            
+			}
+	        else{
+	        	canvas.translate(tx, ty);
+	        	canvas.scale(rx, ry);
+	        	image.draw(canvas);
+	        }
 		}
 		
 	}

@@ -12,6 +12,7 @@ public class DOMDocument {
 	private URL _documentURL;
 	private Map<String,DOMElement> _elementsById;
 	private DOMStyleSheet _styleSheet;
+	private String _signature;
 	
 	public DOMDocument(DOMBundle bundle){
 		_bundle = bundle;
@@ -100,5 +101,13 @@ public class DOMDocument {
 			_styleSheet = styleSheet;
 			applySheetStyle();
 		}
+	}
+	
+	public String getSignature(){
+		return _signature;
+	}
+	
+	public void setSignature(String signature){
+		_signature = signature;
 	}
 }

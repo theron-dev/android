@@ -22,6 +22,9 @@ public class MD5 {
         	 if(s.length() == 1){
         		 sb.append('0');
         	 }
+        	 else if(s.length() > 2){
+        		 sb.append(s, 0, 2);
+        	 }
         	 else{
         		 sb.append(s);
         	 }
