@@ -47,6 +47,8 @@ public class DOMHScrollElement extends DOMContainerElement {
 			contentSize.width = frame.getWidth();
 		}
 		
+		setContentSize(contentSize);
+		
 		return contentSize;
 	}
 	

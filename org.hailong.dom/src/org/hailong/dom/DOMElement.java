@@ -261,7 +261,7 @@ public class DOMElement  {
 	
 	protected IDOMViewEntity elementViewEntity(DOMElement element){
 		if(_viewEntity == null && _parent != null){
-			_parent.elementViewEntity(element);
+			return _parent.elementViewEntity(element);
 		}
 		return _viewEntity;
 	}

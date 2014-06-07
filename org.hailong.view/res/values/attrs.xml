@@ -47,4 +47,9 @@
     <attr name="android:tag"/>
     <attr name="android:visibility"/>
 </declare-styleable>
+
+<declare-styleable name="ActionView">
+    <attr name="actionColor" format="color|reference"/>
+</declare-styleable>
+
 </resources>

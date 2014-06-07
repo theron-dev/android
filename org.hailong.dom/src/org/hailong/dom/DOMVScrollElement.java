@@ -47,6 +47,8 @@ public class DOMVScrollElement extends DOMContainerElement  {
 			contentSize.height = frame.getHeight();
 		}
 		
+		setContentSize(contentSize);
+		
 		return contentSize;
 	}
 	
