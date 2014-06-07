@@ -52,6 +52,7 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 			v.setHeaderDividersEnabled(false);
 			v.setFooterDividersEnabled(false);
 			v.setEnabled(true);
+			v.setSelector(R.drawable.bg_clear);
 			
 			if(isLayouted()){
 				v.setAdapter(this);
@@ -263,7 +264,7 @@ public class DOMListElement extends DOMViewElement implements ListAdapter , DOMD
 
 		public ListView(Context context) {
 			super(context);
-			// TODO Auto-generated constructor stub
+			
 		}
 		
 		
