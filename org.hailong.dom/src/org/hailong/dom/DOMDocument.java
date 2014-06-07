@@ -110,4 +110,11 @@ public class DOMDocument {
 	public void setSignature(String signature){
 		_signature = signature;
 	}
+
+	public DOMElement getElementById(String id){
+		if(_elementsById != null){
+			return _elementsById.get(id);
+		}
+		return null;
+	}
 }
