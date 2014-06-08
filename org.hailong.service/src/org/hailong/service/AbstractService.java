@@ -1,9 +1,9 @@
 package org.hailong.service;
 
-public abstract class AbstractService implements IService {
+public abstract class AbstractService<ST extends IServiceContext> implements IService<ST> {
 
-	private IServiceContext context;
-	private Object config;
+	private ST _context;
+	private Object _config;
 	
 	public AbstractService(){
 
@@ -17,25 +17,25 @@ public abstract class AbstractService implements IService {
 	}
 
 	
-	public IServiceContext getContext(){
-		return context;
+	public ST getContext(){
+		return _context;
 	}
 	
-	public void setContext(IServiceContext context){
-		this.context = context;
+	public void setContext(ST context){
+		_context = context;
 	}
 	
 	public Object getConfig(){
-		return config;
+		return _config;
 	}
 	
 	public void setConfig(Object config){
-		this.config = config;
+		_config = config;
 	}
 	
 	public void destroy(){
-		context = null;
-		config = null;
+		_context = null;
+		_config = null;
 	}
 
 }

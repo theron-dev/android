@@ -1,10 +1,11 @@
 package org.hailong.service.impl;
 
 import org.hailong.service.AbstractService;
+import org.hailong.service.IServiceContext;
 import org.hailong.service.tasks.IUplinkTask;
 import org.hailong.service.tasks.IUplinkTaskListener;
 
-public abstract class UplinkService extends AbstractService {
+public abstract class UplinkService<ST extends IServiceContext> extends AbstractService<ST> {
 
 	public void doDidUplinkTaskLoaded(Class<?> taskType,IUplinkTask uplinkTask,Object resultsData){
 		IUplinkTaskListener listener = uplinkTask.getListener();

@@ -6,11 +6,11 @@ package org.hailong.service;
  * @author hailongzhang
  *
  */
-public interface IService {
+public interface IService<ST extends IServiceContext> {
 
-	public IServiceContext getContext();
+	public ST getContext();
 	
-	public void setContext(IServiceContext context);
+	public void setContext(ST context);
 	
 	public <T extends ITask> boolean handle(Class<T> taskType,T task,int priority) throws Exception;
 	

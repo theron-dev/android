@@ -16,12 +16,7 @@ public class DBObject {
 	private IDBObjectValues _objectValues;
 	private Map<String,Object> _values;
 	
-	public DBObject() {
-		_values = new HashMap<String,Object>(4);	
-	}
-	
-	DBObject(IDBObjectValues objectValues){
-		_objectValues = objectValues.retain();
+	public DBObject() {	
 	}
 	
 	public boolean isFault(){
@@ -74,7 +69,10 @@ public class DBObject {
 		if(_objectValues !=null){
 			_objectValues.setValue(field, value);
 		}
-		else if(_values != null){
+		else{
+			if(_values == null){
+				_values = new HashMap<String,Object>(4);
+			}
 			_values.put(field.value(), value);
 		}
 	}

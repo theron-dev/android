@@ -4,7 +4,12 @@ import java.io.File;
 
 import org.hailong.service.tasks.IImageTask;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -16,7 +21,7 @@ public class ImageViewTask extends ImageView implements IImageTask {
 	private boolean _hasImage = false;
 	private boolean _loading = false;
 	private Object _source;
-	
+	private float _cornerRadius;
 	
 	public ImageViewTask(Context context) {
 		super(context);
@@ -99,4 +104,29 @@ public class ImageViewTask extends ImageView implements IImageTask {
 		_loading = loading;
 	}
 
+	public float getCornerRadius(){
+		return _cornerRadius;
+	}
+	
+	public void setCornerRadius(float cornerRadius){
+		_cornerRadius = cornerRadius;
+		invalidate();
+	}
+	
+	@SuppressLint("DrawAllocation")
+	@Override
+	protected void onDraw(Canvas canvas){
+	
+		if(_cornerRadius >0 ){
+			
+			Path path = new Path();
+			
+			path.addRoundRect(new RectF(0,0,getMeasuredWidth(),getMeasuredHeight()), _cornerRadius, _cornerRadius, Direction.CW);
+			
+			canvas.clipPath(path);
+			
+		}
+		
+		super.onDraw(canvas);
+	}	
 }

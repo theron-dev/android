@@ -187,7 +187,9 @@ public class DBContext {
 			Constructor<DBObject> constructor = _entityConstructors.get(dbEntity);
 			if(constructor != null){
 				try {
-					return constructor.newInstance(objectValues);
+					DBObject object = constructor.newInstance();
+					object.setObjectValues(objectValues);
+					return object;
 				} catch (Exception e) {
 					Log.e(DB.TAG, Log.getStackTraceString(e));
 				} 
@@ -241,11 +243,11 @@ public class DBContext {
 			values.append("?");
 		}
 		
-		sb.append(") VALUES(").append(values.toString()).append("");
+		sb.append(") VALUES(").append(values.toString()).append(")");
 		
 		SQLiteStatement st = _database.compileStatement(sb.toString());
 		
-		int index = 0;
+		int index = 1;
 		
 		for(DBField field : dbEntity.fields()){
 			
@@ -363,7 +365,7 @@ public class DBContext {
 		
 		SQLiteStatement st = _database.compileStatement(sb.toString());
 		
-		int index = 0;
+		int index = 1;
 		
 		for(DBField field : dbEntity.fields()){
 			
@@ -585,7 +587,7 @@ public class DBContext {
 			
 			try {
 				@SuppressWarnings("unchecked")
-				Constructor<DBObject> constructor = (Constructor<DBObject>) objectClass.getConstructor(IDBObjectValues.class);
+				Constructor<DBObject> constructor = (Constructor<DBObject>) objectClass.getConstructor();
 				_entityConstructors.put(dbEntity, constructor);
 			} catch (NoSuchMethodException e) {
 				Log.e(DB.TAG, Log.getStackTraceString(e));

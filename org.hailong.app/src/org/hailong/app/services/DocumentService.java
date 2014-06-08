@@ -41,7 +41,7 @@ import org.hailong.service.tasks.IHttpResourceTask;
 import android.os.Handler;
 import android.util.Log;
 
-public class DocumentService extends AbstractService {
+public class DocumentService extends AbstractService<IServiceContext> {
 
 	private List<DocumentHttpTask> _httpTasks;
 	private ThreadPoolExecutor _poolExecutor;

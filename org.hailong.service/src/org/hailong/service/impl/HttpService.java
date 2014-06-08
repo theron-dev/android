@@ -10,6 +10,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.hailong.core.Value;
 import org.hailong.service.AbstractService;
+import org.hailong.service.IServiceContext;
 import org.hailong.service.ITask;
 import org.hailong.service.tasks.IHttpTask;
 
@@ -21,7 +22,7 @@ import android.util.Log;
  * @author hailongzhang
  *
  */
-public class HttpService extends AbstractService {
+public class HttpService extends AbstractService<IServiceContext> {
 
 	private final static String TAG = "HttpService";
 

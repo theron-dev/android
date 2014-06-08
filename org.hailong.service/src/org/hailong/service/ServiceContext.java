@@ -95,7 +95,7 @@ public class ServiceContext extends Service implements IServiceContext {
 					
 					if(clazz != null && IService.class.isAssignableFrom(clazz)){
 						
-						IServiceContainer container = registerService((Class<IService>)clazz);
+						IServiceContainer container = registerService((Class<IService<IServiceContext>>)clazz);
 						
 						List<?> taskTypes = Value.listValueForKey(cfg, "taskTypes");
 						
@@ -157,7 +157,7 @@ public class ServiceContext extends Service implements IServiceContext {
 		super.onDestroy();
 	}
 	
-	public <T extends IService> IServiceContainer registerService(Class<T> serviceClass){
+	public <T extends IService<IServiceContext>> IServiceContainer registerService(Class<T> serviceClass){
 		ServiceContainer<T> serviceContainer = new ServiceContainer<T>(serviceClass,this);
 		
 		_serviceContainers.add(serviceContainer);
@@ -179,11 +179,11 @@ public class ServiceContext extends Service implements IServiceContext {
         } 
 	}
 	
-	private static class ServiceContainer<T extends IService> implements IServiceContainer{
+	private static class ServiceContainer<T extends IService<IServiceContext>> implements IServiceContainer{
 
 		private Class<T> _serviceClass;
 		private Set<Class<?>> _taskTypes;
-		private IService _instance;
+		private IService<IServiceContext> _instance;
 		private boolean _allowDeallocInstance;
 		private IServiceContext _context;
 		private Object _config;

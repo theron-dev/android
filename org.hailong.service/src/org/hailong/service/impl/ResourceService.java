@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.hailong.core.Value;
 import org.hailong.service.AbstractService;
+import org.hailong.service.IServiceContext;
 import org.hailong.service.ITask;
 import org.hailong.service.task.impl.FileHttpTask;
 import org.hailong.service.tasks.IHttpResourceTask;
@@ -26,7 +27,7 @@ import org.hailong.service.tasks.IResourceTask;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
-public class ResourceService extends AbstractService{
+public class ResourceService extends AbstractService<IServiceContext>{
 
 	private final static String TAG = "ResourceService";
 	

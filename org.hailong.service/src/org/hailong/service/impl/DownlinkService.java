@@ -16,7 +16,7 @@ import org.hailong.service.tasks.IDownlinkTask;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 
-public abstract class DownlinkService extends AbstractService {
+public abstract class DownlinkService<ST extends IServiceContext> extends AbstractService<ST> {
 
 	private DBContext _dbContext = null;
 	private ThreadPoolExecutor _poolExcutor = null;

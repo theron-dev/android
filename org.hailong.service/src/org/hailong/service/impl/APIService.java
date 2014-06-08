@@ -27,7 +27,7 @@ import org.hailong.service.tasks.IAPIWillRequestTask;
 import org.hailong.service.tasks.IHttpAPITask;
 import android.util.Log;
 
-public class APIService extends AbstractService {
+public class APIService extends AbstractService<IServiceContext> {
 
 	private List<HttpTask> _httpTasks;
 	

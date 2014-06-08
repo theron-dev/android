@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.hailong.core.MD5;
 import org.hailong.core.URL;
 import org.hailong.core.Value;
+import org.hailong.service.IServiceContext;
 import org.hailong.service.ITask;
 import org.hailong.service.S;
 import org.hailong.service.task.impl.JSONHttpTask;
@@ -20,7 +21,7 @@ import org.hailong.service.tasks.IURLDownlinkTask;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
-public class URLDownlinkService extends DownlinkService {
+public class URLDownlinkService extends DownlinkService<IServiceContext> {
 
 	private List<HttpTask> _httpTasks ;
 	
