@@ -175,6 +175,13 @@ public class Container {
 					
 				} 
 			}
+			else {
+				try {
+					_property.invoke(_view,  Value.objectValueForKeyPath(dataObject, _keyPath));
+				} catch (Exception e) {
+					
+				}
+			}
 		}
 	}
 }
