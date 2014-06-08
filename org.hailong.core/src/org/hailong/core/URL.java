@@ -288,6 +288,10 @@ public final class URL {
 	
 	public static String encodeQueryValue(String value){
 		
+		if(value == null){
+			return "";
+		}
+		
 		try {
 			return java.net.URLEncoder.encode(value,"utf-8");
 		} catch (UnsupportedEncodingException e) {
@@ -297,6 +301,10 @@ public final class URL {
 	}
 	
 	public static String decodeQueryValue(String value){
+		
+		if(value == null){
+			return "";
+		}
 		
 		try {
 			return java.net.URLDecoder.decode(value, "utf-8");

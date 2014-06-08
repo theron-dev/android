@@ -48,7 +48,7 @@ public class URLDownlinkService extends DownlinkService<IServiceContext> {
 				
 				Log.d(S.TAG, url);
 				
-				if(downTask.isCached() && downTask.getPageIndex() == 1){
+				if(downTask.isAllowCached() && downTask.getPageIndex() == 1){
 					
 					didLoadedFormCached(downTask, taskType);
 					
@@ -191,7 +191,7 @@ public class URLDownlinkService extends DownlinkService<IServiceContext> {
 		@Override
 		public void onLoadedObject(Object result) {
 
-			didLoaded(task, IURLDownlinkTask.class, result, task.isCached() && task.getPageIndex() == 1);
+			didLoaded(task, IURLDownlinkTask.class, result, task.isAllowCached() && task.getPageIndex() == 1);
 			
 			_httpTasks.remove(this);
 		}

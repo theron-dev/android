@@ -117,7 +117,7 @@ public class DBObject {
 		return defaultValue;
 	}
 	
-	public long intValue(DBField field, int defaultValue){
+	public int intValue(DBField field, int defaultValue){
 		return intValue(field.value(),defaultValue);
 	}
 	

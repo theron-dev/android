@@ -260,20 +260,44 @@ public class DBContext {
 				st.bindLong(index, object.longValue(field, 0));
 			}
 			else if(type == DBFieldType.VARCHAR){
-				st.bindString(index, object.stringValue(field, null));
+				String v = object.stringValue(field, null);
+				if(v == null){
+					st.bindNull(index);
+				}
+				else {
+					st.bindString(index, v);
+				}
 			}
 			else if(type == DBFieldType.TEXT){
-				st.bindString(index, object.stringValue(field, null));
+				String v = object.stringValue(field, null);
+				if(v == null){
+					st.bindNull(index);
+				}
+				else {
+					st.bindString(index, v);
+				}
 			}
 			else if(type == DBFieldType.DOUBLE){
 				st.bindDouble(index, object.doubleValue(field, 0.0));
 			}
 			else if(type == DBFieldType.BYTES){
-				st.bindBlob(index, object.bytesValue(field, null));
+				byte[] v = object.bytesValue(field, null);
+				if(v == null){
+					st.bindNull(index);
+				}
+				else {
+					st.bindBlob(index, v);
+				}
 			}
 			else if(type == DBFieldType.OBJECT){
 				try {
-					st.bindString(index, JSON.encodeObject( object.getValue(field) ));
+					String v = JSON.encodeObject( object.getValue(field) );
+					if(v == null) {
+						st.bindNull(index);
+					}
+					else {
+						st.bindString(index, v);
+					}
 				} catch (JSONException e) {
 					Log.e(DB.TAG, Log.getStackTraceString(e));
 				}
